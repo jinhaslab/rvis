@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="보건학 R 시각화 팀">
+<meta name="dcterms.date" content="2025-11-18">
+<title>R 기반 보건학 시각화</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./chapters/01-introduction.html" rel="next">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">R 기반 보건학 시각화</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">R 기반 보건학 시각화</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">R 기반 보건학 시각화</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="false">
+ <span class="menu-text">기초편</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">R과 ggplot2 시작하기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/02-ggplot2-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">ggplot2 완벽 마스터하기</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="false">
+ <span class="menu-text">역학편</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/03-epidemiology.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">역학 데이터 시각화</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/04-spatial-epi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">공간 역학 데이터 시각화</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="false">
+ <span class="menu-text">임상통계편</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/05-clinical-stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">임상 통계 시각화</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/06-publication.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">출판용 시각화</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="false">
+ <span class="menu-text">고급편</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/07-interactive.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">대화형 시각화</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/08-conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">결론 및 제언</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">참고문헌</span></span></a>
+  </div>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#%ED%99%98%EC%98%81%ED%95%A9%EB%8B%88%EB%8B%A4" id="toc-환영합니다" class="nav-link active" data-scroll-target="#%ED%99%98%EC%98%81%ED%95%A9%EB%8B%88%EB%8B%A4">환영합니다!</a>
+  <ul class="collapse">
+<li><a href="#%ED%95%99%EC%8A%B5-%EB%AA%A9%ED%91%9C" id="toc-학습-목표" class="nav-link" data-scroll-target="#%ED%95%99%EC%8A%B5-%EB%AA%A9%ED%91%9C"><span class="header-section-number">0.1</span> 📚 학습 목표</a></li>
+  <li><a href="#%EB%8C%80%EC%83%81-%EB%8F%85%EC%9E%90" id="toc-대상-독자" class="nav-link" data-scroll-target="#%EB%8C%80%EC%83%81-%EB%8F%85%EC%9E%90"><span class="header-section-number">0.2</span> 🎯 대상 독자</a></li>
+  <li>
+<a href="#%EC%B1%85%EC%9D%98-%EA%B5%AC%EC%84%B1" id="toc-책의-구성" class="nav-link" data-scroll-target="#%EC%B1%85%EC%9D%98-%EA%B5%AC%EC%84%B1"><span class="header-section-number">0.3</span> 📖 책의 구성</a>
+  <ul class="collapse">
+<li><a href="#part-i-%EA%B8%B0%EC%B4%88%ED%8E%B8" id="toc-part-i-기초편" class="nav-link" data-scroll-target="#part-i-%EA%B8%B0%EC%B4%88%ED%8E%B8"><span class="header-section-number">0.3.1</span> Part I: 기초편</a></li>
+  <li><a href="#part-ii-%EC%97%AD%ED%95%99%ED%8E%B8" id="toc-part-ii-역학편" class="nav-link" data-scroll-target="#part-ii-%EC%97%AD%ED%95%99%ED%8E%B8"><span class="header-section-number">0.3.2</span> Part II: 역학편</a></li>
+  <li><a href="#part-iii-%EC%9E%84%EC%83%81%ED%86%B5%EA%B3%84%ED%8E%B8" id="toc-part-iii-임상통계편" class="nav-link" data-scroll-target="#part-iii-%EC%9E%84%EC%83%81%ED%86%B5%EA%B3%84%ED%8E%B8"><span class="header-section-number">0.3.3</span> Part III: 임상통계편</a></li>
+  <li><a href="#part-iv-%EA%B3%A0%EA%B8%89%ED%8E%B8" id="toc-part-iv-고급편" class="nav-link" data-scroll-target="#part-iv-%EA%B3%A0%EA%B8%89%ED%8E%B8"><span class="header-section-number">0.3.4</span> Part IV: 고급편</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#%EC%8B%A4%EC%8A%B5-%ED%99%98%EA%B2%BD-%EC%A4%80%EB%B9%84" id="toc-실습-환경-준비" class="nav-link" data-scroll-target="#%EC%8B%A4%EC%8A%B5-%ED%99%98%EA%B2%BD-%EC%A4%80%EB%B9%84"><span class="header-section-number">0.4</span> 💻 실습 환경 준비</a>
+  <ul class="collapse">
+<li><a href="#r%EA%B3%BC-rstudio-%EC%84%A4%EC%B9%98" id="toc-r과-rstudio-설치" class="nav-link" data-scroll-target="#r%EA%B3%BC-rstudio-%EC%84%A4%EC%B9%98"><span class="header-section-number">0.4.1</span> 1. R과 RStudio 설치</a></li>
+  <li><a href="#%ED%95%84%EC%88%98-%ED%8C%A8%ED%82%A4%EC%A7%80-%EC%84%A4%EC%B9%98" id="toc-필수-패키지-설치" class="nav-link" data-scroll-target="#%ED%95%84%EC%88%98-%ED%8C%A8%ED%82%A4%EC%A7%80-%EC%84%A4%EC%B9%98"><span class="header-section-number">0.4.2</span> 2. 필수 패키지 설치</a></li>
+  <li><a href="#%EC%8B%A4%EC%8A%B5-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84" id="toc-실습-데이터-준비" class="nav-link" data-scroll-target="#%EC%8B%A4%EC%8A%B5-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84"><span class="header-section-number">0.4.3</span> 3. 실습 데이터 준비</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#%ED%95%99%EC%8A%B5-%EB%A1%9C%EB%93%9C%EB%A7%B5" id="toc-학습-로드맵" class="nav-link" data-scroll-target="#%ED%95%99%EC%8A%B5-%EB%A1%9C%EB%93%9C%EB%A7%B5"><span class="header-section-number">0.5</span> 🗺️ 학습 로드맵</a>
+  <ul class="collapse">
+<li><a href="#%EC%B4%88%EB%B3%B4%EC%9E%90-r-%EC%B2%98%EC%9D%8C-%EC%8B%9C%EC%9E%91" id="toc-초보자-r-처음-시작" class="nav-link" data-scroll-target="#%EC%B4%88%EB%B3%B4%EC%9E%90-r-%EC%B2%98%EC%9D%8C-%EC%8B%9C%EC%9E%91"><span class="header-section-number">0.5.1</span> 초보자 (R 처음 시작)</a></li>
+  <li><a href="#%EC%A4%91%EA%B8%89%EC%9E%90-r-%EC%82%AC%EC%9A%A9-%EA%B2%BD%ED%97%98-%EC%9E%88%EC%9D%8C" id="toc-중급자-r-사용-경험-있음" class="nav-link" data-scroll-target="#%EC%A4%91%EA%B8%89%EC%9E%90-r-%EC%82%AC%EC%9A%A9-%EA%B2%BD%ED%97%98-%EC%9E%88%EC%9D%8C"><span class="header-section-number">0.5.2</span> 중급자 (R 사용 경험 있음)</a></li>
+  <li><a href="#%EA%B3%A0%EA%B8%89%EC%9E%90-%EB%85%BC%EB%AC%B8%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EB%AA%A9%EC%A0%81" id="toc-고급자-논문프로젝트-목적" class="nav-link" data-scroll-target="#%EA%B3%A0%EA%B8%89%EC%9E%90-%EB%85%BC%EB%AC%B8%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EB%AA%A9%EC%A0%81"><span class="header-section-number">0.5.3</span> 고급자 (논문/프로젝트 목적)</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#%EC%8B%A4%EC%8A%B5-%EC%BD%94%EB%93%9C-%EC%82%AC%EC%9A%A9%EB%B2%95" id="toc-실습-코드-사용법" class="nav-link" data-scroll-target="#%EC%8B%A4%EC%8A%B5-%EC%BD%94%EB%93%9C-%EC%82%AC%EC%9A%A9%EB%B2%95"><span class="header-section-number">0.6</span> 📊 실습 코드 사용법</a>
+  <ul class="collapse">
+<li><a href="#%EC%BD%94%EB%93%9C-%EB%B8%94%EB%A1%9D-%EC%A2%85%EB%A5%98" id="toc-코드-블록-종류" class="nav-link" data-scroll-target="#%EC%BD%94%EB%93%9C-%EB%B8%94%EB%A1%9D-%EC%A2%85%EB%A5%98"><span class="header-section-number">0.6.1</span> 코드 블록 종류</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#%EB%8F%84%EC%9B%80%EC%9D%B4-%ED%95%84%EC%9A%94%ED%95%A0-%EB%95%8C" id="toc-도움이-필요할-때" class="nav-link" data-scroll-target="#%EB%8F%84%EC%9B%80%EC%9D%B4-%ED%95%84%EC%9A%94%ED%95%A0-%EB%95%8C"><span class="header-section-number">0.7</span> 🆘 도움이 필요할 때</a>
+  <ul class="collapse">
+<li><a href="#r-%EA%B4%80%EB%A0%A8-%EC%A7%88%EB%AC%B8" id="toc-r-관련-질문" class="nav-link" data-scroll-target="#r-%EA%B4%80%EB%A0%A8-%EC%A7%88%EB%AC%B8"><span class="header-section-number">0.7.1</span> R 관련 질문</a></li>
+  <li><a href="#ggplot2-%EA%B4%80%EB%A0%A8" id="toc-ggplot2-관련" class="nav-link" data-scroll-target="#ggplot2-%EA%B4%80%EB%A0%A8"><span class="header-section-number">0.7.2</span> ggplot2 관련</a></li>
+  <li><a href="#%EC%97%AD%ED%95%99%EB%B3%B4%EA%B1%B4%ED%95%99-%ED%8A%B9%ED%99%94" id="toc-역학보건학-특화" class="nav-link" data-scroll-target="#%EC%97%AD%ED%95%99%EB%B3%B4%EA%B1%B4%ED%95%99-%ED%8A%B9%ED%99%94"><span class="header-section-number">0.7.3</span> 역학/보건학 특화</a></li>
+  </ul>
+</li>
+  <li><a href="#%EC%9D%B4-%EC%B1%85%EC%9D%84-%EC%9D%B8%EC%9A%A9%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95" id="toc-이-책을-인용하는-방법" class="nav-link" data-scroll-target="#%EC%9D%B4-%EC%B1%85%EC%9D%84-%EC%9D%B8%EC%9A%A9%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95"><span class="header-section-number">0.8</span> 📝 이 책을 인용하는 방법</a></li>
+  <li><a href="#%EA%B8%B0%EC%97%AC%ED%95%98%EA%B8%B0" id="toc-기여하기" class="nav-link" data-scroll-target="#%EA%B8%B0%EC%97%AC%ED%95%98%EA%B8%B0"><span class="header-section-number">0.9</span> 🤝 기여하기</a></li>
+  <li><a href="#%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4" id="toc-라이선스" class="nav-link" data-scroll-target="#%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4"><span class="header-section-number">0.10</span> 📜 라이선스</a></li>
+  </ul>
+</li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">R 기반 보건학 시각화</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">역학 및 임상통계를 위한 실습 가이드</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>보건학 R 시각화 팀 </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 18, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header><section id="환영합니다" class="level1 unnumbered"><h1 class="unnumbered">환영합니다!</h1>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+이 책에 대하여
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>이 책은 <strong>보건학, 역학, 임상 통계</strong> 분야의 대학원생과 전문가를 위한 R 시각화 실습 가이드입니다. ggplot2의 “그래픽 문법(Grammar of Graphics)”을 기반으로, 데이터 탐색부터 학술지 출판, 대화형 대시보드 구축까지 전 과정을 다룹니다.</p>
+</div>
+</div>
+<section id="학습-목표" class="level2" data-number="0.1"><h2 data-number="0.1" class="anchored" data-anchor-id="학습-목표">
+<span class="header-section-number">0.1</span> 📚 학습 목표</h2>
+<p>이 책을 완료하면 다음을 할 수 있습니다:</p>
+<p>✅ ggplot2의 7가지 핵심 구성 요소를 이해하고 활용 ✅ 역학 데이터(유행 곡선, 연령 표준화 비율)를 올바르게 시각화 ✅ 공간 역학 데이터를 지도로 표현 (코로플레스 맵) ✅ 생존 분석과 메타 분석 결과를 전문적으로 시각화 ✅ 학술지 출판 품질의 Figure를 제작 ✅ Shiny를 활용한 공중 보건 대시보드 구축</p>
+</section><section id="대상-독자" class="level2" data-number="0.2"><h2 data-number="0.2" class="anchored" data-anchor-id="대상-독자">
+<span class="header-section-number">0.2</span> 🎯 대상 독자</h2>
+<ul>
+<li>보건학, 역학, 임상통계 전공 <strong>대학원생</strong>
+</li>
+<li>R을 처음 배우거나 시각화를 체계적으로 배우고 싶은 <strong>연구자</strong>
+</li>
+<li>논문 작성을 위해 고품질 그래프가 필요한 <strong>보건의료 전문가</strong>
+</li>
+<li>공중 보건 데이터를 대시보드로 만들고 싶은 <strong>실무자</strong>
+</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+사전 요구사항
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>R 기본 문법 이해 (변수, 함수, 데이터프레임)</li>
+<li>RStudio 사용 경험 권장</li>
+<li>통계학 기초 (평균, 표준편차, 신뢰구간)</li>
+</ul>
+<p>R을 처음 접하신다면 <a href="https://r4ds.hadley.nz/">R for Data Science</a> 1-5장을 먼저 읽어보시기를 권장합니다.</p>
+</div>
+</div>
+</section><section id="책의-구성" class="level2" data-number="0.3"><h2 data-number="0.3" class="anchored" data-anchor-id="책의-구성">
+<span class="header-section-number">0.3</span> 📖 책의 구성</h2>
+<p>이 책은 <strong>4개 파트 8개 챕터</strong>로 구성되어 있습니다:</p>
+<section id="part-i-기초편" class="level3" data-number="0.3.1"><h3 data-number="0.3.1" class="anchored" data-anchor-id="part-i-기초편">
+<span class="header-section-number">0.3.1</span> Part I: 기초편</h3>
+<ul>
+<li>
+<strong>Chapter 1</strong>: R과 ggplot2 시작하기</li>
+<li>
+<strong>Chapter 2</strong>: ggplot2 완벽 마스터 - 그래픽 문법의 7가지 구성 요소</li>
+</ul></section><section id="part-ii-역학편" class="level3" data-number="0.3.2"><h3 data-number="0.3.2" class="anchored" data-anchor-id="part-ii-역학편">
+<span class="header-section-number">0.3.2</span> Part II: 역학편</h3>
+<ul>
+<li>
+<strong>Chapter 3</strong>: 역학 데이터 시각화 - 발병률, 유행곡선, 표준화</li>
+<li>
+<strong>Chapter 4</strong>: 공간 역학 - GIS와 지도 제작</li>
+</ul></section><section id="part-iii-임상통계편" class="level3" data-number="0.3.3"><h3 data-number="0.3.3" class="anchored" data-anchor-id="part-iii-임상통계편">
+<span class="header-section-number">0.3.3</span> Part III: 임상통계편</h3>
+<ul>
+<li>
+<strong>Chapter 5</strong>: 생존 분석과 메타 분석 시각화</li>
+<li>
+<strong>Chapter 6</strong>: 출판 품질 그래프 제작 전략</li>
+</ul></section><section id="part-iv-고급편" class="level3" data-number="0.3.4"><h3 data-number="0.3.4" class="anchored" data-anchor-id="part-iv-고급편">
+<span class="header-section-number">0.3.4</span> Part IV: 고급편</h3>
+<ul>
+<li>
+<strong>Chapter 7</strong>: 대화형 시각화와 Shiny 대시보드</li>
+<li>
+<strong>Chapter 8</strong>: 효과적인 데이터 커뮤니케이션을 위한 제언</li>
+</ul></section></section><section id="실습-환경-준비" class="level2" data-number="0.4"><h2 data-number="0.4" class="anchored" data-anchor-id="실습-환경-준비">
+<span class="header-section-number">0.4</span> 💻 실습 환경 준비</h2>
+<section id="r과-rstudio-설치" class="level3" data-number="0.4.1"><h3 data-number="0.4.1" class="anchored" data-anchor-id="r과-rstudio-설치">
+<span class="header-section-number">0.4.1</span> 1. R과 RStudio 설치</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R 다운로드: https://cran.r-project.org/</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># RStudio 다운로드: https://posit.co/download/rstudio-desktop/</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>권장 버전:</strong></p>
+<ul>
+<li>R ≥ 4.3.0</li>
+<li>RStudio ≥ 2023.06.0</li>
+</ul></section><section id="필수-패키지-설치" class="level3" data-number="0.4.2"><h3 data-number="0.4.2" class="anchored" data-anchor-id="필수-패키지-설치">
+<span class="header-section-number">0.4.2</span> 2. 필수 패키지 설치</h3>
+<p>모든 필요한 패키지는 <code>code/setup.R</code>에서 자동으로 설치됩니다:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 프로젝트 루트에서 실행</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/setup.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>주요 패키지:</p>
+<ul>
+<li>
+<strong>Core</strong>: <code>tidyverse</code>, <code>here</code>, <code>ggplot2</code>
+</li>
+<li>
+<strong>Epidemiology</strong>: <code>incidence2</code>, <code>surveil</code>
+</li>
+<li>
+<strong>Spatial</strong>: <code>sf</code>, <code>tmap</code>
+</li>
+<li>
+<strong>Clinical</strong>: <code>survival</code>, <code>ggsurvfit</code>, <code>metafor</code>
+</li>
+<li>
+<strong>Interactive</strong>: <code>plotly</code>, <code>shiny</code>
+</li>
+<li>
+<strong>Publication</strong>: <code>patchwork</code>, <code>ggrepel</code>, <code>ggpubr</code>
+</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+패키지 설치 시간
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>처음 실행 시 모든 패키지를 설치하는 데 <strong>10-20분</strong> 정도 소요됩니다. 인터넷 연결을 확인하고 충분한 시간을 두고 실행하세요.</p>
+</div>
+</div>
+</section><section id="실습-데이터-준비" class="level3" data-number="0.4.3"><h3 data-number="0.4.3" class="anchored" data-anchor-id="실습-데이터-준비">
+<span class="header-section-number">0.4.3</span> 3. 실습 데이터 준비</h3>
+<section id="방법-1-시뮬레이션-데이터-생성-권장" class="level4"><h4 class="anchored" data-anchor-id="방법-1-시뮬레이션-데이터-생성-권장">방법 1: 시뮬레이션 데이터 생성 (권장)</h4>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 실습용 데이터 자동 생성</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/data-simulation.R"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>다음 파일이 <code>data/processed/</code>에 생성됩니다:</p>
+<ul>
+<li>
+<code>health_survey.csv</code> - 건강검진 데이터 (N=1,000)</li>
+<li>
+<code>disease_incidence.csv</code> - 월별 질병 발생률</li>
+<li>
+<code>regional_disease.csv</code> - 시도별 질병 데이터</li>
+<li>
+<code>clinical_trial.csv</code> - 임상시험 데이터</li>
+<li>
+<code>meta_analysis.csv</code> - 메타분석 데이터</li>
+<li>
+<code>covid_timeseries.csv</code> - COVID-19 유사 시계열</li>
+</ul></section><section id="방법-2-패키지-내장-데이터-사용" class="level4"><h4 class="anchored" data-anchor-id="방법-2-패키지-내장-데이터-사용">방법 2: 패키지 내장 데이터 사용</h4>
+<p>별도 파일 없이 R 패키지에 내장된 데이터를 직접 사용합니다:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 예시</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>      <span class="co"># 기본 R</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>        <span class="co"># 기본 R</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival">survival</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">lung</span><span class="op">)</span>        <span class="co"># 생존 분석</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/reconhub/outbreaks">outbreaks</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">ebola_sim</span><span class="op">)</span>   <span class="co"># 에볼라 유행 데이터</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+데이터 전략
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>이 책의 모든 실습은 <strong>재현 가능성</strong>을 최우선으로 합니다:</p>
+<ol type="1">
+<li>✅ <strong>패키지 내장 데이터</strong> 우선 사용</li>
+<li>✅ <strong>시뮬레이션 데이터</strong> (재현 가능한 <code><a href="https://rdrr.io/r/base/Random.html">set.seed()</a></code>)</li>
+<li>❌ 외부 다운로드 최소화 (Shapefile만 예외)</li>
+</ol>
+<p>따라서 인터넷이 없는 환경에서도 대부분의 실습이 가능합니다.</p>
+</div>
+</div>
+</section></section></section><section id="학습-로드맵" class="level2" data-number="0.5"><h2 data-number="0.5" class="anchored" data-anchor-id="학습-로드맵">
+<span class="header-section-number">0.5</span> 🗺️ 학습 로드맵</h2>
+<section id="초보자-r-처음-시작" class="level3" data-number="0.5.1"><h3 data-number="0.5.1" class="anchored" data-anchor-id="초보자-r-처음-시작">
+<span class="header-section-number">0.5.1</span> 초보자 (R 처음 시작)</h3>
+<pre><code>Ch 1 → Ch 2 (꼼꼼히) → Ch 3 (일부) → Ch 6 (기본)</code></pre>
+</section><section id="중급자-r-사용-경험-있음" class="level3" data-number="0.5.2"><h3 data-number="0.5.2" class="anchored" data-anchor-id="중급자-r-사용-경험-있음">
+<span class="header-section-number">0.5.2</span> 중급자 (R 사용 경험 있음)</h3>
+<pre><code>Ch 2 (복습) → Ch 3-4 (본인 분야) → Ch 5-6 → Ch 7</code></pre>
+</section><section id="고급자-논문프로젝트-목적" class="level3" data-number="0.5.3"><h3 data-number="0.5.3" class="anchored" data-anchor-id="고급자-논문프로젝트-목적">
+<span class="header-section-number">0.5.3</span> 고급자 (논문/프로젝트 목적)</h3>
+<pre><code>Ch 3-5 (필요 챕터) → Ch 6 (출판 전략) → Ch 7 (대시보드)</code></pre>
+</section></section><section id="실습-코드-사용법" class="level2" data-number="0.6"><h2 data-number="0.6" class="anchored" data-anchor-id="실습-코드-사용법">
+<span class="header-section-number">0.6</span> 📊 실습 코드 사용법</h2>
+<section id="코드-블록-종류" class="level3" data-number="0.6.1"><h3 data-number="0.6.1" class="anchored" data-anchor-id="코드-블록-종류">
+<span class="header-section-number">0.6.1</span> 코드 블록 종류</h3>
+<section id="직접-실행할-코드" class="level4"><h4 class="anchored" data-anchor-id="직접-실행할-코드">✍️ 직접 실행할 코드</h4>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 여러분이 직접 RStudio에서 실행하세요</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">wt</span>, y <span class="op">=</span> <span class="va">mpg</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="결과가-함께-표시되는-코드" class="level4"><h4 class="anchored" data-anchor-id="결과가-함께-표시되는-코드">📺 결과가 함께 표시되는 코드</h4>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 이 책에서 실행 결과까지 보여줍니다</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#&gt;   10.40   15.43   19.20   20.09   22.80   33.90</code></pre>
+</div>
+</div>
+</section><section id="연습문제" class="level4"><h4 class="anchored" data-anchor-id="연습문제">💡 연습문제</h4>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+✏️ Exercise 1
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>iris</code> 데이터로 꽃잎 길이(Petal.Length)와 너비(Petal.Width)의 산점도를 그려보세요.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>정답 보기</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Petal.Length</span>, y <span class="op">=</span> <span class="va">Petal.Width</span>, color <span class="op">=</span> <span class="va">Species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</section></section></section><section id="도움이-필요할-때" class="level2" data-number="0.7"><h2 data-number="0.7" class="anchored" data-anchor-id="도움이-필요할-때">
+<span class="header-section-number">0.7</span> 🆘 도움이 필요할 때</h2>
+<section id="r-관련-질문" class="level3" data-number="0.7.1"><h3 data-number="0.7.1" class="anchored" data-anchor-id="r-관련-질문">
+<span class="header-section-number">0.7.1</span> R 관련 질문</h3>
+<ul>
+<li><a href="https://stackoverflow.com/questions/tagged/r">Stack Overflow (R tag)</a></li>
+<li><a href="https://community.rstudio.com/">RStudio Community</a></li>
+<li><a href="https://www.rfordatasci.com/">R for Data Science Community</a></li>
+</ul></section><section id="ggplot2-관련" class="level3" data-number="0.7.2"><h3 data-number="0.7.2" class="anchored" data-anchor-id="ggplot2-관련">
+<span class="header-section-number">0.7.2</span> ggplot2 관련</h3>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/">공식 문서</a></li>
+<li><a href="https://r-graph-gallery.com/">R Graph Gallery</a></li>
+<li><a href="https://ggplot2-book.org/">ggplot2 Book</a></li>
+</ul></section><section id="역학보건학-특화" class="level3" data-number="0.7.3"><h3 data-number="0.7.3" class="anchored" data-anchor-id="역학보건학-특화">
+<span class="header-section-number">0.7.3</span> 역학/보건학 특화</h3>
+<ul>
+<li><a href="https://epirhandbook.com/">Epi R Handbook</a></li>
+<li><a href="https://www.appliedepi.org/">Applied Epi Community</a></li>
+</ul></section></section><section id="이-책을-인용하는-방법" class="level2" data-number="0.8"><h2 data-number="0.8" class="anchored" data-anchor-id="이-책을-인용하는-방법">
+<span class="header-section-number">0.8</span> 📝 이 책을 인용하는 방법</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bibtex code-with-copy"><code class="sourceCode bibtex"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="va">@book</span>{<span class="ot">rvis2024</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span> = {R 기반 보건학 시각화: 역학 및 임상통계를 위한 실습 가이드},</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span> = {보건학 R 시각화 팀},</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span> = {2024},</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span> = {https://your-url.com},</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">note</span> = {Accessed: 2024-11-18}</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section><section id="기여하기" class="level2" data-number="0.9"><h2 data-number="0.9" class="anchored" data-anchor-id="기여하기">
+<span class="header-section-number">0.9</span> 🤝 기여하기</h2>
+<p>이 책은 오픈 소스 프로젝트입니다. 오탈자, 코드 오류, 개선 제안은 언제든 환영합니다!</p>
+<ul>
+<li>GitHub 이슈: <a href="https://github.com">github.com/your-repo/issues</a>
+</li>
+<li>이메일: your-email@example.com</li>
+</ul></section><section id="라이선스" class="level2" data-number="0.10"><h2 data-number="0.10" class="anchored" data-anchor-id="라이선스">
+<span class="header-section-number">0.10</span> 📜 라이선스</h2>
+<ul>
+<li>
+<strong>텍스트 및 코드</strong>: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>
+</li>
+<li>
+<strong>데이터</strong>: CC0 (Public Domain)</li>
+</ul>
+<hr>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+준비되셨나요?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>모든 준비가 끝났다면, <a href="./chapters/01-introduction.html">Chapter 1: R과 ggplot2 시작하기</a>로 이동하세요! 🚀</p>
+</div>
+</div>
+
+
+<!-- -->
+
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./chapters/01-introduction.html" class="pagination-link" aria-label="R과 ggplot2 시작하기">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">R과 ggplot2 시작하기</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb13" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "R 기반 보건학 시각화"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "역학 및 임상통계를 위한 실습 가이드"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "보건학 R 시각화 팀"</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu"># 환영합니다! {.unnumbered}</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="fu">## 이 책에 대하여</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>이 책은 **보건학, 역학, 임상 통계** 분야의 대학원생과 전문가를 위한 R 시각화 실습 가이드입니다.</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>ggplot2의 "그래픽 문법(Grammar of Graphics)"을 기반으로,</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>데이터 탐색부터 학술지 출판, 대화형 대시보드 구축까지 전 과정을 다룹니다.</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## 📚 학습 목표</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>이 책을 완료하면 다음을 할 수 있습니다:</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>✅ ggplot2의 7가지 핵심 구성 요소를 이해하고 활용</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>✅ 역학 데이터(유행 곡선, 연령 표준화 비율)를 올바르게 시각화</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>✅ 공간 역학 데이터를 지도로 표현 (코로플레스 맵)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>✅ 생존 분석과 메타 분석 결과를 전문적으로 시각화</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>✅ 학술지 출판 품질의 Figure를 제작</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>✅ Shiny를 활용한 공중 보건 대시보드 구축</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## 🎯 대상 독자</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>보건학, 역학, 임상통계 전공 **대학원생**</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>R을 처음 배우거나 시각화를 체계적으로 배우고 싶은 **연구자**</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>논문 작성을 위해 고품질 그래프가 필요한 **보건의료 전문가**</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>공중 보건 데이터를 대시보드로 만들고 싶은 **실무자**</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## 사전 요구사항</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>R 기본 문법 이해 (변수, 함수, 데이터프레임)</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>RStudio 사용 경험 권장</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>통계학 기초 (평균, 표준편차, 신뢰구간)</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>R을 처음 접하신다면 <span class="co">[</span><span class="ot">R for Data Science</span><span class="co">](https://r4ds.hadley.nz/)</span> 1-5장을 먼저 읽어보시기를 권장합니다.</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## 📖 책의 구성</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>이 책은 **4개 파트 8개 챕터**로 구성되어 있습니다:</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### Part I: 기초편</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 1**: R과 ggplot2 시작하기</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 2**: ggplot2 완벽 마스터 - 그래픽 문법의 7가지 구성 요소</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a><span class="fu">### Part II: 역학편</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 3**: 역학 데이터 시각화 - 발병률, 유행곡선, 표준화</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 4**: 공간 역학 - GIS와 지도 제작</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a><span class="fu">### Part III: 임상통계편</span></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 5**: 생존 분석과 메타 분석 시각화</span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 6**: 출판 품질 그래프 제작 전략</span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a><span class="fu">### Part IV: 고급편</span></span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 7**: 대화형 시각화와 Shiny 대시보드</span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Chapter 8**: 효과적인 데이터 커뮤니케이션을 위한 제언</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## 💻 실습 환경 준비</span></span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a><span class="fu">### 1. R과 RStudio 설치</span></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a><span class="co"># R 다운로드: https://cran.r-project.org/</span></span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a><span class="co"># RStudio 다운로드: https://posit.co/download/rstudio-desktop/</span></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>**권장 버전:**</span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>R ≥ 4.3.0</span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>RStudio ≥ 2023.06.0</span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2. 필수 패키지 설치</span></span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>모든 필요한 패키지는 <span class="in">`code/setup.R`</span>에서 자동으로 설치됩니다:</span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a><span class="co"># 프로젝트 루트에서 실행</span></span>
+<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"code/setup.R"</span>)</span>
+<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a>주요 패키지:</span>
+<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Core**: <span class="in">`tidyverse`</span>, <span class="in">`here`</span>, <span class="in">`ggplot2`</span></span>
+<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Epidemiology**: <span class="in">`incidence2`</span>, <span class="in">`surveil`</span></span>
+<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Spatial**: <span class="in">`sf`</span>, <span class="in">`tmap`</span></span>
+<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Clinical**: <span class="in">`survival`</span>, <span class="in">`ggsurvfit`</span>, <span class="in">`metafor`</span></span>
+<span id="cb13-104"><a href="#cb13-104" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Interactive**: <span class="in">`plotly`</span>, <span class="in">`shiny`</span></span>
+<span id="cb13-105"><a href="#cb13-105" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Publication**: <span class="in">`patchwork`</span>, <span class="in">`ggrepel`</span>, <span class="in">`ggpubr`</span></span>
+<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-107"><a href="#cb13-107" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb13-108"><a href="#cb13-108" aria-hidden="true" tabindex="-1"></a><span class="fu">## 패키지 설치 시간</span></span>
+<span id="cb13-109"><a href="#cb13-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-110"><a href="#cb13-110" aria-hidden="true" tabindex="-1"></a>처음 실행 시 모든 패키지를 설치하는 데 **10-20분** 정도 소요됩니다.</span>
+<span id="cb13-111"><a href="#cb13-111" aria-hidden="true" tabindex="-1"></a>인터넷 연결을 확인하고 충분한 시간을 두고 실행하세요.</span>
+<span id="cb13-112"><a href="#cb13-112" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-113"><a href="#cb13-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-114"><a href="#cb13-114" aria-hidden="true" tabindex="-1"></a><span class="fu">### 3. 실습 데이터 준비</span></span>
+<span id="cb13-115"><a href="#cb13-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-116"><a href="#cb13-116" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 방법 1: 시뮬레이션 데이터 생성 (권장)</span></span>
+<span id="cb13-117"><a href="#cb13-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-120"><a href="#cb13-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-121"><a href="#cb13-121" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb13-122"><a href="#cb13-122" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb13-123"><a href="#cb13-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-124"><a href="#cb13-124" aria-hidden="true" tabindex="-1"></a><span class="co"># 실습용 데이터 자동 생성</span></span>
+<span id="cb13-125"><a href="#cb13-125" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"code/data-simulation.R"</span>)</span>
+<span id="cb13-126"><a href="#cb13-126" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-127"><a href="#cb13-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-128"><a href="#cb13-128" aria-hidden="true" tabindex="-1"></a>다음 파일이 <span class="in">`data/processed/`</span>에 생성됩니다:</span>
+<span id="cb13-129"><a href="#cb13-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-130"><a href="#cb13-130" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`health_survey.csv`</span> - 건강검진 데이터 (N=1,000)</span>
+<span id="cb13-131"><a href="#cb13-131" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`disease_incidence.csv`</span> - 월별 질병 발생률</span>
+<span id="cb13-132"><a href="#cb13-132" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`regional_disease.csv`</span> - 시도별 질병 데이터</span>
+<span id="cb13-133"><a href="#cb13-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`clinical_trial.csv`</span> - 임상시험 데이터</span>
+<span id="cb13-134"><a href="#cb13-134" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`meta_analysis.csv`</span> - 메타분석 데이터</span>
+<span id="cb13-135"><a href="#cb13-135" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`covid_timeseries.csv`</span> - COVID-19 유사 시계열</span>
+<span id="cb13-136"><a href="#cb13-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-137"><a href="#cb13-137" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 방법 2: 패키지 내장 데이터 사용</span></span>
+<span id="cb13-138"><a href="#cb13-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-139"><a href="#cb13-139" aria-hidden="true" tabindex="-1"></a>별도 파일 없이 R 패키지에 내장된 데이터를 직접 사용합니다:</span>
+<span id="cb13-140"><a href="#cb13-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-143"><a href="#cb13-143" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-144"><a href="#cb13-144" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb13-145"><a href="#cb13-145" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb13-146"><a href="#cb13-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-147"><a href="#cb13-147" aria-hidden="true" tabindex="-1"></a><span class="co"># 예시</span></span>
+<span id="cb13-148"><a href="#cb13-148" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(mtcars)      <span class="co"># 기본 R</span></span>
+<span id="cb13-149"><a href="#cb13-149" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(iris)        <span class="co"># 기본 R</span></span>
+<span id="cb13-150"><a href="#cb13-150" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
+<span id="cb13-151"><a href="#cb13-151" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(lung)        <span class="co"># 생존 분석</span></span>
+<span id="cb13-152"><a href="#cb13-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-153"><a href="#cb13-153" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(outbreaks)</span>
+<span id="cb13-154"><a href="#cb13-154" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(ebola_sim)   <span class="co"># 에볼라 유행 데이터</span></span>
+<span id="cb13-155"><a href="#cb13-155" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-156"><a href="#cb13-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-157"><a href="#cb13-157" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb13-158"><a href="#cb13-158" aria-hidden="true" tabindex="-1"></a><span class="fu">## 데이터 전략</span></span>
+<span id="cb13-159"><a href="#cb13-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-160"><a href="#cb13-160" aria-hidden="true" tabindex="-1"></a>이 책의 모든 실습은 **재현 가능성**을 최우선으로 합니다:</span>
+<span id="cb13-161"><a href="#cb13-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-162"><a href="#cb13-162" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>✅ **패키지 내장 데이터** 우선 사용</span>
+<span id="cb13-163"><a href="#cb13-163" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>✅ **시뮬레이션 데이터** (재현 가능한 <span class="in">`set.seed()`</span>)</span>
+<span id="cb13-164"><a href="#cb13-164" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>❌ 외부 다운로드 최소화 (Shapefile만 예외)</span>
+<span id="cb13-165"><a href="#cb13-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-166"><a href="#cb13-166" aria-hidden="true" tabindex="-1"></a>따라서 인터넷이 없는 환경에서도 대부분의 실습이 가능합니다.</span>
+<span id="cb13-167"><a href="#cb13-167" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-168"><a href="#cb13-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-169"><a href="#cb13-169" aria-hidden="true" tabindex="-1"></a><span class="fu">## 🗺️ 학습 로드맵</span></span>
+<span id="cb13-170"><a href="#cb13-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-171"><a href="#cb13-171" aria-hidden="true" tabindex="-1"></a><span class="fu">### 초보자 (R 처음 시작)</span></span>
+<span id="cb13-172"><a href="#cb13-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-173"><a href="#cb13-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-174"><a href="#cb13-174" aria-hidden="true" tabindex="-1"></a><span class="in">Ch 1 → Ch 2 (꼼꼼히) → Ch 3 (일부) → Ch 6 (기본)</span></span>
+<span id="cb13-175"><a href="#cb13-175" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-176"><a href="#cb13-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-177"><a href="#cb13-177" aria-hidden="true" tabindex="-1"></a><span class="fu">### 중급자 (R 사용 경험 있음)</span></span>
+<span id="cb13-178"><a href="#cb13-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-179"><a href="#cb13-179" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-180"><a href="#cb13-180" aria-hidden="true" tabindex="-1"></a><span class="in">Ch 2 (복습) → Ch 3-4 (본인 분야) → Ch 5-6 → Ch 7</span></span>
+<span id="cb13-181"><a href="#cb13-181" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-182"><a href="#cb13-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-183"><a href="#cb13-183" aria-hidden="true" tabindex="-1"></a><span class="fu">### 고급자 (논문/프로젝트 목적)</span></span>
+<span id="cb13-184"><a href="#cb13-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-185"><a href="#cb13-185" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-186"><a href="#cb13-186" aria-hidden="true" tabindex="-1"></a><span class="in">Ch 3-5 (필요 챕터) → Ch 6 (출판 전략) → Ch 7 (대시보드)</span></span>
+<span id="cb13-187"><a href="#cb13-187" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-188"><a href="#cb13-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-189"><a href="#cb13-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## 📊 실습 코드 사용법</span></span>
+<span id="cb13-190"><a href="#cb13-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-191"><a href="#cb13-191" aria-hidden="true" tabindex="-1"></a><span class="fu">### 코드 블록 종류</span></span>
+<span id="cb13-192"><a href="#cb13-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-193"><a href="#cb13-193" aria-hidden="true" tabindex="-1"></a><span class="fu">#### ✍️ 직접 실행할 코드</span></span>
+<span id="cb13-194"><a href="#cb13-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-197"><a href="#cb13-197" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-198"><a href="#cb13-198" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb13-199"><a href="#cb13-199" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb13-200"><a href="#cb13-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-201"><a href="#cb13-201" aria-hidden="true" tabindex="-1"></a><span class="co"># 여러분이 직접 RStudio에서 실행하세요</span></span>
+<span id="cb13-202"><a href="#cb13-202" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb13-203"><a href="#cb13-203" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mtcars, <span class="fu">aes</span>(<span class="at">x =</span> wt, <span class="at">y =</span> mpg)) <span class="sc">+</span></span>
+<span id="cb13-204"><a href="#cb13-204" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span>
+<span id="cb13-205"><a href="#cb13-205" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-206"><a href="#cb13-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-207"><a href="#cb13-207" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 📺 결과가 함께 표시되는 코드</span></span>
+<span id="cb13-208"><a href="#cb13-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-211"><a href="#cb13-211" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-212"><a href="#cb13-212" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb13-213"><a href="#cb13-213" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb13-214"><a href="#cb13-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-215"><a href="#cb13-215" aria-hidden="true" tabindex="-1"></a><span class="co"># 이 책에서 실행 결과까지 보여줍니다</span></span>
+<span id="cb13-216"><a href="#cb13-216" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mtcars<span class="sc">$</span>mpg)</span>
+<span id="cb13-217"><a href="#cb13-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-218"><a href="#cb13-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-219"><a href="#cb13-219" aria-hidden="true" tabindex="-1"></a><span class="fu">#### 💡 연습문제</span></span>
+<span id="cb13-220"><a href="#cb13-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-221"><a href="#cb13-221" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip icon="false"}</span>
+<span id="cb13-222"><a href="#cb13-222" aria-hidden="true" tabindex="-1"></a><span class="fu">## ✏️ Exercise 1</span></span>
+<span id="cb13-223"><a href="#cb13-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-224"><a href="#cb13-224" aria-hidden="true" tabindex="-1"></a><span class="in">`iris`</span> 데이터로 꽃잎 길이(Petal.Length)와 너비(Petal.Width)의 산점도를 그려보세요.</span>
+<span id="cb13-225"><a href="#cb13-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-228"><a href="#cb13-228" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-229"><a href="#cb13-229" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb13-230"><a href="#cb13-230" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb13-231"><a href="#cb13-231" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "정답 보기"</span></span>
+<span id="cb13-232"><a href="#cb13-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-233"><a href="#cb13-233" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb13-234"><a href="#cb13-234" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(iris, <span class="fu">aes</span>(<span class="at">x =</span> Petal.Length, <span class="at">y =</span> Petal.Width, <span class="at">color =</span> Species)) <span class="sc">+</span></span>
+<span id="cb13-235"><a href="#cb13-235" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb13-236"><a href="#cb13-236" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb13-237"><a href="#cb13-237" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-238"><a href="#cb13-238" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-239"><a href="#cb13-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-240"><a href="#cb13-240" aria-hidden="true" tabindex="-1"></a><span class="fu">## 🆘 도움이 필요할 때</span></span>
+<span id="cb13-241"><a href="#cb13-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-242"><a href="#cb13-242" aria-hidden="true" tabindex="-1"></a><span class="fu">### R 관련 질문</span></span>
+<span id="cb13-243"><a href="#cb13-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-244"><a href="#cb13-244" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Stack Overflow (R tag)</span><span class="co">](https://stackoverflow.com/questions/tagged/r)</span></span>
+<span id="cb13-245"><a href="#cb13-245" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">RStudio Community</span><span class="co">](https://community.rstudio.com/)</span></span>
+<span id="cb13-246"><a href="#cb13-246" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">R for Data Science Community</span><span class="co">](https://www.rfordatasci.com/)</span></span>
+<span id="cb13-247"><a href="#cb13-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-248"><a href="#cb13-248" aria-hidden="true" tabindex="-1"></a><span class="fu">### ggplot2 관련</span></span>
+<span id="cb13-249"><a href="#cb13-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-250"><a href="#cb13-250" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">공식 문서</span><span class="co">](https://ggplot2.tidyverse.org/)</span></span>
+<span id="cb13-251"><a href="#cb13-251" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">R Graph Gallery</span><span class="co">](https://r-graph-gallery.com/)</span></span>
+<span id="cb13-252"><a href="#cb13-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">ggplot2 Book</span><span class="co">](https://ggplot2-book.org/)</span></span>
+<span id="cb13-253"><a href="#cb13-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-254"><a href="#cb13-254" aria-hidden="true" tabindex="-1"></a><span class="fu">### 역학/보건학 특화</span></span>
+<span id="cb13-255"><a href="#cb13-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-256"><a href="#cb13-256" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Epi R Handbook</span><span class="co">](https://epirhandbook.com/)</span></span>
+<span id="cb13-257"><a href="#cb13-257" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Applied Epi Community</span><span class="co">](https://www.appliedepi.org/)</span></span>
+<span id="cb13-258"><a href="#cb13-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-259"><a href="#cb13-259" aria-hidden="true" tabindex="-1"></a><span class="fu">## 📝 이 책을 인용하는 방법</span></span>
+<span id="cb13-260"><a href="#cb13-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-261"><a href="#cb13-261" aria-hidden="true" tabindex="-1"></a><span class="in">```bibtex</span></span>
+<span id="cb13-262"><a href="#cb13-262" aria-hidden="true" tabindex="-1"></a><span class="in">@book{rvis2024,</span></span>
+<span id="cb13-263"><a href="#cb13-263" aria-hidden="true" tabindex="-1"></a><span class="in">  title = {R 기반 보건학 시각화: 역학 및 임상통계를 위한 실습 가이드},</span></span>
+<span id="cb13-264"><a href="#cb13-264" aria-hidden="true" tabindex="-1"></a><span class="in">  author = {보건학 R 시각화 팀},</span></span>
+<span id="cb13-265"><a href="#cb13-265" aria-hidden="true" tabindex="-1"></a><span class="in">  year = {2024},</span></span>
+<span id="cb13-266"><a href="#cb13-266" aria-hidden="true" tabindex="-1"></a><span class="in">  url = {https://your-url.com},</span></span>
+<span id="cb13-267"><a href="#cb13-267" aria-hidden="true" tabindex="-1"></a><span class="in">  note = {Accessed: 2024-11-18}</span></span>
+<span id="cb13-268"><a href="#cb13-268" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb13-269"><a href="#cb13-269" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-270"><a href="#cb13-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-271"><a href="#cb13-271" aria-hidden="true" tabindex="-1"></a><span class="fu">## 🤝 기여하기</span></span>
+<span id="cb13-272"><a href="#cb13-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-273"><a href="#cb13-273" aria-hidden="true" tabindex="-1"></a>이 책은 오픈 소스 프로젝트입니다. 오탈자, 코드 오류, 개선 제안은 언제든 환영합니다!</span>
+<span id="cb13-274"><a href="#cb13-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-275"><a href="#cb13-275" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GitHub 이슈: <span class="co">[</span><span class="ot">github.com/your-repo/issues</span><span class="co">](https://github.com)</span></span>
+<span id="cb13-276"><a href="#cb13-276" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>이메일: your-email@example.com</span>
+<span id="cb13-277"><a href="#cb13-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-278"><a href="#cb13-278" aria-hidden="true" tabindex="-1"></a><span class="fu">## 📜 라이선스</span></span>
+<span id="cb13-279"><a href="#cb13-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-280"><a href="#cb13-280" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**텍스트 및 코드**: <span class="co">[</span><span class="ot">CC BY-NC-SA 4.0</span><span class="co">](https://creativecommons.org/licenses/by-nc-sa/4.0/)</span></span>
+<span id="cb13-281"><a href="#cb13-281" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**데이터**: CC0 (Public Domain)</span>
+<span id="cb13-282"><a href="#cb13-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-283"><a href="#cb13-283" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb13-284"><a href="#cb13-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-285"><a href="#cb13-285" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb13-286"><a href="#cb13-286" aria-hidden="true" tabindex="-1"></a><span class="fu">## 준비되셨나요?</span></span>
+<span id="cb13-287"><a href="#cb13-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-288"><a href="#cb13-288" aria-hidden="true" tabindex="-1"></a>모든 준비가 끝났다면, <span class="co">[</span><span class="ot">Chapter 1: R과 ggplot2 시작하기</span><span class="co">](chapters/01-introduction.qmd)</span>로 이동하세요! 🚀</span>
+<span id="cb13-289"><a href="#cb13-289" aria-hidden="true" tabindex="-1"></a>:::</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p>R 기반 보건학 시각화 by 보건학 R 시각화 팀</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
