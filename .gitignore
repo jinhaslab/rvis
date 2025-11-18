@@ -22,3 +22,4 @@
 !DEPLOY_GUIDE.md
 
 /.quarto/
+.Rproj.user

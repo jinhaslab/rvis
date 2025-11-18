@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.4.550">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="연세대 산업보건 연구소">
+<meta name="dcterms.date" content="2025-11-18">
 <title>R 기반 보건학 시각화 - 5&nbsp; 공간 역학 데이터 시각화</title>
 <style>
 code{white-space: pre-wrap;}
@@ -201,7 +203,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/06-publication.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">출판용 시각화</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">논문 출판 수준 시각화</span></span></a>
   </div>
 </li>
       </ul>
@@ -218,7 +220,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/07-interactive.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">대화형 시각화</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">인터랙티브 시각화</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -247,23 +249,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <a href="#%EA%B3%B5%EA%B0%84-%EC%97%AD%ED%95%99-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%8B%9C%EA%B0%81%ED%99%94" id="toc-공간-역학-데이터-시각화" class="nav-link active" data-scroll-target="#%EA%B3%B5%EA%B0%84-%EC%97%AD%ED%95%99-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%8B%9C%EA%B0%81%ED%99%94"><span class="header-section-number">6</span> 공간 역학 데이터 시각화</a>
   <ul class="collapse">
 <li>
-<a href="#r-%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%B2%98%EB%A6%AC%EC%9D%98-%ED%98%81%EB%AA%85-sf" id="toc-r-공간-데이터-처리의-혁명-sf" class="nav-link" data-scroll-target="#r-%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%B2%98%EB%A6%AC%EC%9D%98-%ED%98%81%EB%AA%85-sf"><span class="header-section-number">6.1</span> 4.1 R 공간 데이터 처리의 혁명: sf</a>
+<a href="#%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%9D%98-%EA%B8%B0%EC%B4%88" id="toc-공간-데이터의-기초" class="nav-link" data-scroll-target="#%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%9D%98-%EA%B8%B0%EC%B4%88"><span class="header-section-number">6.1</span> 4.1 공간 데이터의 기초</a>
   <ul class="collapse">
-<li><a href="#simple-features%EB%9E%80" id="toc-simple-features란" class="nav-link" data-scroll-target="#simple-features%EB%9E%80"><span class="header-section-number">6.1.1</span> 4.1.1 Simple Features란?</a></li>
-  <li><a href="#sf-%EA%B0%9D%EC%B2%B4-%EA%B5%AC%EC%A1%B0" id="toc-sf-객체-구조" class="nav-link" data-scroll-target="#sf-%EA%B0%9D%EC%B2%B4-%EA%B5%AC%EC%A1%B0"><span class="header-section-number">6.1.2</span> 4.1.2 sf 객체 구조</a></li>
+<li><a href="#simple-features-sf%EB%9E%80" id="toc-simple-features-sf란" class="nav-link" data-scroll-target="#simple-features-sf%EB%9E%80"><span class="header-section-number">6.1.1</span> 4.1.1 Simple Features (sf)란?</a></li>
+  <li><a href="#%ED%95%9C%EA%B5%AD-%EC%A7%80%EB%8F%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EA%B0%80%EC%A0%B8%EC%98%A4%EA%B8%B0" id="toc-한국-지도-데이터-가져오기" class="nav-link" data-scroll-target="#%ED%95%9C%EA%B5%AD-%EC%A7%80%EB%8F%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EA%B0%80%EC%A0%B8%EC%98%A4%EA%B8%B0"><span class="header-section-number">6.1.2</span> 4.1.2 한국 지도 데이터 가져오기</a></li>
   </ul>
 </li>
   <li>
-<a href="#%EC%BD%94%EB%A1%9C%ED%94%8C%EB%A0%88%EC%8A%A4-%EB%A7%B5-choropleth-map" id="toc-코로플레스-맵-choropleth-map" class="nav-link" data-scroll-target="#%EC%BD%94%EB%A1%9C%ED%94%8C%EB%A0%88%EC%8A%A4-%EB%A7%B5-choropleth-map"><span class="header-section-number">6.2</span> 4.2 코로플레스 맵 (Choropleth Map)</a>
+<a href="#%EC%8B%9C%EB%AE%AC%EB%A0%88%EC%9D%B4%EC%85%98-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A1%9C-%EC%BD%94%EB%A1%9C%ED%94%8C%EB%A0%88%EC%8A%A4-%EB%A7%B5-%EC%A0%9C%EC%9E%91" id="toc-시뮬레이션-데이터로-코로플레스-맵-제작" class="nav-link" data-scroll-target="#%EC%8B%9C%EB%AE%AC%EB%A0%88%EC%9D%B4%EC%85%98-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A1%9C-%EC%BD%94%EB%A1%9C%ED%94%8C%EB%A0%88%EC%8A%A4-%EB%A7%B5-%EC%A0%9C%EC%9E%91"><span class="header-section-number">6.2</span> 4.2 시뮬레이션 데이터로 코로플레스 맵 제작</a>
   <ul class="collapse">
-<li><a href="#%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84" id="toc-데이터-준비" class="nav-link" data-scroll-target="#%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84"><span class="header-section-number">6.2.1</span> 4.2.1 데이터 준비</a></li>
-  <li><a href="#%EB%8D%B0%EC%9D%B4%ED%84%B0-%EA%B2%B0%ED%95%A9" id="toc-데이터-결합" class="nav-link" data-scroll-target="#%EB%8D%B0%EC%9D%B4%ED%84%B0-%EA%B2%B0%ED%95%A9"><span class="header-section-number">6.2.2</span> 4.2.2 데이터 결합</a></li>
-  <li><a href="#ggplot2%EB%A1%9C-%EC%8B%9C%EA%B0%81%ED%99%94" id="toc-ggplot2로-시각화" class="nav-link" data-scroll-target="#ggplot2%EB%A1%9C-%EC%8B%9C%EA%B0%81%ED%99%94"><span class="header-section-number">6.2.3</span> 4.2.3 ggplot2로 시각화</a></li>
-  <li><a href="#tmap%EC%9C%BC%EB%A1%9C-%EC%8B%9C%EA%B0%81%ED%99%94" id="toc-tmap으로-시각화" class="nav-link" data-scroll-target="#tmap%EC%9C%BC%EB%A1%9C-%EC%8B%9C%EA%B0%81%ED%99%94"><span class="header-section-number">6.2.4</span> 4.2.4 tmap으로 시각화</a></li>
+<li><a href="#%EC%8B%9C%EB%AE%AC%EB%A0%88%EC%9D%B4%EC%85%98-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%83%9D%EC%84%B1" id="toc-시뮬레이션-데이터-생성" class="nav-link" data-scroll-target="#%EC%8B%9C%EB%AE%AC%EB%A0%88%EC%9D%B4%EC%85%98-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%83%9D%EC%84%B1"><span class="header-section-number">6.2.1</span> 4.2.1 시뮬레이션 데이터 생성</a></li>
+  <li><a href="#%EA%B0%84%EB%8B%A8%ED%95%9C-%EC%A0%90-%EC%A7%80%EB%8F%84-point-map" id="toc-간단한-점-지도-point-map" class="nav-link" data-scroll-target="#%EA%B0%84%EB%8B%A8%ED%95%9C-%EC%A0%90-%EC%A7%80%EB%8F%84-point-map"><span class="header-section-number">6.2.2</span> 4.2.2 간단한 점 지도 (Point Map)</a></li>
+  <li><a href="#%EB%A7%89%EB%8C%80-%EA%B7%B8%EB%9E%98%ED%94%84%EB%A1%9C-%EC%A7%80%EC%97%AD-%EB%B9%84%EA%B5%90" id="toc-막대-그래프로-지역-비교" class="nav-link" data-scroll-target="#%EB%A7%89%EB%8C%80-%EA%B7%B8%EB%9E%98%ED%94%84%EB%A1%9C-%EC%A7%80%EC%97%AD-%EB%B9%84%EA%B5%90"><span class="header-section-number">6.2.3</span> 4.2.3 막대 그래프로 지역 비교</a></li>
   </ul>
 </li>
-  <li><a href="#ggplot2-vs-tmap-%EC%A0%84%EB%9E%B5%EC%A0%81-%EC%84%A0%ED%83%9D" id="toc-ggplot2-vs-tmap-전략적-선택" class="nav-link" data-scroll-target="#ggplot2-vs-tmap-%EC%A0%84%EB%9E%B5%EC%A0%81-%EC%84%A0%ED%83%9D"><span class="header-section-number">6.3</span> 4.3 ggplot2 vs tmap: 전략적 선택</a></li>
-  <li><a href="#%EC%9A%94%EC%95%BD" id="toc-요약" class="nav-link" data-scroll-target="#%EC%9A%94%EC%95%BD"><span class="header-section-number">6.4</span> 요약</a></li>
+  <li><a href="#%EC%B9%98%EB%AA%85%EB%A5%A0-case-fatality-rate-%EB%B6%84%EC%84%9D" id="toc-치명률-case-fatality-rate-분석" class="nav-link" data-scroll-target="#%EC%B9%98%EB%AA%85%EB%A5%A0-case-fatality-rate-%EB%B6%84%EC%84%9D"><span class="header-section-number">6.3</span> 4.3 치명률 (Case Fatality Rate) 분석</a></li>
+  <li><a href="#%EC%9D%B8%EA%B5%AC-%ED%91%9C%EC%A4%80%ED%99%94-%EA%B3%B5%EC%A0%95%ED%95%9C-%EB%B9%84%EA%B5%90%EB%A5%BC-%EC%9C%84%ED%95%B4" id="toc-인구-표준화-공정한-비교를-위해" class="nav-link" data-scroll-target="#%EC%9D%B8%EA%B5%AC-%ED%91%9C%EC%A4%80%ED%99%94-%EA%B3%B5%EC%A0%95%ED%95%9C-%EB%B9%84%EA%B5%90%EB%A5%BC-%EC%9C%84%ED%95%B4"><span class="header-section-number">6.4</span> 4.4 인구 표준화: 공정한 비교를 위해</a></li>
+  <li>
+<a href="#%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%B6%84%EC%84%9D-%EC%9B%8C%ED%81%AC%ED%94%8C%EB%A1%9C%EC%9A%B0" id="toc-공간-데이터-분석-워크플로우" class="nav-link" data-scroll-target="#%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%B6%84%EC%84%9D-%EC%9B%8C%ED%81%AC%ED%94%8C%EB%A1%9C%EC%9A%B0"><span class="header-section-number">6.5</span> 4.5 공간 데이터 분석 워크플로우</a>
+  <ul class="collapse">
+<li><a href="#%EC%8B%A4%EC%A0%84-%EB%B6%84%EC%84%9D-%EB%8B%A8%EA%B3%84" id="toc-실전-분석-단계" class="nav-link" data-scroll-target="#%EC%8B%A4%EC%A0%84-%EB%B6%84%EC%84%9D-%EB%8B%A8%EA%B3%84"><span class="header-section-number">6.5.1</span> 4.5.1 실전 분석 단계</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#%EC%9C%A0%EC%9A%A9%ED%95%9C-%ED%8C%81%EA%B3%BC-%ED%8A%B8%EB%9F%AC%EB%B8%94%EC%8A%88%ED%8C%85" id="toc-유용한-팁과-트러블슈팅" class="nav-link" data-scroll-target="#%EC%9C%A0%EC%9A%A9%ED%95%9C-%ED%8C%81%EA%B3%BC-%ED%8A%B8%EB%9F%AC%EB%B8%94%EC%8A%88%ED%8C%85"><span class="header-section-number">6.6</span> 4.6 유용한 팁과 트러블슈팅</a>
+  <ul class="collapse">
+<li><a href="#%EC%A2%8C%ED%91%9C%EA%B3%84-%EB%B3%80%ED%99%98" id="toc-좌표계-변환" class="nav-link" data-scroll-target="#%EC%A2%8C%ED%91%9C%EA%B3%84-%EB%B3%80%ED%99%98"><span class="header-section-number">6.6.1</span> 4.6.1 좌표계 변환</a></li>
+  <li><a href="#%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%EC%8A%A4" id="toc-공간-데이터-소스" class="nav-link" data-scroll-target="#%EA%B3%B5%EA%B0%84-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%EC%8A%A4"><span class="header-section-number">6.6.2</span> 4.6.2 공간 데이터 소스</a></li>
+  <li><a href="#ggplot2-vs-tmap-%EC%84%A0%ED%83%9D-%EA%B0%80%EC%9D%B4%EB%93%9C" id="toc-ggplot2-vs-tmap-선택-가이드" class="nav-link" data-scroll-target="#ggplot2-vs-tmap-%EC%84%A0%ED%83%9D-%EA%B0%80%EC%9D%B4%EB%93%9C"><span class="header-section-number">6.6.3</span> 4.6.3 ggplot2 vs tmap 선택 가이드</a></li>
+  </ul>
+</li>
+  <li><a href="#%EC%9A%94%EC%95%BD" id="toc-요약" class="nav-link" data-scroll-target="#%EC%9A%94%EC%95%BD"><span class="header-section-number">6.7</span> 요약</a></li>
   </ul>
 </li>
   </ul></nav>
@@ -279,7 +295,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>연세대 산업보건 연구소 </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 18, 2025</p>
+    </div>
+  </div>
   
     
   </div>
@@ -294,78 +322,562 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-학습 목표
+🎯 학습 목표
 </div>
 </div>
 <div class="callout-body-container callout-body">
+<p>이 챕터를 마치면 다음을 할 수 있습니다:</p>
 <ul>
-<li>sf 패키지로 공간 데이터 처리</li>
-<li>역학 데이터와 지리 데이터 결합</li>
-<li>ggplot2와 tmap으로 코로플레스 맵 제작</li>
-<li>공간 패턴 해석</li>
+<li>
+<strong>sf 패키지</strong>로 공간 데이터를 R에서 처리</li>
+<li>역학 데이터와 지리 데이터 결합하여 코로플레스 맵 제작</li>
+<li>
+<strong>ggplot2</strong>와 <strong>tmap</strong>으로 전문적인 지도 시각화</li>
+<li>공간 패턴을 해석하고 클러스터 탐지</li>
+<li>지역별 질병 부담 비교 및 표준화</li>
 </ul>
 </div>
 </div>
-<section id="r-공간-데이터-처리의-혁명-sf" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="r-공간-데이터-처리의-혁명-sf">
-<span class="header-section-number">6.1</span> 4.1 R 공간 데이터 처리의 혁명: sf</h2>
-<p>(내용 추가 예정 - PDF 페이지 11-12)</p>
-<section id="simple-features란" class="level3" data-number="6.1.1"><h3 data-number="6.1.1" class="anchored" data-anchor-id="simple-features란">
-<span class="header-section-number">6.1.1</span> 4.1.1 Simple Features란?</h3>
-</section><section id="sf-객체-구조" class="level3" data-number="6.1.2"><h3 data-number="6.1.2" class="anchored" data-anchor-id="sf-객체-구조">
-<span class="header-section-number">6.1.2</span> 4.1.2 sf 객체 구조</h3>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+📦 필요한 패키지
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"sf"</span>, <span class="st">"rnaturalearth"</span>, <span class="st">"rnaturalearthdata"</span>, <span class="st">"tmap"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<section id="공간-데이터의-기초" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="공간-데이터의-기초">
+<span class="header-section-number">6.1</span> 4.1 공간 데이터의 기초</h2>
+<section id="simple-features-sf란" class="level3" data-number="6.1.1"><h3 data-number="6.1.1" class="anchored" data-anchor-id="simple-features-sf란">
+<span class="header-section-number">6.1.1</span> 4.1.1 Simple Features (sf)란?</h3>
+<p><strong>sf (Simple Features for R)</strong>는 공간 데이터를 다루는 현대적인 R 패키지입니다.</p>
+<p><strong>주요 특징:</strong> - tidyverse와 완벽 호환 (dplyr, ggplot2 등) - GDAL/GEOS 기반으로 빠르고 안정적 - 데이터프레임처럼 다룰 수 있는 직관적 구조</p>
+<p><strong>좌표계 (CRS, Coordinate Reference System):</strong> - <strong>WGS84 (EPSG:4326)</strong>: 경도/위도 좌표계 (GPS 표준) - <strong>Korea 2000 (EPSG:5179)</strong>: 한국 평면직각좌표계 - <strong>Web Mercator (EPSG:3857)</strong>: 웹 지도용</p>
+</section><section id="한국-지도-데이터-가져오기" class="level3" data-number="6.1.2"><h3 data-number="6.1.2" class="anchored" data-anchor-id="한국-지도-데이터-가져오기">
+<span class="header-section-number">6.1.2</span> 4.1.2 한국 지도 데이터 가져오기</h3>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/rnaturalearth/">rnaturalearth</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Shapefile 읽기 (예시)</span></span>
-<span><span class="co"># korea_map &lt;- st_read("data/external/sig.shp")</span></span>
+<span><span class="co"># 세계 지도에서 한국 추출</span></span>
+<span><span class="va">korea</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://docs.ropensci.org/rnaturalearth/reference/ne_countries.html">ne_countries</a></span><span class="op">(</span>scale <span class="op">=</span> <span class="st">"medium"</span>, country <span class="op">=</span> <span class="st">"South Korea"</span>, returnclass <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 구조 확인</span></span>
-<span><span class="co"># glimpse(korea_map)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html">glimpse</a></span><span class="op">(</span><span class="va">korea</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Rows: 1
+#&gt; Columns: 169
+#&gt; $ featurecla &lt;chr&gt; "Admin-0 country"
+#&gt; $ scalerank  &lt;int&gt; 1
+#&gt; $ labelrank  &lt;int&gt; 2
+#&gt; $ sovereignt &lt;chr&gt; "South Korea"
+#&gt; $ sov_a3     &lt;chr&gt; "KOR"
+#&gt; $ adm0_dif   &lt;int&gt; 0
+#&gt; $ level      &lt;int&gt; 2
+#&gt; $ type       &lt;chr&gt; "Sovereign country"
+#&gt; $ tlc        &lt;chr&gt; "1"
+#&gt; $ admin      &lt;chr&gt; "South Korea"
+#&gt; $ adm0_a3    &lt;chr&gt; "KOR"
+#&gt; $ geou_dif   &lt;int&gt; 0
+#&gt; $ geounit    &lt;chr&gt; "South Korea"
+#&gt; $ gu_a3      &lt;chr&gt; "KOR"
+#&gt; $ su_dif     &lt;int&gt; 0
+#&gt; $ subunit    &lt;chr&gt; "South Korea"
+#&gt; $ su_a3      &lt;chr&gt; "KOR"
+#&gt; $ brk_diff   &lt;int&gt; 0
+#&gt; $ name       &lt;chr&gt; "South Korea"
+#&gt; $ name_long  &lt;chr&gt; "Republic of Korea"
+#&gt; $ brk_a3     &lt;chr&gt; "KOR"
+#&gt; $ brk_name   &lt;chr&gt; "Republic of Korea"
+#&gt; $ brk_group  &lt;chr&gt; NA
+#&gt; $ abbrev     &lt;chr&gt; "S.K."
+#&gt; $ postal     &lt;chr&gt; "KR"
+#&gt; $ formal_en  &lt;chr&gt; "Republic of Korea"
+#&gt; $ formal_fr  &lt;chr&gt; NA
+#&gt; $ name_ciawf &lt;chr&gt; "Korea, South"
+#&gt; $ note_adm0  &lt;chr&gt; NA
+#&gt; $ note_brk   &lt;chr&gt; NA
+#&gt; $ name_sort  &lt;chr&gt; "Korea, Rep."
+#&gt; $ name_alt   &lt;chr&gt; NA
+#&gt; $ mapcolor7  &lt;int&gt; 4
+#&gt; $ mapcolor8  &lt;int&gt; 1
+#&gt; $ mapcolor9  &lt;int&gt; 1
+#&gt; $ mapcolor13 &lt;int&gt; 5
+#&gt; $ pop_est    &lt;dbl&gt; 51709098
+#&gt; $ pop_rank   &lt;int&gt; 16
+#&gt; $ pop_year   &lt;int&gt; 2019
+#&gt; $ gdp_md     &lt;int&gt; 1646739
+#&gt; $ gdp_year   &lt;int&gt; 2019
+#&gt; $ economy    &lt;chr&gt; "4. Emerging region: MIKT"
+#&gt; $ income_grp &lt;chr&gt; "1. High income: OECD"
+#&gt; $ fips_10    &lt;chr&gt; "KS"
+#&gt; $ iso_a2     &lt;chr&gt; "KR"
+#&gt; $ iso_a2_eh  &lt;chr&gt; "KR"
+#&gt; $ iso_a3     &lt;chr&gt; "KOR"
+#&gt; $ iso_a3_eh  &lt;chr&gt; "KOR"
+#&gt; $ iso_n3     &lt;chr&gt; "410"
+#&gt; $ iso_n3_eh  &lt;chr&gt; "410"
+#&gt; $ un_a3      &lt;chr&gt; "410"
+#&gt; $ wb_a2      &lt;chr&gt; "KR"
+#&gt; $ wb_a3      &lt;chr&gt; "KOR"
+#&gt; $ woe_id     &lt;int&gt; 23424868
+#&gt; $ woe_id_eh  &lt;int&gt; 23424868
+#&gt; $ woe_note   &lt;chr&gt; "Exact WOE match as country"
+#&gt; $ adm0_iso   &lt;chr&gt; "KOR"
+#&gt; $ adm0_diff  &lt;chr&gt; NA
+#&gt; $ adm0_tlc   &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_us &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_fr &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_ru &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_es &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_cn &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_tw &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_in &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_np &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_pk &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_de &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_gb &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_br &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_il &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_ps &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_sa &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_eg &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_ma &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_pt &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_ar &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_jp &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_ko &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_vn &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_tr &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_id &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_pl &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_gr &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_it &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_nl &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_se &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_bd &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_ua &lt;chr&gt; "KOR"
+#&gt; $ adm0_a3_un &lt;int&gt; -99
+#&gt; $ adm0_a3_wb &lt;int&gt; -99
+#&gt; $ continent  &lt;chr&gt; "Asia"
+#&gt; $ region_un  &lt;chr&gt; "Asia"
+#&gt; $ subregion  &lt;chr&gt; "Eastern Asia"
+#&gt; $ region_wb  &lt;chr&gt; "East Asia &amp; Pacific"
+#&gt; $ name_len   &lt;int&gt; 11
+#&gt; $ long_len   &lt;int&gt; 17
+#&gt; $ abbrev_len &lt;int&gt; 4
+#&gt; $ tiny       &lt;int&gt; -99
+#&gt; $ homepart   &lt;int&gt; 1
+#&gt; $ min_zoom   &lt;dbl&gt; 0
+#&gt; $ min_label  &lt;dbl&gt; 2.5
+#&gt; $ max_label  &lt;dbl&gt; 7
+#&gt; $ label_x    &lt;dbl&gt; 128.1295
+#&gt; $ label_y    &lt;dbl&gt; 36.38492
+#&gt; $ ne_id      &lt;dbl&gt; 1159320985
+#&gt; $ wikidataid &lt;chr&gt; "Q884"
+#&gt; $ name_ar    &lt;chr&gt; "كوريا الجنوبية"
+#&gt; $ name_bn    &lt;chr&gt; "দক্ষিণ কোরিয়া"
+#&gt; $ name_de    &lt;chr&gt; "Südkorea"
+#&gt; $ name_en    &lt;chr&gt; "South Korea"
+#&gt; $ name_es    &lt;chr&gt; "Corea del Sur"
+#&gt; $ name_fa    &lt;chr&gt; "کره جنوبی"
+#&gt; $ name_fr    &lt;chr&gt; "Corée du Sud"
+#&gt; $ name_el    &lt;chr&gt; "Νότια Κορέα"
+#&gt; $ name_he    &lt;chr&gt; "קוריאה הדרומית"
+#&gt; $ name_hi    &lt;chr&gt; "दक्षिण कोरिया"
+#&gt; $ name_hu    &lt;chr&gt; "Dél-Korea"
+#&gt; $ name_id    &lt;chr&gt; "Korea Selatan"
+#&gt; $ name_it    &lt;chr&gt; "Corea del Sud"
+#&gt; $ name_ja    &lt;chr&gt; "大韓民国"
+#&gt; $ name_ko    &lt;chr&gt; "대한민국"
+#&gt; $ name_nl    &lt;chr&gt; "Zuid-Korea"
+#&gt; $ name_pl    &lt;chr&gt; "Korea Południowa"
+#&gt; $ name_pt    &lt;chr&gt; "Coreia do Sul"
+#&gt; $ name_ru    &lt;chr&gt; "Республика Корея"
+#&gt; $ name_sv    &lt;chr&gt; "Sydkorea"
+#&gt; $ name_tr    &lt;chr&gt; "Güney Kore"
+#&gt; $ name_uk    &lt;chr&gt; "Південна Корея"
+#&gt; $ name_ur    &lt;chr&gt; "جنوبی کوریا"
+#&gt; $ name_vi    &lt;chr&gt; "Hàn Quốc"
+#&gt; $ name_zh    &lt;chr&gt; "大韩民国"
+#&gt; $ name_zht   &lt;chr&gt; "大韓民國"
+#&gt; $ fclass_iso &lt;chr&gt; "Admin-0 country"
+#&gt; $ tlc_diff   &lt;chr&gt; NA
+#&gt; $ fclass_tlc &lt;chr&gt; "Admin-0 country"
+#&gt; $ fclass_us  &lt;chr&gt; NA
+#&gt; $ fclass_fr  &lt;chr&gt; NA
+#&gt; $ fclass_ru  &lt;chr&gt; NA
+#&gt; $ fclass_es  &lt;chr&gt; NA
+#&gt; $ fclass_cn  &lt;chr&gt; NA
+#&gt; $ fclass_tw  &lt;chr&gt; NA
+#&gt; $ fclass_in  &lt;chr&gt; NA
+#&gt; $ fclass_np  &lt;chr&gt; NA
+#&gt; $ fclass_pk  &lt;chr&gt; NA
+#&gt; $ fclass_de  &lt;chr&gt; NA
+#&gt; $ fclass_gb  &lt;chr&gt; NA
+#&gt; $ fclass_br  &lt;chr&gt; NA
+#&gt; $ fclass_il  &lt;chr&gt; NA
+#&gt; $ fclass_ps  &lt;chr&gt; NA
+#&gt; $ fclass_sa  &lt;chr&gt; NA
+#&gt; $ fclass_eg  &lt;chr&gt; NA
+#&gt; $ fclass_ma  &lt;chr&gt; NA
+#&gt; $ fclass_pt  &lt;chr&gt; NA
+#&gt; $ fclass_ar  &lt;chr&gt; NA
+#&gt; $ fclass_jp  &lt;chr&gt; NA
+#&gt; $ fclass_ko  &lt;chr&gt; NA
+#&gt; $ fclass_vn  &lt;chr&gt; NA
+#&gt; $ fclass_tr  &lt;chr&gt; NA
+#&gt; $ fclass_id  &lt;chr&gt; NA
+#&gt; $ fclass_pl  &lt;chr&gt; NA
+#&gt; $ fclass_gr  &lt;chr&gt; NA
+#&gt; $ fclass_it  &lt;chr&gt; NA
+#&gt; $ fclass_nl  &lt;chr&gt; NA
+#&gt; $ fclass_se  &lt;chr&gt; NA
+#&gt; $ fclass_bd  &lt;chr&gt; NA
+#&gt; $ fclass_ua  &lt;chr&gt; NA
+#&gt; $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((126.6339 37...</code></pre>
 </div>
-</section></section><section id="코로플레스-맵-choropleth-map" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="코로플레스-맵-choropleth-map">
-<span class="header-section-number">6.2</span> 4.2 코로플레스 맵 (Choropleth Map)</h2>
-<p>(내용 추가 예정 - PDF 페이지 12-13)</p>
-<section id="데이터-준비" class="level3" data-number="6.2.1"><h3 data-number="6.2.1" class="anchored" data-anchor-id="데이터-준비">
-<span class="header-section-number">6.2.1</span> 4.2.1 데이터 준비</h3>
-</section><section id="데이터-결합" class="level3" data-number="6.2.2"><h3 data-number="6.2.2" class="anchored" data-anchor-id="데이터-결합">
-<span class="header-section-number">6.2.2</span> 4.2.2 데이터 결합</h3>
-</section><section id="ggplot2로-시각화" class="level3" data-number="6.2.3"><h3 data-number="6.2.3" class="anchored" data-anchor-id="ggplot2로-시각화">
-<span class="header-section-number">6.2.3</span> 4.2.3 ggplot2로 시각화</h3>
+</div>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 지역별 질병 데이터</span></span>
-<span><span class="va">regional_disease</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span></span>
-<span>  <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html">here</a></span><span class="op">(</span><span class="st">"data"</span>, <span class="st">"processed"</span>, <span class="st">"regional_disease.csv"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 기본 플롯</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">korea</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"lightblue"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"대한민국"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-korea-basic" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-korea-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-spatial-epi_files/figure-html/fig-korea-basic-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-korea-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: 한국 기본 지도
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="시뮬레이션-데이터로-코로플레스-맵-제작" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="시뮬레이션-데이터로-코로플레스-맵-제작">
+<span class="header-section-number">6.2</span> 4.2 시뮬레이션 데이터로 코로플레스 맵 제작</h2>
+<p>실습을 위해 시도별 가상 질병 데이터를 만들겠습니다.</p>
+<section id="시뮬레이션-데이터-생성" class="level3" data-number="6.2.1"><h3 data-number="6.2.1" class="anchored" data-anchor-id="시뮬레이션-데이터-생성">
+<span class="header-section-number">6.2.1</span> 4.2.1 시뮬레이션 데이터 생성</h3>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 한국 17개 시도 데이터 생성</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">regional_disease</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>  region <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"서울"</span>, <span class="st">"부산"</span>, <span class="st">"대구"</span>, <span class="st">"인천"</span>, <span class="st">"광주"</span>, <span class="st">"대전"</span>, <span class="st">"울산"</span>, <span class="st">"세종"</span>,</span>
+<span>             <span class="st">"경기"</span>, <span class="st">"강원"</span>, <span class="st">"충북"</span>, <span class="st">"충남"</span>, <span class="st">"전북"</span>, <span class="st">"전남"</span>, <span class="st">"경북"</span>, <span class="st">"경남"</span>, <span class="st">"제주"</span><span class="op">)</span>,</span>
+<span>  population <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">9700000</span>, <span class="fl">3400000</span>, <span class="fl">2400000</span>, <span class="fl">3000000</span>, <span class="fl">1500000</span>, <span class="fl">1500000</span>, <span class="fl">1100000</span>, <span class="fl">360000</span>,</span>
+<span>                 <span class="fl">13500000</span>, <span class="fl">1500000</span>, <span class="fl">1600000</span>, <span class="fl">2100000</span>, <span class="fl">1800000</span>, <span class="fl">1800000</span>, <span class="fl">2600000</span>, <span class="fl">3300000</span>, <span class="fl">670000</span><span class="op">)</span>,</span>
+<span>  cases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">980</span>, <span class="fl">340</span>, <span class="fl">245</span>, <span class="fl">305</span>, <span class="fl">155</span>, <span class="fl">152</span>, <span class="fl">112</span>, <span class="fl">37</span>,</span>
+<span>            <span class="fl">1360</span>, <span class="fl">153</span>, <span class="fl">163</span>, <span class="fl">214</span>, <span class="fl">183</span>, <span class="fl">185</span>, <span class="fl">265</span>, <span class="fl">335</span>, <span class="fl">68</span><span class="op">)</span>,</span>
+<span>  deaths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">98</span>, <span class="fl">34</span>, <span class="fl">25</span>, <span class="fl">31</span>, <span class="fl">16</span>, <span class="fl">15</span>, <span class="fl">11</span>, <span class="fl">4</span>,</span>
+<span>             <span class="fl">136</span>, <span class="fl">15</span>, <span class="fl">16</span>, <span class="fl">21</span>, <span class="fl">18</span>, <span class="fl">19</span>, <span class="fl">27</span>, <span class="fl">34</span>, <span class="fl">7</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    incidence_rate <span class="op">=</span> <span class="op">(</span><span class="va">cases</span> <span class="op">/</span> <span class="va">population</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100000</span>,  <span class="co"># 인구 10만명당</span></span>
+<span>    case_fatality <span class="op">=</span> <span class="op">(</span><span class="va">deaths</span> <span class="op">/</span> <span class="va">cases</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>  <span class="co"># 치명률 (%)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 데이터 확인</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">regional_disease</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 × 6
+#&gt;   region population cases deaths incidence_rate case_fatality
+#&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;          &lt;dbl&gt;         &lt;dbl&gt;
+#&gt; 1 서울      9700000   980     98           10.1         10   
+#&gt; 2 부산      3400000   340     34           10           10   
+#&gt; 3 대구      2400000   245     25           10.2         10.2 
+#&gt; 4 인천      3000000   305     31           10.2         10.2 
+#&gt; 5 광주      1500000   155     16           10.3         10.3 
+#&gt; 6 대전      1500000   152     15           10.1          9.87</code></pre>
+</div>
+</div>
+</section><section id="간단한-점-지도-point-map" class="level3" data-number="6.2.2"><h3 data-number="6.2.2" class="anchored" data-anchor-id="간단한-점-지도-point-map">
+<span class="header-section-number">6.2.2</span> 4.2.2 간단한 점 지도 (Point Map)</h3>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 시도별 대략적인 좌표 (중심점)</span></span>
+<span><span class="va">region_coords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>  region <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"서울"</span>, <span class="st">"부산"</span>, <span class="st">"대구"</span>, <span class="st">"인천"</span>, <span class="st">"광주"</span>, <span class="st">"대전"</span>, <span class="st">"울산"</span>, <span class="st">"세종"</span>,</span>
+<span>             <span class="st">"경기"</span>, <span class="st">"강원"</span>, <span class="st">"충북"</span>, <span class="st">"충남"</span>, <span class="st">"전북"</span>, <span class="st">"전남"</span>, <span class="st">"경북"</span>, <span class="st">"경남"</span>, <span class="st">"제주"</span><span class="op">)</span>,</span>
+<span>  lon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">126.98</span>, <span class="fl">129.08</span>, <span class="fl">128.60</span>, <span class="fl">126.71</span>, <span class="fl">126.85</span>, <span class="fl">127.38</span>, <span class="fl">129.31</span>, <span class="fl">127.29</span>,</span>
+<span>          <span class="fl">127.18</span>, <span class="fl">128.21</span>, <span class="fl">127.70</span>, <span class="fl">126.80</span>, <span class="fl">127.15</span>, <span class="fl">126.99</span>, <span class="fl">128.89</span>, <span class="fl">128.25</span>, <span class="fl">126.53</span><span class="op">)</span>,</span>
+<span>  lat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">37.57</span>, <span class="fl">35.18</span>, <span class="fl">35.87</span>, <span class="fl">37.46</span>, <span class="fl">35.16</span>, <span class="fl">36.35</span>, <span class="fl">35.54</span>, <span class="fl">36.48</span>,</span>
+<span>          <span class="fl">37.41</span>, <span class="fl">37.82</span>, <span class="fl">36.64</span>, <span class="fl">36.52</span>, <span class="fl">35.72</span>, <span class="fl">34.86</span>, <span class="fl">36.25</span>, <span class="fl">35.46</span>, <span class="fl">33.49</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 공간 데이터와 결합</span></span>
-<span><span class="co"># combined_sf &lt;- left_join(korea_map, regional_disease, by = "region")</span></span>
+<span><span class="co"># 데이터 결합</span></span>
+<span><span class="va">map_data</span> <span class="op">&lt;-</span> <span class="va">regional_disease</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">region_coords</span>, by <span class="op">=</span> <span class="st">"region"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 코로플레스 맵</span></span>
-<span><span class="co"># ggplot(data = combined_sf) +</span></span>
-<span><span class="co">#   geom_sf(aes(fill = incidence_rate)) +</span></span>
-<span><span class="co">#   scale_fill_viridis_c() +</span></span>
-<span><span class="co">#   theme_minimal()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co"># 점 지도</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">korea</span>, fill <span class="op">=</span> <span class="st">"grey95"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">map_data</span>,</span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">lon</span>, y <span class="op">=</span> <span class="va">lat</span>, size <span class="op">=</span> <span class="va">incidence_rate</span>, color <span class="op">=</span> <span class="va">incidence_rate</span><span class="op">)</span>,</span>
+<span>             alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_size.html">scale_size_continuous</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"발생률\n(인구 10만명당)"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">15</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_color_viridis_c</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"발생률\n(인구 10만명당)"</span>, option <span class="op">=</span> <span class="st">"plasma"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"시도별 질병 발생률 분포"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"원의 크기와 색상이 발생률에 비례"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    legend.position <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span>    plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span>, size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-point-map" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-point-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-spatial-epi_files/figure-html/fig-point-map-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
 </div>
-</section><section id="tmap으로-시각화" class="level3" data-number="6.2.4"><h3 data-number="6.2.4" class="anchored" data-anchor-id="tmap으로-시각화">
-<span class="header-section-number">6.2.4</span> 4.2.4 tmap으로 시각화</h3>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-point-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: 시도별 발생률 (원 크기 비례)
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="막대-그래프로-지역-비교" class="level3" data-number="6.2.3"><h3 data-number="6.2.3" class="anchored" data-anchor-id="막대-그래프로-지역-비교">
+<span class="header-section-number">6.2.3</span> 4.2.3 막대 그래프로 지역 비교</h3>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap">tmap</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># tm_shape(combined_sf) +</span></span>
-<span><span class="co">#   tm_fill("incidence_rate",</span></span>
-<span><span class="co">#           style = "quantile",</span></span>
-<span><span class="co">#           palette = "Blues",</span></span>
-<span><span class="co">#           title = "Incidence Rate") +</span></span>
-<span><span class="co">#   tm_borders(col = "grey50") +</span></span>
-<span><span class="co">#   tm_layout(main.title = "Regional Disease Incidence")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 발생률 순위</span></span>
+<span><span class="va">regional_disease</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">incidence_rate</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>region <span class="op">=</span> <span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html">fct_reorder</a></span><span class="op">(</span><span class="va">region</span>, <span class="va">incidence_rate</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">region</span>, y <span class="op">=</span> <span class="va">incidence_rate</span>, fill <span class="op">=</span> <span class="va">incidence_rate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_col</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">incidence_rate</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>            hjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_fill_viridis_c</a></span><span class="op">(</span>option <span class="op">=</span> <span class="st">"plasma"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"시도별 질병 발생률 (인구 10만명당)"</span>,</span>
+<span>    x <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"발생률 (per 100,000)"</span>,</span>
+<span>    fill <span class="op">=</span> <span class="st">"발생률"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    legend.position <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>    plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span>, size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-regional-bar" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-regional-bar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-spatial-epi_files/figure-html/fig-regional-bar-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
 </div>
-</section></section><section id="ggplot2-vs-tmap-전략적-선택" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="ggplot2-vs-tmap-전략적-선택">
-<span class="header-section-number">6.3</span> 4.3 ggplot2 vs tmap: 전략적 선택</h2>
-<p>(내용 추가 예정 - PDF 페이지 13)</p>
-</section><section id="요약" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="요약">
-<span class="header-section-number">6.4</span> 요약</h2>
-<p>(내용 추가 예정)</p>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regional-bar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: 시도별 발생률 순위
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="치명률-case-fatality-rate-분석" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="치명률-case-fatality-rate-분석">
+<span class="header-section-number">6.3</span> 4.3 치명률 (Case Fatality Rate) 분석</h2>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">regional_disease</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">incidence_rate</span>, y <span class="op">=</span> <span class="va">case_fatality</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>size <span class="op">=</span> <span class="va">population</span>, color <span class="op">=</span> <span class="va">region</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">TRUE</span>, color <span class="op">=</span> <span class="st">"red"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">region</span><span class="op">)</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, size <span class="op">=</span> <span class="fl">3</span>, check_overlap <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_size.html">scale_size_continuous</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"인구"</span>, labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"발생률과 치명률의 관계"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"발생률 (인구 10만명당)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"치명률 (%)"</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"시도"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span>, size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>,</span>
+<span>    legend.position <span class="op">=</span> <span class="st">"bottom"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-cfr-comparison" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-cfr-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-spatial-epi_files/figure-html/fig-cfr-comparison-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cfr-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.4: 발생률 vs 치명률 산점도
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="인구-표준화-공정한-비교를-위해" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="인구-표준화-공정한-비교를-위해">
+<span class="header-section-number">6.4</span> 4.4 인구 표준화: 공정한 비교를 위해</h2>
+<p><strong>문제</strong>: 인구가 많은 지역이 발생 건수가 많을 수 있음</p>
+<p><strong>해결</strong>: <strong>표준화 발생비 (SIR, Standardized Incidence Ratio)</strong> 사용</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 전국 평균 발생률</span></span>
+<span><span class="va">national_rate</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">regional_disease</span><span class="op">$</span><span class="va">cases</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">regional_disease</span><span class="op">$</span><span class="va">population</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100000</span></span>
+<span></span>
+<span><span class="co"># SIR 계산</span></span>
+<span><span class="va">regional_disease_sir</span> <span class="op">&lt;-</span> <span class="va">regional_disease</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    expected_cases <span class="op">=</span> <span class="op">(</span><span class="va">population</span> <span class="op">/</span> <span class="fl">100000</span><span class="op">)</span> <span class="op">*</span> <span class="va">national_rate</span>,</span>
+<span>    SIR <span class="op">=</span> <span class="op">(</span><span class="va">cases</span> <span class="op">/</span> <span class="va">expected_cases</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,</span>
+<span>    SIR_category <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span>      <span class="va">SIR</span> <span class="op">&lt;</span> <span class="fl">80</span> <span class="op">~</span> <span class="st">"매우 낮음"</span>,</span>
+<span>      <span class="va">SIR</span> <span class="op">&lt;</span> <span class="fl">95</span> <span class="op">~</span> <span class="st">"낮음"</span>,</span>
+<span>      <span class="va">SIR</span> <span class="op">&lt;</span> <span class="fl">105</span> <span class="op">~</span> <span class="st">"평균"</span>,</span>
+<span>      <span class="va">SIR</span> <span class="op">&lt;</span> <span class="fl">120</span> <span class="op">~</span> <span class="st">"높음"</span>,</span>
+<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">"매우 높음"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># SIR 결과</span></span>
+<span><span class="va">regional_disease_sir</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">region</span>, <span class="va">cases</span>, <span class="va">expected_cases</span>, <span class="va">SIR</span>, <span class="va">SIR_category</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">SIR</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 17 × 5
+#&gt;    region cases expected_cases   SIR SIR_category
+#&gt;    &lt;chr&gt;  &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+#&gt;  1 광주     155          152.  102.  평균        
+#&gt;  2 세종      37           36.5 101.  평균        
+#&gt;  3 전남     185          182.  101.  평균        
+#&gt;  4 대구     245          243.  101.  평균        
+#&gt;  5 강원     153          152.  101.  평균        
+#&gt;  6 경북     265          263.  101.  평균        
+#&gt;  7 충남     214          213.  101.  평균        
+#&gt;  8 충북     163          162.  101.  평균        
+#&gt;  9 울산     112          111.  100.  평균        
+#&gt; 10 전북     183          182.  100.  평균        
+#&gt; 11 인천     305          304.  100.  평균        
+#&gt; 12 경남     335          334.  100.  평균        
+#&gt; 13 제주      68           67.9 100.  평균        
+#&gt; 14 대전     152          152.  100.  평균        
+#&gt; 15 서울     980          983.   99.7 평균        
+#&gt; 16 경기    1360         1368.   99.4 평균        
+#&gt; 17 부산     340          345.   98.7 평균</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># SIR 점 지도</span></span>
+<span><span class="va">map_data_sir</span> <span class="op">&lt;-</span> <span class="va">regional_disease_sir</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">region_coords</span>, by <span class="op">=</span> <span class="st">"region"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">korea</span>, fill <span class="op">=</span> <span class="st">"grey95"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">map_data_sir</span>,</span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">lon</span>, y <span class="op">=</span> <span class="va">lat</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">SIR</span> <span class="op">-</span> <span class="fl">100</span><span class="op">)</span>, color <span class="op">=</span> <span class="va">SIR</span><span class="op">)</span>,</span>
+<span>             alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_size.html">scale_size_continuous</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"전국 평균과의\n차이"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">15</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_color_gradient2</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"SIR"</span>,</span>
+<span>    low <span class="op">=</span> <span class="st">"blue"</span>, mid <span class="op">=</span> <span class="st">"white"</span>, high <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>    midpoint <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>    breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">80</span>, <span class="fl">90</span>, <span class="fl">100</span>, <span class="fl">110</span>, <span class="fl">120</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"표준화 발생비 (SIR)"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"100 = 전국 평균, &gt;100 = 평균보다 높음, &lt;100 = 평균보다 낮음"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    legend.position <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span>    plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span>, size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-sir-map" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-sir-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-spatial-epi_files/figure-html/fig-sir-map-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sir-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.5: 표준화 발생비 (SIR) - 전국 평균 대비
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="공간-데이터-분석-워크플로우" class="level2" data-number="6.5"><h2 data-number="6.5" class="anchored" data-anchor-id="공간-데이터-분석-워크플로우">
+<span class="header-section-number">6.5</span> 4.5 공간 데이터 분석 워크플로우</h2>
+<section id="실전-분석-단계" class="level3" data-number="6.5.1"><h3 data-number="6.5.1" class="anchored" data-anchor-id="실전-분석-단계">
+<span class="header-section-number">6.5.1</span> 4.5.1 실전 분석 단계</h3>
+<p><strong>1단계: 데이터 수집</strong> - 질병 발생 데이터 (보건소, 질병관리청) - 인구 데이터 (통계청) - 공간 경계 파일 (Shapefile, GeoJSON)</p>
+<p><strong>2단계: 데이터 전처리</strong></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 표준화</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span> 인구 <span class="dv">10</span>만명당 발생률</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span> 연령 표준화 (직접<span class="sc">/</span>간접 표준화)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span> SIR 계산</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>3단계: 공간 결합</strong></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># sf 객체와 데이터 결합</span></span>
+<span><span class="va">combined_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">spatial_data</span>, <span class="va">disease_data</span>, by <span class="op">=</span> <span class="st">"region_id"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>4단계: 시각화</strong> - 코로플레스 맵: <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf()</a></code> + <code>scale_fill_*</code> - 점 지도: <code><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point()</a></code> with coordinates - 복합 레이어: 지도 + 점 + 라벨</p>
+<p><strong>5단계: 해석</strong> - 공간 클러스터 탐지 - 핫스팟 분석 - 시계열 공간 변화</p>
+</section></section><section id="유용한-팁과-트러블슈팅" class="level2" data-number="6.6"><h2 data-number="6.6" class="anchored" data-anchor-id="유용한-팁과-트러블슈팅">
+<span class="header-section-number">6.6</span> 4.6 유용한 팁과 트러블슈팅</h2>
+<section id="좌표계-변환" class="level3" data-number="6.6.1"><h3 data-number="6.6.1" class="anchored" data-anchor-id="좌표계-변환">
+<span class="header-section-number">6.6.1</span> 4.6.1 좌표계 변환</h3>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># WGS84 → UTM-K (EPSG:5179) 변환</span></span>
+<span><span class="va">korea_utm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">korea</span>, crs <span class="op">=</span> <span class="fl">5179</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 좌표계 확인</span></span>
+<span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">korea_utm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="공간-데이터-소스" class="level3" data-number="6.6.2"><h3 data-number="6.6.2" class="anchored" data-anchor-id="공간-데이터-소스">
+<span class="header-section-number">6.6.2</span> 4.6.2 공간 데이터 소스</h3>
+<p><strong>무료 공간 데이터:</strong> - <strong>대한민국 행정구역</strong>: <a href="http://data.nsdi.go.kr">국가공간정보포털</a> - <strong>세계 지도</strong>: <code>rnaturalearth</code> 패키지 - <strong>OpenStreetMap</strong>: <code>osmdata</code> 패키지 - <strong>통계청</strong>: <a href="https://sgis.kostat.go.kr">SGIS</a></p>
+</section><section id="ggplot2-vs-tmap-선택-가이드" class="level3" data-number="6.6.3"><h3 data-number="6.6.3" class="anchored" data-anchor-id="ggplot2-vs-tmap-선택-가이드">
+<span class="header-section-number">6.6.3</span> 4.6.3 ggplot2 vs tmap 선택 가이드</h3>
+<table class="table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 63%">
+<col style="width: 18%">
+</colgroup>
+<thead><tr class="header">
+<th>기준</th>
+<th>ggplot2 + geom_sf()</th>
+<th>tmap</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>학습 곡선</strong></td>
+<td>tidyverse 사용자에게 쉬움</td>
+<td>전용 문법 필요</td>
+</tr>
+<tr class="even">
+<td><strong>커스터마이징</strong></td>
+<td>매우 유연</td>
+<td>템플릿 기반</td>
+</tr>
+<tr class="odd">
+<td><strong>인터랙티브</strong></td>
+<td>plotly로 변환 가능</td>
+<td>내장 지원 (<code>tmap_mode("view")</code>)</td>
+</tr>
+<tr class="even">
+<td><strong>출판 품질</strong></td>
+<td>완벽 제어</td>
+<td>빠른 프로토타입</td>
+</tr>
+<tr class="odd">
+<td><strong>권장 용도</strong></td>
+<td>논문, 세밀한 조정</td>
+<td>탐색적 분석, 대시보드</td>
+</tr>
+</tbody>
+</table></section></section><section id="요약" class="level2" data-number="6.7"><h2 data-number="6.7" class="anchored" data-anchor-id="요약">
+<span class="header-section-number">6.7</span> 요약</h2>
+<p>✅ <strong>sf 패키지</strong>로 공간 데이터를 데이터프레임처럼 다룸 ✅ <strong>발생률 계산</strong>: 인구 10만명당 표준화 필수 ✅ <strong>SIR (표준화 발생비)</strong>: 공정한 지역 간 비교 ✅ <strong>시각화 전략</strong>: 점 지도 vs 코로플레스 맵 ✅ <strong>데이터 소스</strong>: 국가공간정보포털, rnaturalearth</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+📚 더 배우기
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>고급 공간 분석:</strong> - <code>spdep</code> 패키지: 공간 자기상관, Moran’s I - <code>spatstat</code> 패키지: 점 패턴 분석 - <code>ggspatial</code> 패키지: 북쪽 화살표, 축척 추가</p>
+<p><strong>인터랙티브 지도:</strong> - <code>leaflet</code> 패키지: 웹 인터랙티브 지도 - <code>mapview</code> 패키지: 빠른 탐색용 지도</p>
+</div>
+</div>
 
 
 <!-- -->
@@ -980,93 +1492,378 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "공간 역학 데이터 시각화"</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># 공간 역학 데이터 시각화</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## 학습 목표</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>sf 패키지로 공간 데이터 처리</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>역학 데이터와 지리 데이터 결합</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>ggplot2와 tmap으로 코로플레스 맵 제작</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>공간 패턴 해석</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.1 R 공간 데이터 처리의 혁명: sf</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>(내용 추가 예정 - PDF 페이지 11-12)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.1.1 Simple Features란?</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.1.2 sf 객체 구조</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Shapefile 읽기 (예시)</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co"># korea_map &lt;- st_read("data/external/sig.shp")</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co"># 구조 확인</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co"># glimpse(korea_map)</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.2 코로플레스 맵 (Choropleth Map)</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>(내용 추가 예정 - PDF 페이지 12-13)</span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.2.1 데이터 준비</span></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.2.2 데이터 결합</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.2.3 ggplot2로 시각화</span></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="co"># 지역별 질병 데이터</span></span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>regional_disease <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"processed"</span>, <span class="st">"regional_disease.csv"</span>)</span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="co"># 공간 데이터와 결합</span></span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="co"># combined_sf &lt;- left_join(korea_map, regional_disease, by = "region")</span></span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="co"># 코로플레스 맵</span></span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(data = combined_sf) +</span></span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_sf(aes(fill = incidence_rate)) +</span></span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_fill_viridis_c() +</span></span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal()</span></span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.2.4 tmap으로 시각화</span></span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tmap)</span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a><span class="co"># tm_shape(combined_sf) +</span></span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="co">#   tm_fill("incidence_rate",</span></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="co">#           style = "quantile",</span></span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a><span class="co">#           palette = "Blues",</span></span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a><span class="co">#           title = "Incidence Rate") +</span></span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a><span class="co">#   tm_borders(col = "grey50") +</span></span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="co">#   tm_layout(main.title = "Regional Disease Incidence")</span></span>
-<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.3 ggplot2 vs tmap: 전략적 선택</span></span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>(내용 추가 예정 - PDF 페이지 13)</span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## 요약</span></span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>(내용 추가 예정)</span>
+<div class="sourceCode" id="cb16" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "공간 역학 데이터 시각화"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "연세대 산업보건 연구소"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup, include=FALSE}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="in"># 한글 폰트 설정</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="in">library(showtext)</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="in">library(sysfonts)</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="in">font_add_google("Noto Sans KR", "noto")</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="in">showtext_auto()</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="in">library(ggplot2)</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="in">theme_set(theme_grey(base_family = "noto"))</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="in">showtext_opts(dpi = 96)</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="in">  fig.showtext = TRUE,</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="in">  dev = "png",</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="in">  dpi = 96</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="in">)</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="fu"># 공간 역학 데이터 시각화</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## 🎯 학습 목표</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>이 챕터를 마치면 다음을 할 수 있습니다:</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**sf 패키지**로 공간 데이터를 R에서 처리</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>역학 데이터와 지리 데이터 결합하여 코로플레스 맵 제작</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**ggplot2**와 **tmap**으로 전문적인 지도 시각화</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>공간 패턴을 해석하고 클러스터 탐지</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>지역별 질병 부담 비교 및 표준화</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a><span class="fu">## 📦 필요한 패키지</span></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"sf"</span>, <span class="st">"rnaturalearth"</span>, <span class="st">"rnaturalearthdata"</span>, <span class="st">"tmap"</span>))</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.1 공간 데이터의 기초</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.1.1 Simple Features (sf)란?</span></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>**sf (Simple Features for R)**는 공간 데이터를 다루는 현대적인 R 패키지입니다.</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>**주요 특징:**</span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>tidyverse와 완벽 호환 (dplyr, ggplot2 등)</span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GDAL/GEOS 기반으로 빠르고 안정적</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>데이터프레임처럼 다룰 수 있는 직관적 구조</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>**좌표계 (CRS, Coordinate Reference System):**</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**WGS84 (EPSG:4326)**: 경도/위도 좌표계 (GPS 표준)</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Korea 2000 (EPSG:5179)**: 한국 평면직각좌표계</span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Web Mercator (EPSG:3857)**: 웹 지도용</span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.1.2 한국 지도 데이터 가져오기</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rnaturalearth)</span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a><span class="co"># 세계 지도에서 한국 추출</span></span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a>korea <span class="ot">&lt;-</span> <span class="fu">ne_countries</span>(<span class="at">scale =</span> <span class="st">"medium"</span>, <span class="at">country =</span> <span class="st">"South Korea"</span>, <span class="at">returnclass =</span> <span class="st">"sf"</span>)</span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a><span class="co"># 구조 확인</span></span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(korea)</span>
+<span id="cb16-81"><a href="#cb16-81" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-82"><a href="#cb16-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-88"><a href="#cb16-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-korea-basic</span></span>
+<span id="cb16-89"><a href="#cb16-89" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "한국 기본 지도"</span></span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a><span class="co"># 기본 플롯</span></span>
+<span id="cb16-92"><a href="#cb16-92" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> korea) <span class="sc">+</span></span>
+<span id="cb16-93"><a href="#cb16-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb16-94"><a href="#cb16-94" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-95"><a href="#cb16-95" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"대한민국"</span>)</span>
+<span id="cb16-96"><a href="#cb16-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-97"><a href="#cb16-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-98"><a href="#cb16-98" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.2 시뮬레이션 데이터로 코로플레스 맵 제작</span></span>
+<span id="cb16-99"><a href="#cb16-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-100"><a href="#cb16-100" aria-hidden="true" tabindex="-1"></a>실습을 위해 시도별 가상 질병 데이터를 만들겠습니다.</span>
+<span id="cb16-101"><a href="#cb16-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-102"><a href="#cb16-102" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.2.1 시뮬레이션 데이터 생성</span></span>
+<span id="cb16-103"><a href="#cb16-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-106"><a href="#cb16-106" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-107"><a href="#cb16-107" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-108"><a href="#cb16-108" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-109"><a href="#cb16-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-110"><a href="#cb16-110" aria-hidden="true" tabindex="-1"></a><span class="co"># 한국 17개 시도 데이터 생성</span></span>
+<span id="cb16-111"><a href="#cb16-111" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb16-112"><a href="#cb16-112" aria-hidden="true" tabindex="-1"></a>regional_disease <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb16-113"><a href="#cb16-113" aria-hidden="true" tabindex="-1"></a>  <span class="at">region =</span> <span class="fu">c</span>(<span class="st">"서울"</span>, <span class="st">"부산"</span>, <span class="st">"대구"</span>, <span class="st">"인천"</span>, <span class="st">"광주"</span>, <span class="st">"대전"</span>, <span class="st">"울산"</span>, <span class="st">"세종"</span>,</span>
+<span id="cb16-114"><a href="#cb16-114" aria-hidden="true" tabindex="-1"></a>             <span class="st">"경기"</span>, <span class="st">"강원"</span>, <span class="st">"충북"</span>, <span class="st">"충남"</span>, <span class="st">"전북"</span>, <span class="st">"전남"</span>, <span class="st">"경북"</span>, <span class="st">"경남"</span>, <span class="st">"제주"</span>),</span>
+<span id="cb16-115"><a href="#cb16-115" aria-hidden="true" tabindex="-1"></a>  <span class="at">population =</span> <span class="fu">c</span>(<span class="dv">9700000</span>, <span class="dv">3400000</span>, <span class="dv">2400000</span>, <span class="dv">3000000</span>, <span class="dv">1500000</span>, <span class="dv">1500000</span>, <span class="dv">1100000</span>, <span class="dv">360000</span>,</span>
+<span id="cb16-116"><a href="#cb16-116" aria-hidden="true" tabindex="-1"></a>                 <span class="dv">13500000</span>, <span class="dv">1500000</span>, <span class="dv">1600000</span>, <span class="dv">2100000</span>, <span class="dv">1800000</span>, <span class="dv">1800000</span>, <span class="dv">2600000</span>, <span class="dv">3300000</span>, <span class="dv">670000</span>),</span>
+<span id="cb16-117"><a href="#cb16-117" aria-hidden="true" tabindex="-1"></a>  <span class="at">cases =</span> <span class="fu">c</span>(<span class="dv">980</span>, <span class="dv">340</span>, <span class="dv">245</span>, <span class="dv">305</span>, <span class="dv">155</span>, <span class="dv">152</span>, <span class="dv">112</span>, <span class="dv">37</span>,</span>
+<span id="cb16-118"><a href="#cb16-118" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1360</span>, <span class="dv">153</span>, <span class="dv">163</span>, <span class="dv">214</span>, <span class="dv">183</span>, <span class="dv">185</span>, <span class="dv">265</span>, <span class="dv">335</span>, <span class="dv">68</span>),</span>
+<span id="cb16-119"><a href="#cb16-119" aria-hidden="true" tabindex="-1"></a>  <span class="at">deaths =</span> <span class="fu">c</span>(<span class="dv">98</span>, <span class="dv">34</span>, <span class="dv">25</span>, <span class="dv">31</span>, <span class="dv">16</span>, <span class="dv">15</span>, <span class="dv">11</span>, <span class="dv">4</span>,</span>
+<span id="cb16-120"><a href="#cb16-120" aria-hidden="true" tabindex="-1"></a>             <span class="dv">136</span>, <span class="dv">15</span>, <span class="dv">16</span>, <span class="dv">21</span>, <span class="dv">18</span>, <span class="dv">19</span>, <span class="dv">27</span>, <span class="dv">34</span>, <span class="dv">7</span>)</span>
+<span id="cb16-121"><a href="#cb16-121" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-122"><a href="#cb16-122" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb16-123"><a href="#cb16-123" aria-hidden="true" tabindex="-1"></a>    <span class="at">incidence_rate =</span> (cases <span class="sc">/</span> population) <span class="sc">*</span> <span class="dv">100000</span>,  <span class="co"># 인구 10만명당</span></span>
+<span id="cb16-124"><a href="#cb16-124" aria-hidden="true" tabindex="-1"></a>    <span class="at">case_fatality =</span> (deaths <span class="sc">/</span> cases) <span class="sc">*</span> <span class="dv">100</span>  <span class="co"># 치명률 (%)</span></span>
+<span id="cb16-125"><a href="#cb16-125" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-126"><a href="#cb16-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-127"><a href="#cb16-127" aria-hidden="true" tabindex="-1"></a><span class="co"># 데이터 확인</span></span>
+<span id="cb16-128"><a href="#cb16-128" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(regional_disease)</span>
+<span id="cb16-129"><a href="#cb16-129" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-130"><a href="#cb16-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-131"><a href="#cb16-131" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.2.2 간단한 점 지도 (Point Map)</span></span>
+<span id="cb16-132"><a href="#cb16-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-135"><a href="#cb16-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-136"><a href="#cb16-136" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-137"><a href="#cb16-137" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-138"><a href="#cb16-138" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-point-map</span></span>
+<span id="cb16-139"><a href="#cb16-139" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "시도별 발생률 (원 크기 비례)"</span></span>
+<span id="cb16-140"><a href="#cb16-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-141"><a href="#cb16-141" aria-hidden="true" tabindex="-1"></a><span class="co"># 시도별 대략적인 좌표 (중심점)</span></span>
+<span id="cb16-142"><a href="#cb16-142" aria-hidden="true" tabindex="-1"></a>region_coords <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb16-143"><a href="#cb16-143" aria-hidden="true" tabindex="-1"></a>  <span class="at">region =</span> <span class="fu">c</span>(<span class="st">"서울"</span>, <span class="st">"부산"</span>, <span class="st">"대구"</span>, <span class="st">"인천"</span>, <span class="st">"광주"</span>, <span class="st">"대전"</span>, <span class="st">"울산"</span>, <span class="st">"세종"</span>,</span>
+<span id="cb16-144"><a href="#cb16-144" aria-hidden="true" tabindex="-1"></a>             <span class="st">"경기"</span>, <span class="st">"강원"</span>, <span class="st">"충북"</span>, <span class="st">"충남"</span>, <span class="st">"전북"</span>, <span class="st">"전남"</span>, <span class="st">"경북"</span>, <span class="st">"경남"</span>, <span class="st">"제주"</span>),</span>
+<span id="cb16-145"><a href="#cb16-145" aria-hidden="true" tabindex="-1"></a>  <span class="at">lon =</span> <span class="fu">c</span>(<span class="fl">126.98</span>, <span class="fl">129.08</span>, <span class="fl">128.60</span>, <span class="fl">126.71</span>, <span class="fl">126.85</span>, <span class="fl">127.38</span>, <span class="fl">129.31</span>, <span class="fl">127.29</span>,</span>
+<span id="cb16-146"><a href="#cb16-146" aria-hidden="true" tabindex="-1"></a>          <span class="fl">127.18</span>, <span class="fl">128.21</span>, <span class="fl">127.70</span>, <span class="fl">126.80</span>, <span class="fl">127.15</span>, <span class="fl">126.99</span>, <span class="fl">128.89</span>, <span class="fl">128.25</span>, <span class="fl">126.53</span>),</span>
+<span id="cb16-147"><a href="#cb16-147" aria-hidden="true" tabindex="-1"></a>  <span class="at">lat =</span> <span class="fu">c</span>(<span class="fl">37.57</span>, <span class="fl">35.18</span>, <span class="fl">35.87</span>, <span class="fl">37.46</span>, <span class="fl">35.16</span>, <span class="fl">36.35</span>, <span class="fl">35.54</span>, <span class="fl">36.48</span>,</span>
+<span id="cb16-148"><a href="#cb16-148" aria-hidden="true" tabindex="-1"></a>          <span class="fl">37.41</span>, <span class="fl">37.82</span>, <span class="fl">36.64</span>, <span class="fl">36.52</span>, <span class="fl">35.72</span>, <span class="fl">34.86</span>, <span class="fl">36.25</span>, <span class="fl">35.46</span>, <span class="fl">33.49</span>)</span>
+<span id="cb16-149"><a href="#cb16-149" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-150"><a href="#cb16-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-151"><a href="#cb16-151" aria-hidden="true" tabindex="-1"></a><span class="co"># 데이터 결합</span></span>
+<span id="cb16-152"><a href="#cb16-152" aria-hidden="true" tabindex="-1"></a>map_data <span class="ot">&lt;-</span> regional_disease <span class="sc">%&gt;%</span></span>
+<span id="cb16-153"><a href="#cb16-153" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(region_coords, <span class="at">by =</span> <span class="st">"region"</span>)</span>
+<span id="cb16-154"><a href="#cb16-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-155"><a href="#cb16-155" aria-hidden="true" tabindex="-1"></a><span class="co"># 점 지도</span></span>
+<span id="cb16-156"><a href="#cb16-156" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb16-157"><a href="#cb16-157" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> korea, <span class="at">fill =</span> <span class="st">"grey95"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb16-158"><a href="#cb16-158" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> map_data,</span>
+<span id="cb16-159"><a href="#cb16-159" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> lon, <span class="at">y =</span> lat, <span class="at">size =</span> incidence_rate, <span class="at">color =</span> incidence_rate),</span>
+<span id="cb16-160"><a href="#cb16-160" aria-hidden="true" tabindex="-1"></a>             <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb16-161"><a href="#cb16-161" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_continuous</span>(<span class="at">name =</span> <span class="st">"발생률</span><span class="sc">\n</span><span class="st">(인구 10만명당)"</span>, <span class="at">range =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">15</span>)) <span class="sc">+</span></span>
+<span id="cb16-162"><a href="#cb16-162" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_c</span>(<span class="at">name =</span> <span class="st">"발생률</span><span class="sc">\n</span><span class="st">(인구 10만명당)"</span>, <span class="at">option =</span> <span class="st">"plasma"</span>) <span class="sc">+</span></span>
+<span id="cb16-163"><a href="#cb16-163" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-164"><a href="#cb16-164" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"시도별 질병 발생률 분포"</span>,</span>
+<span id="cb16-165"><a href="#cb16-165" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"원의 크기와 색상이 발생률에 비례"</span>) <span class="sc">+</span></span>
+<span id="cb16-166"><a href="#cb16-166" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb16-167"><a href="#cb16-167" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb16-168"><a href="#cb16-168" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>)</span>
+<span id="cb16-169"><a href="#cb16-169" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-170"><a href="#cb16-170" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-171"><a href="#cb16-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-172"><a href="#cb16-172" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.2.3 막대 그래프로 지역 비교</span></span>
+<span id="cb16-173"><a href="#cb16-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-176"><a href="#cb16-176" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-177"><a href="#cb16-177" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-178"><a href="#cb16-178" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-179"><a href="#cb16-179" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-regional-bar</span></span>
+<span id="cb16-180"><a href="#cb16-180" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "시도별 발생률 순위"</span></span>
+<span id="cb16-181"><a href="#cb16-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-182"><a href="#cb16-182" aria-hidden="true" tabindex="-1"></a><span class="co"># 발생률 순위</span></span>
+<span id="cb16-183"><a href="#cb16-183" aria-hidden="true" tabindex="-1"></a>regional_disease <span class="sc">%&gt;%</span></span>
+<span id="cb16-184"><a href="#cb16-184" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(incidence_rate)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-185"><a href="#cb16-185" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">region =</span> <span class="fu">fct_reorder</span>(region, incidence_rate)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-186"><a href="#cb16-186" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> region, <span class="at">y =</span> incidence_rate, <span class="at">fill =</span> incidence_rate)) <span class="sc">+</span></span>
+<span id="cb16-187"><a href="#cb16-187" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb16-188"><a href="#cb16-188" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">round</span>(incidence_rate, <span class="dv">1</span>)),</span>
+<span id="cb16-189"><a href="#cb16-189" aria-hidden="true" tabindex="-1"></a>            <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.1</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb16-190"><a href="#cb16-190" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"plasma"</span>) <span class="sc">+</span></span>
+<span id="cb16-191"><a href="#cb16-191" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb16-192"><a href="#cb16-192" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb16-193"><a href="#cb16-193" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"시도별 질병 발생률 (인구 10만명당)"</span>,</span>
+<span id="cb16-194"><a href="#cb16-194" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb16-195"><a href="#cb16-195" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"발생률 (per 100,000)"</span>,</span>
+<span id="cb16-196"><a href="#cb16-196" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"발생률"</span></span>
+<span id="cb16-197"><a href="#cb16-197" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-198"><a href="#cb16-198" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-199"><a href="#cb16-199" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb16-200"><a href="#cb16-200" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb16-201"><a href="#cb16-201" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>)</span>
+<span id="cb16-202"><a href="#cb16-202" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-203"><a href="#cb16-203" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-204"><a href="#cb16-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-205"><a href="#cb16-205" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.3 치명률 (Case Fatality Rate) 분석</span></span>
+<span id="cb16-206"><a href="#cb16-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-209"><a href="#cb16-209" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-210"><a href="#cb16-210" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-211"><a href="#cb16-211" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-212"><a href="#cb16-212" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-cfr-comparison</span></span>
+<span id="cb16-213"><a href="#cb16-213" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "발생률 vs 치명률 산점도"</span></span>
+<span id="cb16-214"><a href="#cb16-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-215"><a href="#cb16-215" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(regional_disease, <span class="fu">aes</span>(<span class="at">x =</span> incidence_rate, <span class="at">y =</span> case_fatality)) <span class="sc">+</span></span>
+<span id="cb16-216"><a href="#cb16-216" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">size =</span> population, <span class="at">color =</span> region), <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb16-217"><a href="#cb16-217" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb16-218"><a href="#cb16-218" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> region), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.8</span>, <span class="at">size =</span> <span class="dv">3</span>, <span class="at">check_overlap =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb16-219"><a href="#cb16-219" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_continuous</span>(<span class="at">name =</span> <span class="st">"인구"</span>, <span class="at">labels =</span> scales<span class="sc">::</span>comma) <span class="sc">+</span></span>
+<span id="cb16-220"><a href="#cb16-220" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb16-221"><a href="#cb16-221" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"발생률과 치명률의 관계"</span>,</span>
+<span id="cb16-222"><a href="#cb16-222" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"발생률 (인구 10만명당)"</span>,</span>
+<span id="cb16-223"><a href="#cb16-223" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"치명률 (%)"</span>,</span>
+<span id="cb16-224"><a href="#cb16-224" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"시도"</span></span>
+<span id="cb16-225"><a href="#cb16-225" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-226"><a href="#cb16-226" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-227"><a href="#cb16-227" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb16-228"><a href="#cb16-228" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb16-229"><a href="#cb16-229" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"bottom"</span></span>
+<span id="cb16-230"><a href="#cb16-230" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-231"><a href="#cb16-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-232"><a href="#cb16-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-233"><a href="#cb16-233" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.4 인구 표준화: 공정한 비교를 위해</span></span>
+<span id="cb16-234"><a href="#cb16-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-235"><a href="#cb16-235" aria-hidden="true" tabindex="-1"></a>**문제**: 인구가 많은 지역이 발생 건수가 많을 수 있음</span>
+<span id="cb16-236"><a href="#cb16-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-237"><a href="#cb16-237" aria-hidden="true" tabindex="-1"></a>**해결**: **표준화 발생비 (SIR, Standardized Incidence Ratio)** 사용</span>
+<span id="cb16-238"><a href="#cb16-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-241"><a href="#cb16-241" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-242"><a href="#cb16-242" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-243"><a href="#cb16-243" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-244"><a href="#cb16-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-245"><a href="#cb16-245" aria-hidden="true" tabindex="-1"></a><span class="co"># 전국 평균 발생률</span></span>
+<span id="cb16-246"><a href="#cb16-246" aria-hidden="true" tabindex="-1"></a>national_rate <span class="ot">&lt;-</span> <span class="fu">sum</span>(regional_disease<span class="sc">$</span>cases) <span class="sc">/</span> <span class="fu">sum</span>(regional_disease<span class="sc">$</span>population) <span class="sc">*</span> <span class="dv">100000</span></span>
+<span id="cb16-247"><a href="#cb16-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-248"><a href="#cb16-248" aria-hidden="true" tabindex="-1"></a><span class="co"># SIR 계산</span></span>
+<span id="cb16-249"><a href="#cb16-249" aria-hidden="true" tabindex="-1"></a>regional_disease_sir <span class="ot">&lt;-</span> regional_disease <span class="sc">%&gt;%</span></span>
+<span id="cb16-250"><a href="#cb16-250" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb16-251"><a href="#cb16-251" aria-hidden="true" tabindex="-1"></a>    <span class="at">expected_cases =</span> (population <span class="sc">/</span> <span class="dv">100000</span>) <span class="sc">*</span> national_rate,</span>
+<span id="cb16-252"><a href="#cb16-252" aria-hidden="true" tabindex="-1"></a>    <span class="at">SIR =</span> (cases <span class="sc">/</span> expected_cases) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb16-253"><a href="#cb16-253" aria-hidden="true" tabindex="-1"></a>    <span class="at">SIR_category =</span> <span class="fu">case_when</span>(</span>
+<span id="cb16-254"><a href="#cb16-254" aria-hidden="true" tabindex="-1"></a>      SIR <span class="sc">&lt;</span> <span class="dv">80</span> <span class="sc">~</span> <span class="st">"매우 낮음"</span>,</span>
+<span id="cb16-255"><a href="#cb16-255" aria-hidden="true" tabindex="-1"></a>      SIR <span class="sc">&lt;</span> <span class="dv">95</span> <span class="sc">~</span> <span class="st">"낮음"</span>,</span>
+<span id="cb16-256"><a href="#cb16-256" aria-hidden="true" tabindex="-1"></a>      SIR <span class="sc">&lt;</span> <span class="dv">105</span> <span class="sc">~</span> <span class="st">"평균"</span>,</span>
+<span id="cb16-257"><a href="#cb16-257" aria-hidden="true" tabindex="-1"></a>      SIR <span class="sc">&lt;</span> <span class="dv">120</span> <span class="sc">~</span> <span class="st">"높음"</span>,</span>
+<span id="cb16-258"><a href="#cb16-258" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"매우 높음"</span></span>
+<span id="cb16-259"><a href="#cb16-259" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a><span class="co"># SIR 결과</span></span>
+<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a>regional_disease_sir <span class="sc">%&gt;%</span></span>
+<span id="cb16-264"><a href="#cb16-264" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(region, cases, expected_cases, SIR, SIR_category) <span class="sc">%&gt;%</span></span>
+<span id="cb16-265"><a href="#cb16-265" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(SIR))</span>
+<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: true</span></span>
+<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-sir-map</span></span>
+<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "표준화 발생비 (SIR) - 전국 평균 대비"</span></span>
+<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a><span class="co"># SIR 점 지도</span></span>
+<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a>map_data_sir <span class="ot">&lt;-</span> regional_disease_sir <span class="sc">%&gt;%</span></span>
+<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(region_coords, <span class="at">by =</span> <span class="st">"region"</span>)</span>
+<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb16-281"><a href="#cb16-281" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> korea, <span class="at">fill =</span> <span class="st">"grey95"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb16-282"><a href="#cb16-282" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> map_data_sir,</span>
+<span id="cb16-283"><a href="#cb16-283" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> lon, <span class="at">y =</span> lat, <span class="at">size =</span> <span class="fu">abs</span>(SIR <span class="sc">-</span> <span class="dv">100</span>), <span class="at">color =</span> SIR),</span>
+<span id="cb16-284"><a href="#cb16-284" aria-hidden="true" tabindex="-1"></a>             <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb16-285"><a href="#cb16-285" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_continuous</span>(<span class="at">name =</span> <span class="st">"전국 평균과의</span><span class="sc">\n</span><span class="st">차이"</span>, <span class="at">range =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">15</span>)) <span class="sc">+</span></span>
+<span id="cb16-286"><a href="#cb16-286" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(</span>
+<span id="cb16-287"><a href="#cb16-287" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"SIR"</span>,</span>
+<span id="cb16-288"><a href="#cb16-288" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"white"</span>, <span class="at">high =</span> <span class="st">"red"</span>,</span>
+<span id="cb16-289"><a href="#cb16-289" aria-hidden="true" tabindex="-1"></a>    <span class="at">midpoint =</span> <span class="dv">100</span>,</span>
+<span id="cb16-290"><a href="#cb16-290" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">80</span>, <span class="dv">90</span>, <span class="dv">100</span>, <span class="dv">110</span>, <span class="dv">120</span>)</span>
+<span id="cb16-291"><a href="#cb16-291" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-292"><a href="#cb16-292" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-293"><a href="#cb16-293" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb16-294"><a href="#cb16-294" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"표준화 발생비 (SIR)"</span>,</span>
+<span id="cb16-295"><a href="#cb16-295" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"100 = 전국 평균, &gt;100 = 평균보다 높음, &lt;100 = 평균보다 낮음"</span></span>
+<span id="cb16-296"><a href="#cb16-296" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-297"><a href="#cb16-297" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb16-298"><a href="#cb16-298" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb16-299"><a href="#cb16-299" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>)</span>
+<span id="cb16-300"><a href="#cb16-300" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-301"><a href="#cb16-301" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-302"><a href="#cb16-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-303"><a href="#cb16-303" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.5 공간 데이터 분석 워크플로우</span></span>
+<span id="cb16-304"><a href="#cb16-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-305"><a href="#cb16-305" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.5.1 실전 분석 단계</span></span>
+<span id="cb16-306"><a href="#cb16-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-307"><a href="#cb16-307" aria-hidden="true" tabindex="-1"></a>**1단계: 데이터 수집**</span>
+<span id="cb16-308"><a href="#cb16-308" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>질병 발생 데이터 (보건소, 질병관리청)</span>
+<span id="cb16-309"><a href="#cb16-309" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>인구 데이터 (통계청)</span>
+<span id="cb16-310"><a href="#cb16-310" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>공간 경계 파일 (Shapefile, GeoJSON)</span>
+<span id="cb16-311"><a href="#cb16-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-312"><a href="#cb16-312" aria-hidden="true" tabindex="-1"></a>**2단계: 데이터 전처리**</span>
+<span id="cb16-313"><a href="#cb16-313" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb16-314"><a href="#cb16-314" aria-hidden="true" tabindex="-1"></a><span class="co"># 표준화</span></span>
+<span id="cb16-315"><a href="#cb16-315" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span> 인구 <span class="dv">10</span>만명당 발생률</span>
+<span id="cb16-316"><a href="#cb16-316" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span> 연령 표준화 (직접<span class="sc">/</span>간접 표준화)</span>
+<span id="cb16-317"><a href="#cb16-317" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span> SIR 계산</span>
+<span id="cb16-318"><a href="#cb16-318" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-319"><a href="#cb16-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-320"><a href="#cb16-320" aria-hidden="true" tabindex="-1"></a>**3단계: 공간 결합**</span>
+<span id="cb16-321"><a href="#cb16-321" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb16-322"><a href="#cb16-322" aria-hidden="true" tabindex="-1"></a><span class="co"># sf 객체와 데이터 결합</span></span>
+<span id="cb16-323"><a href="#cb16-323" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(spatial_data, disease_data, <span class="at">by =</span> <span class="st">"region_id"</span>)</span>
+<span id="cb16-324"><a href="#cb16-324" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-325"><a href="#cb16-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-326"><a href="#cb16-326" aria-hidden="true" tabindex="-1"></a>**4단계: 시각화**</span>
+<span id="cb16-327"><a href="#cb16-327" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>코로플레스 맵: <span class="in">`geom_sf()`</span> + <span class="in">`scale_fill_*`</span></span>
+<span id="cb16-328"><a href="#cb16-328" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>점 지도: <span class="in">`geom_point()`</span> with coordinates</span>
+<span id="cb16-329"><a href="#cb16-329" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>복합 레이어: 지도 + 점 + 라벨</span>
+<span id="cb16-330"><a href="#cb16-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-331"><a href="#cb16-331" aria-hidden="true" tabindex="-1"></a>**5단계: 해석**</span>
+<span id="cb16-332"><a href="#cb16-332" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>공간 클러스터 탐지</span>
+<span id="cb16-333"><a href="#cb16-333" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>핫스팟 분석</span>
+<span id="cb16-334"><a href="#cb16-334" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>시계열 공간 변화</span>
+<span id="cb16-335"><a href="#cb16-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-336"><a href="#cb16-336" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4.6 유용한 팁과 트러블슈팅</span></span>
+<span id="cb16-337"><a href="#cb16-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-338"><a href="#cb16-338" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.6.1 좌표계 변환</span></span>
+<span id="cb16-339"><a href="#cb16-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-342"><a href="#cb16-342" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-343"><a href="#cb16-343" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb16-344"><a href="#cb16-344" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
+<span id="cb16-345"><a href="#cb16-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-346"><a href="#cb16-346" aria-hidden="true" tabindex="-1"></a><span class="co"># WGS84 → UTM-K (EPSG:5179) 변환</span></span>
+<span id="cb16-347"><a href="#cb16-347" aria-hidden="true" tabindex="-1"></a>korea_utm <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(korea, <span class="at">crs =</span> <span class="dv">5179</span>)</span>
+<span id="cb16-348"><a href="#cb16-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-349"><a href="#cb16-349" aria-hidden="true" tabindex="-1"></a><span class="co"># 좌표계 확인</span></span>
+<span id="cb16-350"><a href="#cb16-350" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(korea_utm)</span>
+<span id="cb16-351"><a href="#cb16-351" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-352"><a href="#cb16-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-353"><a href="#cb16-353" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.6.2 공간 데이터 소스</span></span>
+<span id="cb16-354"><a href="#cb16-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-355"><a href="#cb16-355" aria-hidden="true" tabindex="-1"></a>**무료 공간 데이터:**</span>
+<span id="cb16-356"><a href="#cb16-356" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**대한민국 행정구역**: <span class="co">[</span><span class="ot">국가공간정보포털</span><span class="co">](http://data.nsdi.go.kr)</span></span>
+<span id="cb16-357"><a href="#cb16-357" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**세계 지도**: <span class="in">`rnaturalearth`</span> 패키지</span>
+<span id="cb16-358"><a href="#cb16-358" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**OpenStreetMap**: <span class="in">`osmdata`</span> 패키지</span>
+<span id="cb16-359"><a href="#cb16-359" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**통계청**: <span class="co">[</span><span class="ot">SGIS</span><span class="co">](https://sgis.kostat.go.kr)</span></span>
+<span id="cb16-360"><a href="#cb16-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-361"><a href="#cb16-361" aria-hidden="true" tabindex="-1"></a><span class="fu">### 4.6.3 ggplot2 vs tmap 선택 가이드</span></span>
+<span id="cb16-362"><a href="#cb16-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-363"><a href="#cb16-363" aria-hidden="true" tabindex="-1"></a>| 기준 | ggplot2 + geom_sf() | tmap |</span>
+<span id="cb16-364"><a href="#cb16-364" aria-hidden="true" tabindex="-1"></a>|------|---------------------|------|</span>
+<span id="cb16-365"><a href="#cb16-365" aria-hidden="true" tabindex="-1"></a>| **학습 곡선** | tidyverse 사용자에게 쉬움 | 전용 문법 필요 |</span>
+<span id="cb16-366"><a href="#cb16-366" aria-hidden="true" tabindex="-1"></a>| **커스터마이징** | 매우 유연 | 템플릿 기반 |</span>
+<span id="cb16-367"><a href="#cb16-367" aria-hidden="true" tabindex="-1"></a>| **인터랙티브** | plotly로 변환 가능 | 내장 지원 (<span class="in">`tmap_mode("view")`</span>) |</span>
+<span id="cb16-368"><a href="#cb16-368" aria-hidden="true" tabindex="-1"></a>| **출판 품질** | 완벽 제어 | 빠른 프로토타입 |</span>
+<span id="cb16-369"><a href="#cb16-369" aria-hidden="true" tabindex="-1"></a>| **권장 용도** | 논문, 세밀한 조정 | 탐색적 분석, 대시보드 |</span>
+<span id="cb16-370"><a href="#cb16-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-371"><a href="#cb16-371" aria-hidden="true" tabindex="-1"></a><span class="fu">## 요약</span></span>
+<span id="cb16-372"><a href="#cb16-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-373"><a href="#cb16-373" aria-hidden="true" tabindex="-1"></a>✅ **sf 패키지**로 공간 데이터를 데이터프레임처럼 다룸</span>
+<span id="cb16-374"><a href="#cb16-374" aria-hidden="true" tabindex="-1"></a>✅ **발생률 계산**: 인구 10만명당 표준화 필수</span>
+<span id="cb16-375"><a href="#cb16-375" aria-hidden="true" tabindex="-1"></a>✅ **SIR (표준화 발생비)**: 공정한 지역 간 비교</span>
+<span id="cb16-376"><a href="#cb16-376" aria-hidden="true" tabindex="-1"></a>✅ **시각화 전략**: 점 지도 vs 코로플레스 맵</span>
+<span id="cb16-377"><a href="#cb16-377" aria-hidden="true" tabindex="-1"></a>✅ **데이터 소스**: 국가공간정보포털, rnaturalearth</span>
+<span id="cb16-378"><a href="#cb16-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-379"><a href="#cb16-379" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb16-380"><a href="#cb16-380" aria-hidden="true" tabindex="-1"></a><span class="fu">## 📚 더 배우기</span></span>
+<span id="cb16-381"><a href="#cb16-381" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-382"><a href="#cb16-382" aria-hidden="true" tabindex="-1"></a>**고급 공간 분석:**</span>
+<span id="cb16-383"><a href="#cb16-383" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`spdep`</span> 패키지: 공간 자기상관, Moran's I</span>
+<span id="cb16-384"><a href="#cb16-384" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`spatstat`</span> 패키지: 점 패턴 분석</span>
+<span id="cb16-385"><a href="#cb16-385" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`ggspatial`</span> 패키지: 북쪽 화살표, 축척 추가</span>
+<span id="cb16-386"><a href="#cb16-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-387"><a href="#cb16-387" aria-hidden="true" tabindex="-1"></a>**인터랙티브 지도:**</span>
+<span id="cb16-388"><a href="#cb16-388" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`leaflet`</span> 패키지: 웹 인터랙티브 지도</span>
+<span id="cb16-389"><a href="#cb16-389" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`mapview`</span> 패키지: 빠른 탐색용 지도</span>
+<span id="cb16-390"><a href="#cb16-390" aria-hidden="true" tabindex="-1"></a>:::</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
