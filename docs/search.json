@@ -1,0 +1,690 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "R 기반 보건학 시각화",
+    "section": "",
+    "text": "환영합니다!",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#학습-목표",
+    "href": "index.html#학습-목표",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.1 📚 학습 목표",
+    "text": "0.1 📚 학습 목표\n이 책을 완료하면 다음을 할 수 있습니다:\n✅ ggplot2의 7가지 핵심 구성 요소를 이해하고 활용 ✅ 역학 데이터(유행 곡선, 연령 표준화 비율)를 올바르게 시각화 ✅ 공간 역학 데이터를 지도로 표현 (코로플레스 맵) ✅ 생존 분석과 메타 분석 결과를 전문적으로 시각화 ✅ 학술지 출판 품질의 Figure를 제작 ✅ Shiny를 활용한 공중 보건 대시보드 구축",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#대상-독자",
+    "href": "index.html#대상-독자",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.2 🎯 대상 독자",
+    "text": "0.2 🎯 대상 독자\n\n보건학, 역학, 임상통계 전공 대학원생\n\nR을 처음 배우거나 시각화를 체계적으로 배우고 싶은 연구자\n\n논문 작성을 위해 고품질 그래프가 필요한 보건의료 전문가\n\n공중 보건 데이터를 대시보드로 만들고 싶은 실무자\n\n\n\n\n\n\n\n\n사전 요구사항\n\n\n\n\nR 기본 문법 이해 (변수, 함수, 데이터프레임)\nRStudio 사용 경험 권장\n통계학 기초 (평균, 표준편차, 신뢰구간)\n\nR을 처음 접하신다면 R for Data Science 1-5장을 먼저 읽어보시기를 권장합니다.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#책의-구성",
+    "href": "index.html#책의-구성",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.3 📖 책의 구성",
+    "text": "0.3 📖 책의 구성\n이 책은 4개 파트 8개 챕터로 구성되어 있습니다:\n\n0.3.1 Part I: 기초편\n\n\nChapter 1: R과 ggplot2 시작하기\n\nChapter 2: ggplot2 완벽 마스터 - 그래픽 문법의 7가지 구성 요소\n\n0.3.2 Part II: 역학편\n\n\nChapter 3: 역학 데이터 시각화 - 발병률, 유행곡선, 표준화\n\nChapter 4: 공간 역학 - GIS와 지도 제작\n\n0.3.3 Part III: 임상통계편\n\n\nChapter 5: 생존 분석과 메타 분석 시각화\n\nChapter 6: 출판 품질 그래프 제작 전략\n\n0.3.4 Part IV: 고급편\n\n\nChapter 7: 대화형 시각화와 Shiny 대시보드\n\nChapter 8: 효과적인 데이터 커뮤니케이션을 위한 제언",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#실습-환경-준비",
+    "href": "index.html#실습-환경-준비",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.4 💻 실습 환경 준비",
+    "text": "0.4 💻 실습 환경 준비\n\n0.4.1 1. R과 RStudio 설치\n# R 다운로드: https://cran.r-project.org/\n# RStudio 다운로드: https://posit.co/download/rstudio-desktop/\n권장 버전:\n\nR ≥ 4.3.0\nRStudio ≥ 2023.06.0\n\n0.4.2 2. 필수 패키지 설치\n모든 필요한 패키지는 code/setup.R에서 자동으로 설치됩니다:\n\n# 프로젝트 루트에서 실행\nsource(\"code/setup.R\")\n\n주요 패키지:\n\n\nCore: tidyverse, here, ggplot2\n\n\nEpidemiology: incidence2, surveil\n\n\nSpatial: sf, tmap\n\n\nClinical: survival, ggsurvfit, metafor\n\n\nInteractive: plotly, shiny\n\n\nPublication: patchwork, ggrepel, ggpubr\n\n\n\n\n\n\n\n\n패키지 설치 시간\n\n\n\n처음 실행 시 모든 패키지를 설치하는 데 10-20분 정도 소요됩니다. 인터넷 연결을 확인하고 충분한 시간을 두고 실행하세요.\n\n\n\n0.4.3 3. 실습 데이터 준비\n방법 1: 시뮬레이션 데이터 생성 (권장)\n\n# 실습용 데이터 자동 생성\nsource(\"code/data-simulation.R\")\n\n다음 파일이 data/processed/에 생성됩니다:\n\n\nhealth_survey.csv - 건강검진 데이터 (N=1,000)\n\ndisease_incidence.csv - 월별 질병 발생률\n\nregional_disease.csv - 시도별 질병 데이터\n\nclinical_trial.csv - 임상시험 데이터\n\nmeta_analysis.csv - 메타분석 데이터\n\ncovid_timeseries.csv - COVID-19 유사 시계열\n방법 2: 패키지 내장 데이터 사용\n별도 파일 없이 R 패키지에 내장된 데이터를 직접 사용합니다:\n\n# 예시\ndata(mtcars)      # 기본 R\ndata(iris)        # 기본 R\nlibrary(survival)\ndata(lung)        # 생존 분석\n\nlibrary(outbreaks)\ndata(ebola_sim)   # 에볼라 유행 데이터\n\n\n\n\n\n\n\n데이터 전략\n\n\n\n이 책의 모든 실습은 재현 가능성을 최우선으로 합니다:\n\n✅ 패키지 내장 데이터 우선 사용\n✅ 시뮬레이션 데이터 (재현 가능한 set.seed())\n❌ 외부 다운로드 최소화 (Shapefile만 예외)\n\n따라서 인터넷이 없는 환경에서도 대부분의 실습이 가능합니다.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#학습-로드맵",
+    "href": "index.html#학습-로드맵",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.5 🗺️ 학습 로드맵",
+    "text": "0.5 🗺️ 학습 로드맵\n\n0.5.1 초보자 (R 처음 시작)\nCh 1 → Ch 2 (꼼꼼히) → Ch 3 (일부) → Ch 6 (기본)\n\n0.5.2 중급자 (R 사용 경험 있음)\nCh 2 (복습) → Ch 3-4 (본인 분야) → Ch 5-6 → Ch 7\n\n0.5.3 고급자 (논문/프로젝트 목적)\nCh 3-5 (필요 챕터) → Ch 6 (출판 전략) → Ch 7 (대시보드)",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#실습-코드-사용법",
+    "href": "index.html#실습-코드-사용법",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.6 📊 실습 코드 사용법",
+    "text": "0.6 📊 실습 코드 사용법\n\n0.6.1 코드 블록 종류\n✍️ 직접 실행할 코드\n\n# 여러분이 직접 RStudio에서 실행하세요\nlibrary(ggplot2)\nggplot(mtcars, aes(x = wt, y = mpg)) +\n  geom_point()\n\n📺 결과가 함께 표시되는 코드\n\n# 이 책에서 실행 결과까지 보여줍니다\nsummary(mtcars$mpg)\n\n#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. \n#&gt;   10.40   15.43   19.20   20.09   22.80   33.90\n\n\n💡 연습문제\n\n\n\n\n\n\n✏️ Exercise 1\n\n\n\niris 데이터로 꽃잎 길이(Petal.Length)와 너비(Petal.Width)의 산점도를 그려보세요.\n\n정답 보기library(ggplot2)\nggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +\n  geom_point() +\n  theme_minimal()",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#도움이-필요할-때",
+    "href": "index.html#도움이-필요할-때",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.7 🆘 도움이 필요할 때",
+    "text": "0.7 🆘 도움이 필요할 때\n\n0.7.1 R 관련 질문\n\nStack Overflow (R tag)\nRStudio Community\nR for Data Science Community\n\n0.7.2 ggplot2 관련\n\n공식 문서\nR Graph Gallery\nggplot2 Book\n\n0.7.3 역학/보건학 특화\n\nEpi R Handbook\nApplied Epi Community",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#이-책을-인용하는-방법",
+    "href": "index.html#이-책을-인용하는-방법",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.8 📝 이 책을 인용하는 방법",
+    "text": "0.8 📝 이 책을 인용하는 방법\n@book{rvis2024,\n  title = {R 기반 보건학 시각화: 역학 및 임상통계를 위한 실습 가이드},\n  author = {보건학 R 시각화 팀},\n  year = {2024},\n  url = {https://your-url.com},\n  note = {Accessed: 2024-11-18}\n}",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#기여하기",
+    "href": "index.html#기여하기",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.9 🤝 기여하기",
+    "text": "0.9 🤝 기여하기\n이 책은 오픈 소스 프로젝트입니다. 오탈자, 코드 오류, 개선 제안은 언제든 환영합니다!\n\nGitHub 이슈: github.com/your-repo/issues\n\n이메일: your-email@example.com",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#라이선스",
+    "href": "index.html#라이선스",
+    "title": "R 기반 보건학 시각화",
+    "section": "\n0.10 📜 라이선스",
+    "text": "0.10 📜 라이선스\n\n\n텍스트 및 코드: CC BY-NC-SA 4.0\n\n\n데이터: CC0 (Public Domain)\n\n\n\n\n\n\n\n\n준비되셨나요?\n\n\n\n모든 준비가 끝났다면, Chapter 1: R과 ggplot2 시작하기로 이동하세요! 🚀",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>R 기반 보건학 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html",
+    "href": "chapters/01-introduction.html",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "",
+    "text": "3 R과 ggplot2 시작하기",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html#왜-r인가",
+    "href": "chapters/01-introduction.html#왜-r인가",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "\n3.1 1.1 왜 R인가?",
+    "text": "3.1 1.1 왜 R인가?\n\n3.1.1 1.1.1 보건학 연구에서 R의 위치\n(내용 추가 예정)\n\n3.1.2 1.1.2 R vs. 다른 통계 소프트웨어\n(내용 추가 예정)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html#개발-환경-설정",
+    "href": "chapters/01-introduction.html#개발-환경-설정",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "\n3.2 1.2 개발 환경 설정",
+    "text": "3.2 1.2 개발 환경 설정\n\n3.2.1 1.2.1 R 설치\n최소 R 4.3.0 이상이 필요합니다.\n\n\nWindows: https://cran.r-project.org/bin/windows/base/\n\nmacOS: https://cran.r-project.org/bin/macosx/\n\nLinux: sudo apt install r-base (Ubuntu/Debian)\n\n\n# R 버전 확인\nR.version.string\n\n\n3.2.2 1.2.2 RStudio 설치\nRStudio Desktop (무료): https://posit.co/download/rstudio-desktop/\n\n3.2.3 1.2.3 프로젝트 폴더 구조 만들기\n\n\n\n\n\n\n📂 프로젝트 폴더 구조\n\n\n\n실습을 위해 다음과 같은 폴더 구조를 만들어주세요:\nrvis-practice/          # 프로젝트 루트 폴더\n├── rvis-practice.Rproj # RStudio 프로젝트 파일\n├── code/               # R 스크립트\n│   ├── setup.R\n│   └── data-simulation.R\n└── data/               # 데이터 저장\n    └── processed/\n\n\nStep 1: RStudio에서 새 프로젝트 생성\n\nRStudio 열기\n\nFile → New Project → New Directory → New Project\n\n폴더 이름: rvis-practice\n\n\nCreate Project 클릭\n\nStep 2: 필요한 폴더 생성\n\n# R Console에서 실행\ndir.create(\"code\")\ndir.create(\"data\")\ndir.create(\"data/processed\")\n\n\n3.2.4 1.2.4 실습 스크립트 다운로드\n\n\n\n\n\n\n💾 스크립트 다운로드 방법 (2가지)\n\n\n\n방법 1: GitHub에서 직접 다운로드 (추천)\n\nhttps://github.com/jinhaslab/rvis 접속\n\ncode/setup.R 클릭 → Raw 버튼 → 우클릭 “다른 이름으로 저장”\n\ncode/data-simulation.R도 동일하게 저장\n\n방법 2: R에서 자동 다운로드\n\n# 작업 디렉토리 확인\ngetwd()  # rvis-practice 폴더여야 함\n\n# setup.R 다운로드\ndownload.file(\n  url = \"https://raw.githubusercontent.com/jinhaslab/rvis/main/code/setup.R\",\n  destfile = \"code/setup.R\"\n)\n\n# data-simulation.R 다운로드\ndownload.file(\n  url = \"https://raw.githubusercontent.com/jinhaslab/rvis/main/code/data-simulation.R\",\n  destfile = \"code/data-simulation.R\"\n)\n\n\n\n\n3.2.5 1.2.5 패키지 설치 (10-20분 소요)\n\n\n\n\n\n\n⏱️ 시간 소요 안내\n\n\n\n패키지 설치는 최초 1회만 10-20분 정도 걸립니다. 설치 후에는 빠르게 로드할 수 있습니다.\n\n\n\n# 프로젝트 루트에서 실행\nsource(\"code/setup.R\")\n\n설치되는 패키지 목록:\n\n\n핵심: tidyverse, ggplot2, here\n\n시각화: patchwork, ggrepel, ggpubr\n\n역학: incidence2, surveil, outbreaks\n\n공간 분석: sf (선택)\n\n임상 통계: survival, ggsurvfit, metafor\n\n인터랙티브: plotly, shiny, DT\n\n3.2.6 1.2.6 실습 데이터 생성 (1-2분)\n\n# 실습용 데이터 자동 생성\nsource(\"code/data-simulation.R\")\n\n생성되는 데이터:\n\n\nhealth_survey.csv - 건강 설문조사 (N=1000)\n\ndisease_incidence.csv - 질병 발생률 (월별)\n\nregional_disease.csv - 지역별 질병 (17개 시도)\n\nclinical_trial.csv - 임상시험 (N=500)\n\nmeta_analysis.csv - 메타분석 (15개 연구)\n\ncovid_timeseries.csv - COVID 시계열 (~1400일)\n\n\n\n\n\n\n\n✅ 설정 완료 확인\n\n\n\n\n# 패키지 로드 테스트\nlibrary(tidyverse)\nlibrary(ggplot2)\n\n# 데이터 확인\nlist.files(\"data/processed\")\n\n모든 설정이 완료되었습니다! 🎉",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html#r-기초-복습",
+    "href": "chapters/01-introduction.html#r-기초-복습",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "\n3.3 1.3 R 기초 복습",
+    "text": "3.3 1.3 R 기초 복습\n\n3.3.1 1.3.1 데이터 타입\n\n# 벡터\nages &lt;- c(25, 30, 35, 40, 45)\nnames &lt;- c(\"Alice\", \"Bob\", \"Charlie\", \"David\", \"Eve\")\n\n# 데이터프레임\npatients &lt;- data.frame(\n  name = names,\n  age = ages,\n  stringsAsFactors = FALSE\n)\n\npatients\n\n\n3.3.2 1.3.2 tidyverse 소개\n(내용 추가 예정)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html#ggplot2-그래픽-문법",
+    "href": "chapters/01-introduction.html#ggplot2-그래픽-문법",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "\n3.4 1.4 ggplot2: 그래픽 문법",
+    "text": "3.4 1.4 ggplot2: 그래픽 문법\n\n3.4.1 1.4.1 왜 ggplot2인가?\n(내용 추가 예정)\n\n3.4.2 1.4.2 첫 번째 플롯\n\nlibrary(ggplot2)\n\n# mtcars 데이터로 산점도 그리기\nggplot(data = mtcars, aes(x = wt, y = mpg)) +\n  geom_point() +\n  labs(\n    title = \"자동차 무게와 연비의 관계\",\n    x = \"무게 (1000 lbs)\",\n    y = \"연비 (mpg)\"\n  )\n\n\n3.4.3 1.4.3 코드 분해하기\n(내용 추가 예정)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html#프로젝트-구조",
+    "href": "chapters/01-introduction.html#프로젝트-구조",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "\n3.5 1.5 프로젝트 구조",
+    "text": "3.5 1.5 프로젝트 구조\n\n3.5.1 1.5.1 R 프로젝트 (.Rproj)\n(내용 추가 예정)\n\n3.5.2 1.5.2 here 패키지로 경로 관리\n\nlibrary(here)\n\n# 프로젝트 루트 기준 경로\ndata_path &lt;- here(\"data\", \"processed\", \"health_survey.csv\")",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html#실습-1-기본-그래프-만들기",
+    "href": "chapters/01-introduction.html#실습-1-기본-그래프-만들기",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "\n3.6 1.6 실습 1: 기본 그래프 만들기",
+    "text": "3.6 1.6 실습 1: 기본 그래프 만들기\n\n\n\n\n\n\n✏️ Exercise 1.1\n\n\n\niris 데이터를 사용하여 꽃받침 길이(Sepal.Length)와 너비(Sepal.Width)의 산점도를 그려보세요.\n\n정답 보기library(ggplot2)\n\nggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +\n  geom_point() +\n  labs(\n    title = \"붓꽃 꽃받침 크기\",\n    x = \"길이 (cm)\",\n    y = \"너비 (cm)\"\n  )",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/01-introduction.html#요약",
+    "href": "chapters/01-introduction.html#요약",
+    "title": "\n2  R과 ggplot2 시작하기\n",
+    "section": "\n3.7 요약",
+    "text": "3.7 요약\n이 챕터에서 배운 내용:\n\n✅ R과 RStudio 환경 설정\n✅ ggplot2의 기본 철학\n✅ 첫 번째 그래프 생성\n✅ 프로젝트 구조 이해\n\n\n\n\n\n\n\n다음 챕터\n\n\n\nChapter 2: ggplot2 완벽 마스터하기에서 그래픽 문법의 7가지 구성 요소를 깊이 있게 배웁니다.",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>R과 ggplot2 시작하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/02-ggplot2-basics.html",
+    "href": "chapters/02-ggplot2-basics.html",
+    "title": "\n3  ggplot2 완벽 마스터하기\n",
+    "section": "",
+    "text": "4 ggplot2 완벽 마스터하기",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>ggplot2 완벽 마스터하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/02-ggplot2-basics.html#그래픽-문법의-7가지-구성-요소",
+    "href": "chapters/02-ggplot2-basics.html#그래픽-문법의-7가지-구성-요소",
+    "title": "\n3  ggplot2 완벽 마스터하기\n",
+    "section": "\n4.1 2.1 그래픽 문법의 7가지 구성 요소",
+    "text": "4.1 2.1 그래픽 문법의 7가지 구성 요소\n(내용 추가 예정 - PDF 페이지 4-5 내용)\n\n4.1.1 2.1.1 데이터 (Data)\n\n4.1.2 2.1.2 미학 매핑 (Aesthetic Mappings)\n\n4.1.3 2.1.3 지오메트리 (Geometries)\n\n4.1.4 2.1.4 통계 변환 (Statistical Transformations)\n\n4.1.5 2.1.5 스케일 (Scales)\n\n4.1.6 2.1.6 좌표계 (Coordinate System)\n\n4.1.7 2.1.7 패싯 (Faceting)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>ggplot2 완벽 마스터하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/02-ggplot2-basics.html#aes-함수-완전-정복",
+    "href": "chapters/02-ggplot2-basics.html#aes-함수-완전-정복",
+    "title": "\n3  ggplot2 완벽 마스터하기\n",
+    "section": "\n4.2 2.2 aes() 함수 완전 정복",
+    "text": "4.2 2.2 aes() 함수 완전 정복\n(내용 추가 예정 - PDF 페이지 4-5)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>ggplot2 완벽 마스터하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/02-ggplot2-basics.html#기술-통계-시각화",
+    "href": "chapters/02-ggplot2-basics.html#기술-통계-시각화",
+    "title": "\n3  ggplot2 완벽 마스터하기\n",
+    "section": "\n4.3 2.3 기술 통계 시각화",
+    "text": "4.3 2.3 기술 통계 시각화\n(내용 추가 예정 - PDF 페이지 5-6)\n\n4.3.1 2.3.1 히스토그램 (geom_histogram)\n\n4.3.2 2.3.2 막대 그래프 (geom_bar)\n\n4.3.3 2.3.3 박스플롯 (geom_boxplot)\n\n4.3.4 2.3.4 산점도 (geom_point)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>ggplot2 완벽 마스터하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/02-ggplot2-basics.html#층화stratification와-역학적-사고",
+    "href": "chapters/02-ggplot2-basics.html#층화stratification와-역학적-사고",
+    "title": "\n3  ggplot2 완벽 마스터하기\n",
+    "section": "\n4.4 2.4 층화(Stratification)와 역학적 사고",
+    "text": "4.4 2.4 층화(Stratification)와 역학적 사고\n(내용 추가 예정 - PDF 페이지 6)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>ggplot2 완벽 마스터하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/02-ggplot2-basics.html#실습-건강검진-데이터-분석",
+    "href": "chapters/02-ggplot2-basics.html#실습-건강검진-데이터-분석",
+    "title": "\n3  ggplot2 완벽 마스터하기\n",
+    "section": "\n4.5 2.5 실습: 건강검진 데이터 분석",
+    "text": "4.5 2.5 실습: 건강검진 데이터 분석\n\nlibrary(tidyverse)\n\n# 시뮬레이션 데이터 로드\nhealth_survey &lt;- read_csv(here::here(\"data\", \"processed\", \"health_survey.csv\"))\n\n# 데이터 구조 확인\nglimpse(health_survey)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>ggplot2 완벽 마스터하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/02-ggplot2-basics.html#요약",
+    "href": "chapters/02-ggplot2-basics.html#요약",
+    "title": "\n3  ggplot2 완벽 마스터하기\n",
+    "section": "\n4.6 요약",
+    "text": "4.6 요약\n(내용 추가 예정)",
+    "crumbs": [
+      "기초편",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>ggplot2 완벽 마스터하기</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/03-epidemiology.html",
+    "href": "chapters/03-epidemiology.html",
+    "title": "\n4  역학 데이터 시각화\n",
+    "section": "",
+    "text": "5 역학 데이터 시각화의 핵심 기법",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/03-epidemiology.html#발병률-및-유병률-추세",
+    "href": "chapters/03-epidemiology.html#발병률-및-유병률-추세",
+    "title": "\n4  역학 데이터 시각화\n",
+    "section": "\n5.1 3.1 발병률 및 유병률 추세",
+    "text": "5.1 3.1 발병률 및 유병률 추세\n(내용 추가 예정 - PDF 페이지 7)\n\n5.1.1 3.1.1 시계열 추세선\n\n5.1.2 3.1.2 누적 발병률\n\n5.1.3 3.1.3 불확실성 표현\n\nlibrary(tidyverse)\n\ndisease_incidence &lt;- read_csv(\n  here::here(\"data\", \"processed\", \"disease_incidence.csv\")\n)\n\n# 시계열 플롯 with 95% CI\nggplot(disease_incidence, aes(x = date, y = rate)) +\n  geom_line(color = \"blue\", linewidth = 1) +\n  geom_point(color = \"blue\") +\n  geom_ribbon(aes(ymin = lower_ci, ymax = upper_ci),\n              alpha = 0.2, fill = \"blue\") +\n  labs(\n    title = \"Annual Incidence Rate (with 95% CI)\",\n    x = \"Year\",\n    y = \"Incidence Rate per 100,000\"\n  )",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/03-epidemiology.html#감염병-유행-곡선-epicurve",
+    "href": "chapters/03-epidemiology.html#감염병-유행-곡선-epicurve",
+    "title": "\n4  역학 데이터 시각화\n",
+    "section": "\n5.2 3.2 감염병 유행 곡선 (Epicurve)",
+    "text": "5.2 3.2 감염병 유행 곡선 (Epicurve)\n(내용 추가 예정 - PDF 페이지 7-9)\n\n5.2.1 3.2.1 왜 incidence2 패키지인가?\n\n5.2.2 3.2.2 incidence2 워크플로우\n\nlibrary(incidence2)\nlibrary(outbreaks)\n\n# 에볼라 유행 데이터\nlinelist &lt;- outbreaks::ebola_sim$linelist\n\n# incidence 객체 생성\ninc_daily &lt;- incidence(\n  linelist,\n  date_index = \"date_of_onset\",\n  interval = \"day\"\n)\n\n# 유행 곡선 플로팅\nplot(inc_daily) +\n  labs(\n    title = \"Ebola Outbreak Epicurve (Daily)\",\n    x = \"Date\",\n    y = \"Daily Cases\"\n  )",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/03-epidemiology.html#연령-표준화-비율",
+    "href": "chapters/03-epidemiology.html#연령-표준화-비율",
+    "title": "\n4  역학 데이터 시각화\n",
+    "section": "\n5.3 3.3 연령 표준화 비율",
+    "text": "5.3 3.3 연령 표준화 비율\n(내용 추가 예정 - PDF 페이지 9-11)\n\n5.3.1 3.3.1 개념과 필요성\n\n5.3.2 3.3.2 surveil 패키지 활용\n\nlibrary(surveil)\n\n# 예제 데이터\ndata(cancer, package = \"surveil\")\ndata(standard, package = \"surveil\")\n\n# 연령-표준화 비율 계산 및 시각화\n# (실제 코드는 챕터에서 상세히)",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/03-epidemiology.html#요약",
+    "href": "chapters/03-epidemiology.html#요약",
+    "title": "\n4  역학 데이터 시각화\n",
+    "section": "\n5.4 요약",
+    "text": "5.4 요약\n(내용 추가 예정)",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/04-spatial-epi.html",
+    "href": "chapters/04-spatial-epi.html",
+    "title": "\n5  공간 역학 데이터 시각화\n",
+    "section": "",
+    "text": "6 공간 역학 데이터 시각화",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>공간 역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/04-spatial-epi.html#r-공간-데이터-처리의-혁명-sf",
+    "href": "chapters/04-spatial-epi.html#r-공간-데이터-처리의-혁명-sf",
+    "title": "\n5  공간 역학 데이터 시각화\n",
+    "section": "\n6.1 4.1 R 공간 데이터 처리의 혁명: sf",
+    "text": "6.1 4.1 R 공간 데이터 처리의 혁명: sf\n(내용 추가 예정 - PDF 페이지 11-12)\n\n6.1.1 4.1.1 Simple Features란?\n\n6.1.2 4.1.2 sf 객체 구조\n\nlibrary(sf)\nlibrary(tidyverse)\n\n# Shapefile 읽기 (예시)\n# korea_map &lt;- st_read(\"data/external/sig.shp\")\n\n# 구조 확인\n# glimpse(korea_map)",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>공간 역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/04-spatial-epi.html#코로플레스-맵-choropleth-map",
+    "href": "chapters/04-spatial-epi.html#코로플레스-맵-choropleth-map",
+    "title": "\n5  공간 역학 데이터 시각화\n",
+    "section": "\n6.2 4.2 코로플레스 맵 (Choropleth Map)",
+    "text": "6.2 4.2 코로플레스 맵 (Choropleth Map)\n(내용 추가 예정 - PDF 페이지 12-13)\n\n6.2.1 4.2.1 데이터 준비\n\n6.2.2 4.2.2 데이터 결합\n\n6.2.3 4.2.3 ggplot2로 시각화\n\n# 지역별 질병 데이터\nregional_disease &lt;- read_csv(\n  here::here(\"data\", \"processed\", \"regional_disease.csv\")\n)\n\n# 공간 데이터와 결합\n# combined_sf &lt;- left_join(korea_map, regional_disease, by = \"region\")\n\n# 코로플레스 맵\n# ggplot(data = combined_sf) +\n#   geom_sf(aes(fill = incidence_rate)) +\n#   scale_fill_viridis_c() +\n#   theme_minimal()\n\n\n6.2.4 4.2.4 tmap으로 시각화\n\nlibrary(tmap)\n\n# tm_shape(combined_sf) +\n#   tm_fill(\"incidence_rate\",\n#           style = \"quantile\",\n#           palette = \"Blues\",\n#           title = \"Incidence Rate\") +\n#   tm_borders(col = \"grey50\") +\n#   tm_layout(main.title = \"Regional Disease Incidence\")",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>공간 역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/04-spatial-epi.html#ggplot2-vs-tmap-전략적-선택",
+    "href": "chapters/04-spatial-epi.html#ggplot2-vs-tmap-전략적-선택",
+    "title": "\n5  공간 역학 데이터 시각화\n",
+    "section": "\n6.3 4.3 ggplot2 vs tmap: 전략적 선택",
+    "text": "6.3 4.3 ggplot2 vs tmap: 전략적 선택\n(내용 추가 예정 - PDF 페이지 13)",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>공간 역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/04-spatial-epi.html#요약",
+    "href": "chapters/04-spatial-epi.html#요약",
+    "title": "\n5  공간 역학 데이터 시각화\n",
+    "section": "\n6.4 요약",
+    "text": "6.4 요약\n(내용 추가 예정)",
+    "crumbs": [
+      "역학편",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>공간 역학 데이터 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/05-clinical-stats.html",
+    "href": "chapters/05-clinical-stats.html",
+    "title": "\n6  임상 통계 시각화\n",
+    "section": "",
+    "text": "7 임상 통계 및 분석 역학 시각화",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>임상 통계 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/05-clinical-stats.html#생존-분석-ggsurvfit",
+    "href": "chapters/05-clinical-stats.html#생존-분석-ggsurvfit",
+    "title": "\n6  임상 통계 시각화\n",
+    "section": "\n7.1 5.1 생존 분석: ggsurvfit",
+    "text": "7.1 5.1 생존 분석: ggsurvfit\n(내용 추가 예정 - PDF 페이지 14-15)\n\n7.1.1 5.1.1 Kaplan-Meier 곡선의 중요성\n\n7.1.2 5.1.2 ggsurvfit 워크플로우\n\nlibrary(ggsurvfit)\nlibrary(survival)\n\n# survival 패키지의 lung 데이터\nfit &lt;- survfit2(Surv(time, status) ~ sex, data = lung)\n\n# 생존 곡선 + 위험 테이블\nfit |&gt;\n  ggsurvfit(linewidth = 1) +\n  labs(\n    x = \"Days\",\n    y = \"Overall survival probability\",\n    title = \"Kaplan-Meier Survival Plot by Sex\"\n  ) +\n  add_confidence_interval() +\n  add_risktable(\n    risktable_stats = \"n.risk\",\n    title = \"Number at Risk\"\n  ) +\n  scale_ggsurvfit()",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>임상 통계 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/05-clinical-stats.html#메타-분석-metafor",
+    "href": "chapters/05-clinical-stats.html#메타-분석-metafor",
+    "title": "\n6  임상 통계 시각화\n",
+    "section": "\n7.2 5.2 메타 분석: metafor",
+    "text": "7.2 5.2 메타 분석: metafor\n(내용 추가 예정 - PDF 페이지 15-16)\n\n7.2.1 5.2.1 메타 분석의 의의\n\n7.2.2 5.2.2 포레스트 플롯 (Forest Plot)\n\nlibrary(metafor)\n\n# BCG 백신 메타 분석 예제\ndat &lt;- escalc(\n  measure = \"RR\",\n  ai = tpos, bi = tneg,\n  ci = cpos, di = cneg,\n  data = dat.bcg,\n  slab = paste(author, year, sep = \", \")\n)\n\n# 랜덤 효과 모델\nres &lt;- rma(yi, vi, data = dat)\n\n# 포레스트 플롯\nforest(res,\n       atransf = exp,\n       at = log(c(0.05, 0.25, 1, 4)),\n       header = \"Author(s) and Year\",\n       xlab = \"Risk Ratio (95% CI)\")",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>임상 통계 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/05-clinical-stats.html#임상시험-결과-시각화",
+    "href": "chapters/05-clinical-stats.html#임상시험-결과-시각화",
+    "title": "\n6  임상 통계 시각화\n",
+    "section": "\n7.3 5.3 임상시험 결과 시각화",
+    "text": "7.3 5.3 임상시험 결과 시각화\n(내용 추가 예정 - PDF 페이지 16-17)\n\n7.3.1 5.3.1 geom_errorbar의 올바른 사용\n\n\n\n\n\n\n⚠️ 통계적 책임\n\n\n\ngeom_errorbar()는 통계적 지식이 없습니다. ymin/ymax에 무엇을 넣을지는 분석가의 책임입니다.\n\n\nSE (Standard Error): 평균의 정밀도\n\n95% CI (Confidence Interval): 모평균에 대한 신뢰\n\n적절한 것을 선택하세요!\n\n\n\n# 임상시험 데이터\nclinical_trial &lt;- read_csv(\n  here::here(\"data\", \"processed\", \"clinical_trial.csv\")\n)\n\n# 그룹별 요약\nsummary_data &lt;- clinical_trial |&gt;\n  group_by(treatment) |&gt;\n  summarise(\n    mean_improvement = mean(improvement),\n    se = sd(improvement) / sqrt(n()),\n    ci_lower = mean_improvement - 1.96 * se,\n    ci_upper = mean_improvement + 1.96 * se\n  )\n\n# 평균 + 95% CI\nggplot(summary_data, aes(x = treatment, y = mean_improvement)) +\n  geom_point(size = 3) +\n  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), width = 0.2) +\n  labs(\n    title = \"Treatment Effect with 95% CI\",\n    x = \"Treatment Group\",\n    y = \"Mean Improvement\"\n  )",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>임상 통계 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/05-clinical-stats.html#요약",
+    "href": "chapters/05-clinical-stats.html#요약",
+    "title": "\n6  임상 통계 시각화\n",
+    "section": "\n7.4 요약",
+    "text": "7.4 요약\n(내용 추가 예정)",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>임상 통계 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/06-publication.html",
+    "href": "chapters/06-publication.html",
+    "title": "\n7  출판용 시각화\n",
+    "section": "",
+    "text": "8 출판 및 발표를 위한 고급 시각화 전략",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>출판용 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/06-publication.html#가독성-향상-ggrepel",
+    "href": "chapters/06-publication.html#가독성-향상-ggrepel",
+    "title": "\n7  출판용 시각화\n",
+    "section": "\n8.1 6.1 가독성 향상: ggrepel",
+    "text": "8.1 6.1 가독성 향상: ggrepel\n(내용 추가 예정 - PDF 페이지 18)\n\n8.1.1 6.1.1 텍스트 라벨 겹침 문제\n\nlibrary(ggrepel)\n\n# 산점도에 라벨 추가 (겹치지 않게)\nggplot(mtcars, aes(x = wt, y = mpg, label = rownames(mtcars))) +\n  geom_point(color = 'red') +\n  geom_text_repel() +  # geom_text() 대신\n  theme_classic(base_size = 16)",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>출판용 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/06-publication.html#다중-플롯-조합-patchwork",
+    "href": "chapters/06-publication.html#다중-플롯-조합-patchwork",
+    "title": "\n7  출판용 시각화\n",
+    "section": "\n8.2 6.2 다중 플롯 조합: patchwork",
+    "text": "8.2 6.2 다중 플롯 조합: patchwork\n(내용 추가 예정 - PDF 페이지 19)\n\n8.2.1 6.2.1 patchwork의 혁신\n\nlibrary(patchwork)\n\n# 여러 플롯 생성\np1 &lt;- ggplot(mtcars, aes(mpg, disp)) + geom_point()\np2 &lt;- ggplot(mtcars, aes(gear, disp, group = gear)) + geom_boxplot()\np3 &lt;- ggplot(mtcars, aes(disp, qsec)) + geom_smooth()\n\n# 조합: (p1과 p2를 나란히) / 그 아래 p3\n(p1 | p2) / p3 +\n  plot_annotation(tag_levels = 'A')  # A), B), C) 태그",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>출판용 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/06-publication.html#학술지-스타일-ggthemes-ggpubr",
+    "href": "chapters/06-publication.html#학술지-스타일-ggthemes-ggpubr",
+    "title": "\n7  출판용 시각화\n",
+    "section": "\n8.3 6.3 학술지 스타일: ggthemes & ggpubr",
+    "text": "8.3 6.3 학술지 스타일: ggthemes & ggpubr\n(내용 추가 예정 - PDF 페이지 19-21)\n\n8.3.1 6.3.1 내장 테마\n\n# 깔끔한 내장 테마들\np + theme_bw()\np + theme_classic()\np + theme_minimal()\n\n\n8.3.2 6.3.2 ggthemes\n\nlibrary(ggthemes)\n\np + theme_economist() + scale_colour_economist()\np + theme_wsj()\np + scale_color_colorblind()  # 색맹 친화적\n\n\n8.3.3 6.3.3 ggpubr: P-값 추가\n\nlibrary(ggpubr)\n\nggboxplot(ToothGrowth, x = \"dose\", y = \"len\", fill = \"dose\") +\n  stat_compare_means(\n    comparisons = list(c(\"0.5\", \"1\"), c(\"1\", \"2\"), c(\"0.5\", \"2\")),\n    label = \"p.signif\"  # *, **, *** 표시\n  ) +\n  stat_compare_means(label.y = 50)  # 전체 그룹 비교 p-value",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>출판용 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/06-publication.html#출판-품질-체크리스트",
+    "href": "chapters/06-publication.html#출판-품질-체크리스트",
+    "title": "\n7  출판용 시각화\n",
+    "section": "\n8.4 6.4 출판 품질 체크리스트",
+    "text": "8.4 6.4 출판 품질 체크리스트\n\n\n\n\n\n\n✅ 학술지 제출 전 체크리스트\n\n\n\n필수 요소:\n\n모든 축에 명확한 레이블 + 단위\n그림 캡션 (Figure legend)\n글꼴 크기 적절 (최소 10pt)\n해상도 충분 (≥300 DPI)\n색상 색맹 친화적\n통계 정보 명시 (SE? CI? P-value?)\n\n권장 사항:\n\ntheme 일관성 유지\n범례 위치 최적화\n불필요한 격자선 제거\n파일 형식: PDF (벡터) 또는 PNG (고해상도)",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>출판용 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/06-publication.html#요약",
+    "href": "chapters/06-publication.html#요약",
+    "title": "\n7  출판용 시각화\n",
+    "section": "\n8.5 요약",
+    "text": "8.5 요약\n(내용 추가 예정)",
+    "crumbs": [
+      "임상통계편",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>출판용 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/07-interactive.html",
+    "href": "chapters/07-interactive.html",
+    "title": "\n8  대화형 시각화\n",
+    "section": "",
+    "text": "9 대화형 시각화 및 공중 보건 대시보드",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>대화형 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/07-interactive.html#정적-동적-plotly와-ggplotly",
+    "href": "chapters/07-interactive.html#정적-동적-plotly와-ggplotly",
+    "title": "\n8  대화형 시각화\n",
+    "section": "\n9.1 7.1 정적 → 동적: plotly와 ggplotly()",
+    "text": "9.1 7.1 정적 → 동적: plotly와 ggplotly()\n(내용 추가 예정 - PDF 페이지 21-22)\n\n9.1.1 7.1.1 plotly의 강력함\n\nlibrary(plotly)\n\n# 1. 일반 ggplot 객체 생성\np_static &lt;- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +\n  geom_point() +\n  labs(title = \"Static ggplot\")\n\n# 2. ggplotly()로 변환 (단 한 줄!)\np_interactive &lt;- ggplotly(p_static)\n\n# RStudio Viewer나 RMarkdown HTML에서 실행\np_interactive\n\n\n\n\n\n\n\n💡 투자 대비 수익(ROI) 최고!\n\n\n\nggplot2 문법을 마스터했다면, ggplotly(p)라는 단 한 줄로 강력한 인터랙티브 그래프로 변환됩니다!\n\n✅ 마우스 오버 → 툴팁 자동\n✅ 확대/축소 가능\n✅ 데이터 탐색 용이",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>대화형 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/07-interactive.html#shiny-대시보드-구축",
+    "href": "chapters/07-interactive.html#shiny-대시보드-구축",
+    "title": "\n8  대화형 시각화\n",
+    "section": "\n9.2 7.2 Shiny 대시보드 구축",
+    "text": "9.2 7.2 Shiny 대시보드 구축\n(내용 추가 예정 - PDF 페이지 22-24)\n\n9.2.1 7.2.1 Shiny의 핵심: UI와 Server\n\nlibrary(shiny)\n\n# UI: 사용자가 보는 화면\nui &lt;- fluidPage(\n  titlePanel(\"Public Health Dashboard\"),\n\n  sidebarLayout(\n    sidebarPanel(\n      selectInput(\"district\", \"Select District:\",\n                  choices = c(\"All\", \"District A\", \"District B\"))\n    ),\n\n    mainPanel(\n      plotOutput(\"epicurve\")\n    )\n  )\n)\n\n# Server: 실제 연산이 일어나는 곳\nserver &lt;- function(input, output) {\n\n  # 반응형 플롯\n  output$epicurve &lt;- renderPlot({\n    # input$district 값에 따라 자동으로 재실행됨!\n    filtered_data &lt;- filter_by_district(data, input$district)\n\n    ggplot(filtered_data, aes(x = date, y = cases)) +\n      geom_col() +\n      labs(title = paste(\"Epicurve -\", input$district))\n  })\n}\n\n# 앱 실행\nshinyApp(ui = ui, server = server)\n\n\n9.2.2 7.2.2 반응성(Reactivity) 이해\n\n\n\n\n\n\n🔄 Shiny의 핵심: 반응성\n\n\n\n\n사용자가 UI 위젯 변경 (예: input$district)\nShiny가 자동 감지\n해당 input에 의존하는 모든 코드 자동 재실행\n\nUI 업데이트\n\n코드를 선언하면, Shiny가 자동으로 관리합니다!\n\n\n\n9.2.3 7.2.3 실전 예제: 말라리아 대시보드\n\n전체 코드 보기# app.R\nlibrary(shiny)\nlibrary(tidyverse)\nlibrary(plotly)\n\n# (데이터 로딩 및 plot_epicurve 함수 정의 생략)\n\nui &lt;- fluidPage(\n  titlePanel(\"Malaria Surveillance Dashboard\"),\n\n  sidebarLayout(\n    sidebarPanel(\n      selectInput(\"select_district\",\n                  label = \"Select District:\",\n                  choices = c(\"All\", \"District A\", \"District B\")),\n\n      selectInput(\"select_agegroup\",\n                  label = \"Select Age Group:\",\n                  choices = c(\"All ages\" = \"total\",\n                              \"&lt;5\" = \"u5\",\n                              \"&gt;=5\" = \"o5\"))\n    ),\n\n    mainPanel(\n      plotlyOutput(\"malaria_epicurve\")\n    )\n  )\n)\n\nserver &lt;- function(input, output) {\n\n  output$malaria_epicurve &lt;- renderPlotly({\n\n    # input 값에 따라 플롯 생성\n    p &lt;- plot_epicurve(\n      malaria_data,\n      district = input$select_district,\n      agegroup = input$select_agegroup\n    )\n\n    # ggplot → plotly 변환\n    ggplotly(p)\n  })\n}\n\nshinyApp(ui = ui, server = server)",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>대화형 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/07-interactive.html#shiny-앱-배포",
+    "href": "chapters/07-interactive.html#shiny-앱-배포",
+    "title": "\n8  대화형 시각화\n",
+    "section": "\n9.3 7.3 Shiny 앱 배포",
+    "text": "9.3 7.3 Shiny 앱 배포\n(내용 추가 예정)\n\n9.3.1 7.3.1 shinyapps.io\n\n9.3.2 7.3.2 Shiny Server\n\n9.3.3 7.3.3 Docker",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>대화형 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/07-interactive.html#요약",
+    "href": "chapters/07-interactive.html#요약",
+    "title": "\n8  대화형 시각화\n",
+    "section": "\n9.4 요약",
+    "text": "9.4 요약\n(내용 추가 예정)",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>대화형 시각화</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/08-conclusion.html",
+    "href": "chapters/08-conclusion.html",
+    "title": "\n9  결론 및 제언\n",
+    "section": "",
+    "text": "10 효과적인 보건 데이터 커뮤니케이션을 위한 제언",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>결론 및 제언</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/08-conclusion.html#학습-여정-회고",
+    "href": "chapters/08-conclusion.html#학습-여정-회고",
+    "title": "\n9  결론 및 제언\n",
+    "section": "\n10.1 8.1 학습 여정 회고",
+    "text": "10.1 8.1 학습 여정 회고\n(내용 추가 예정 - PDF 페이지 24-25)\n우리는 다음 여정을 거쳤습니다:\n\n\nggplot2 기본 문법 (Ch 1-2)\n\n그래픽 문법의 7가지 구성 요소\naes(), geom, facet\n\n\n\n역학 특화 시각화 (Ch 3-4)\n\n유행 곡선 (incidence2)\n연령 표준화 비율 (surveil)\n공간 역학 (sf, tmap)\n\n\n\n임상통계 시각화 (Ch 5)\n\n생존 분석 (ggsurvfit)\n메타 분석 (metafor)\n\n\n\n출판 및 공유 (Ch 6-7)\n\n출판 품질 (patchwork, ggpubr)\n대화형 대시보드 (Shiny)",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>결론 및 제언</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/08-conclusion.html#효과적인-데이터-커뮤니케이션-원칙",
+    "href": "chapters/08-conclusion.html#효과적인-데이터-커뮤니케이션-원칙",
+    "title": "\n9  결론 및 제언\n",
+    "section": "\n10.2 8.2 효과적인 데이터 커뮤니케이션 원칙",
+    "text": "10.2 8.2 효과적인 데이터 커뮤니케이션 원칙\n(내용 추가 예정 - PDF 페이지 25)\n\n10.2.1 8.2.1 목적에 맞는 도구 선택\n\n\n\n\n\n\n🎯 시각화 목적에 따른 선택\n\n\n\n\n\n목적\n도구\n예시\n\n\n\n\n탐색 (Exploration)\n빠른 ggplot\nEDA, 데이터 이해\n\n\n\n설명 (Explanation)\n출판 품질 ggplot\n논문 Figure\n\n\n\n상호작용 (Interaction)\nPlotly, Shiny\n대시보드, 웹앱\n\n\n\n\n\n\n10.2.2 8.2.2 통계적 정확성\n\n\n\n\n\n\n⚠️ 반드시 피해야 할 함정\n\n\n\n\n\n연령 구조 미보정: 조(Crude) 비율의 함정\n\n✅ 해결: 연령 표준화 비율 (Ch 3.3)\n\n\n\nSE vs CI 혼동: geom_errorbar의 책임\n\n✅ 해결: 올바른 통계량 선택 (Ch 5.3)\n\n\n\n축 조작: 0부터 시작하지 않는 y축\n\n✅ 해결: scale_y_continuous(limits = c(0, ...))\n\n\n\n\n\n\n\n10.2.3 8.2.3 재현 가능한 연구\n\n# ✅ Good: 재현 가능\nsource(\"code/setup.R\")\nsource(\"code/data-simulation.R\")\n\n# 모든 분석이 스크립트로 기록됨\n# → 다른 연구자가 재현 가능\n\n# ❌ Bad: 클릭 기반 소프트웨어\n# → 재현 불가",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>결론 및 제언</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/08-conclusion.html#추가-학습-자료",
+    "href": "chapters/08-conclusion.html#추가-학습-자료",
+    "title": "\n9  결론 및 제언\n",
+    "section": "\n10.3 8.3 추가 학습 자료",
+    "text": "10.3 8.3 추가 학습 자료\n\n10.3.1 8.3.1 필수 도서\n\n\nWickham, H. & Grolemund, G. (2017). R for Data Science\n\nhttps://r4ds.hadley.nz/\n📌 데이터 과학 전반\n\n\n\nWickham, H. (2016). ggplot2 Book\n\nhttps://ggplot2-book.org/\n📌 ggplot2 완전 정복\n\n\n\nBatra, N. et al. (2021). The Epidemiologist R Handbook\n\nhttps://epirhandbook.com/\n📌 역학 실무 R\n\n\n\n10.3.2 8.3.2 온라인 리소스\n시각화 갤러리: - R Graph Gallery - From Data to Viz\n커뮤니티: - RStudio Community - Stack Overflow - R tag\n블로그: - R-Bloggers - Cedric Scherer’s ggplot2 Tutorials\n\n10.3.3 8.3.3 특화 패키지\n계속 발전하는 R 생태계:\n# 최신 패키지 탐색\nbrowseURL(\"https://cran.r-project.org/web/packages/\")\nbrowseURL(\"https://www.tidyverse.org/packages/\")",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>결론 및 제언</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/08-conclusion.html#커뮤니티-참여",
+    "href": "chapters/08-conclusion.html#커뮤니티-참여",
+    "title": "\n9  결론 및 제언\n",
+    "section": "\n10.4 8.4 커뮤니티 참여",
+    "text": "10.4 8.4 커뮤니티 참여\n\n10.4.1 8.4.1 질문하기\n\nStack Overflow에 재현 가능한 예제(reprex) 제공\nRStudio Community에서 토론\nGitHub Issues에 버그 리포트\n\n10.4.2 8.4.2 기여하기\n\n오픈소스 패키지 개발 참여\n블로그 글 작성\n튜토리얼 번역",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>결론 및 제언</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/08-conclusion.html#최종-체크리스트",
+    "href": "chapters/08-conclusion.html#최종-체크리스트",
+    "title": "\n9  결론 및 제언\n",
+    "section": "\n10.5 8.5 최종 체크리스트",
+    "text": "10.5 8.5 최종 체크리스트\n\n\n\n\n\n\n✅ R 시각화 마스터 체크리스트\n\n\n\n기초:\n\nggplot2의 7가지 구성 요소 이해\naes() 매핑 자유자재로 활용\ngeom 선택 및 조합\n\n역학:\n\n유행 곡선 (incidence2)\n연령 표준화 비율 (surveil)\n공간 지도 (sf, tmap)\n\n임상:\n\n생존 곡선 (ggsurvfit)\n포레스트 플롯 (metafor)\nSE vs CI 구분\n\n출판:\n\n다중 패널 (patchwork)\n학술지 스타일 (ggthemes, ggpubr)\n고해상도 저장 (ggsave)\n\n고급:\n\n인터랙티브 (plotly)\n대시보드 (Shiny)",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>결론 및 제언</span>"
+    ]
+  },
+  {
+    "objectID": "chapters/08-conclusion.html#마치며",
+    "href": "chapters/08-conclusion.html#마치며",
+    "title": "\n9  결론 및 제언\n",
+    "section": "\n10.6 8.6 마치며",
+    "text": "10.6 8.6 마치며\n데이터 시각화는 기술이자 예술이며, 무엇보다 소통입니다.\n이 책에서 배운 R 시각화 기법들이 여러분의 연구 결과를:\n\n🔍 더 명확하게 이해하고\n📊 더 설득력 있게 전달하며\n🌍 더 많은 사람들에게 공유하는 데\n\n도움이 되기를 바랍니다.\n\n\n\n\n\n\n\n📬 연락하기\n\n\n\n\n\n이메일: your-email@example.com\n\nGitHub: github.com/your-repo\n\n\n웹사이트: your-website.com\n\n\n질문, 피드백, 개선 제안을 언제든 환영합니다!\n\n\n\n\n\n\n\n\n🎉 축하합니다!\n\n\n\nR 기반 보건학 시각화 과정을 완료하셨습니다!\n이제 여러분은 ggplot2부터 Shiny까지, 보건학 데이터를 전문적으로 시각화할 수 있는 역량을 갖추셨습니다.\n계속해서 배우고, 실습하고, 공유하세요! 🚀",
+    "crumbs": [
+      "고급편",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>결론 및 제언</span>"
+    ]
+  },
+  {
+    "objectID": "references.html",
+    "href": "references.html",
+    "title": "10  참고문헌",
+    "section": "",
+    "text": "참고문헌\n이 책은 다음 자료들을 참고하여 작성되었습니다.",
+    "crumbs": [
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>참고문헌</span>"
+    ]
+  },
+  {
+    "objectID": "references.html#주요-참고-도서",
+    "href": "references.html#주요-참고-도서",
+    "title": "10  참고문헌",
+    "section": "10.1 주요 참고 도서",
+    "text": "10.1 주요 참고 도서\n\nWickham, H., & Grolemund, G. (2017). R for Data Science. O’Reilly Media. https://r4ds.hadley.nz/\nWickham, H. (2016). ggplot2: Elegant Graphics for Data Analysis (3rd ed.). Springer. https://ggplot2-book.org/\nHealy, K. (2018). Data Visualization: A Practical Introduction. Princeton University Press.\nMoraga, P. (2019). Geospatial Health Data: Modeling and Visualization with R-INLA and Shiny. Chapman and Hall/CRC.\nBatra, N., et al. (2021). The Epidemiologist R Handbook. https://epirhandbook.com/",
+    "crumbs": [
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>참고문헌</span>"
+    ]
+  },
+  {
+    "objectID": "references.html#r-패키지",
+    "href": "references.html#r-패키지",
+    "title": "10  참고문헌",
+    "section": "10.2 R 패키지",
+    "text": "10.2 R 패키지\n\n10.2.1 시각화\n\nWickham, H. (2016). ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics. https://CRAN.R-project.org/package=ggplot2\nPedersen, T. L. (2024). patchwork: The Composer of Plots. https://CRAN.R-project.org/package=patchwork\nSlowikowski, K. (2024). ggrepel: Automatically Position Non-Overlapping Text Labels. https://CRAN.R-project.org/package=ggrepel\nKassambara, A. (2023). ggpubr: ‘ggplot2’ Based Publication Ready Plots. https://CRAN.R-project.org/package=ggpubr\n\n\n\n10.2.2 역학 분석\n\nJombart, T., et al. (2022). incidence2: Compute, Handle and Plot Incidence. https://CRAN.R-project.org/package=incidence2\nDonegan, C. (2022). surveil: Public Health Surveillance. https://CRAN.R-project.org/package=surveil\n\n\n\n10.2.3 공간 분석\n\nPebesma, E. (2018). Simple Features for R: Standardized Support for Spatial Vector Data. The R Journal, 10(1), 439-446. https://doi.org/10.32614/RJ-2018-009\nTennekes, M. (2018). tmap: Thematic Maps in R. Journal of Statistical Software, 84(6), 1-39. https://doi.org/10.18637/jss.v084.i06\n\n\n\n10.2.4 임상 통계\n\nTherneau, T. (2024). survival: Survival Analysis. https://CRAN.R-project.org/package=survival\nSjoberg, D. D., et al. (2023). ggsurvfit: Flexible Time-to-Event Figures. https://CRAN.R-project.org/package=ggsurvfit\nViechtbauer, W. (2010). Conducting Meta-Analyses in R with the metafor Package. Journal of Statistical Software, 36(3), 1-48. https://doi.org/10.18637/jss.v036.i03\n\n\n\n10.2.5 대화형 시각화\n\nSievert, C. (2020). Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC. https://plotly-r.com/\nChang, W., et al. (2024). shiny: Web Application Framework for R. https://CRAN.R-project.org/package=shiny",
+    "crumbs": [
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>참고문헌</span>"
+    ]
+  },
+  {
+    "objectID": "references.html#웹-리소스",
+    "href": "references.html#웹-리소스",
+    "title": "10  참고문헌",
+    "section": "10.3 웹 리소스",
+    "text": "10.3 웹 리소스\n\n10.3.1 튜토리얼\n\nR Graph Gallery. https://r-graph-gallery.com/\nFrom Data to Viz. https://www.data-to-viz.com/\nCedric Scherer’s ggplot2 Tutorial. https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/\n\n\n\n10.3.2 커뮤니티\n\nRStudio Community. https://community.rstudio.com/\nStack Overflow (R tag). https://stackoverflow.com/questions/tagged/r\nR-Bloggers. https://www.r-bloggers.com/\n\n\n\n10.3.3 데이터 소스\n\n통계지리정보서비스(SGIS). https://sgis.kostat.go.kr/\n질병관리청 감염병포털. https://npt.kdca.go.kr/\nOur World in Data. https://ourworldindata.org/",
+    "crumbs": [
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>참고문헌</span>"
+    ]
+  },
+  {
+    "objectID": "references.html#학술-논문",
+    "href": "references.html#학술-논문",
+    "title": "10  참고문헌",
+    "section": "10.4 학술 논문",
+    "text": "10.4 학술 논문\n\nWilkinson, L. (2005). The Grammar of Graphics (2nd ed.). Springer.\nTufte, E. R. (2001). The Visual Display of Quantitative Information (2nd ed.). Graphics Press.\nCleveland, W. S., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. Journal of the American Statistical Association, 79(387), 531-554.\nFriendly, M. (2008). A Brief History of Data Visualization. In C. Chen, W. Härdle, & A. Unwin (Eds.), Handbook of Data Visualization (pp. 15-56). Springer.\n\n\n\n\n\n\n\n\nBibTeX 파일\n\n\n\n전체 참고문헌 목록은 references.bib 파일에서 확인할 수 있습니다.",
+    "crumbs": [
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>참고문헌</span>"
+    ]
+  }
+]
