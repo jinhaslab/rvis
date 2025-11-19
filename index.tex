@@ -1,0 +1,2172 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  letterpaper,
+]{scrbook}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+  \setmainfont[]{Noto Sans KR}
+  \setsansfont[]{Noto Sans KR}
+  \setmonofont[]{D2Coding}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\usepackage{kotex}
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
+\@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
+\definecolor{quarto-callout-color}{HTML}{909090}
+\definecolor{quarto-callout-note-color}{HTML}{0758E5}
+\definecolor{quarto-callout-important-color}{HTML}{CC1914}
+\definecolor{quarto-callout-warning-color}{HTML}{EB9113}
+\definecolor{quarto-callout-tip-color}{HTML}{00A047}
+\definecolor{quarto-callout-caution-color}{HTML}{FC5300}
+\definecolor{quarto-callout-color-frame}{HTML}{acacac}
+\definecolor{quarto-callout-note-color-frame}{HTML}{4582ec}
+\definecolor{quarto-callout-important-color-frame}{HTML}{d9534f}
+\definecolor{quarto-callout-warning-color-frame}{HTML}{f0ad4e}
+\definecolor{quarto-callout-tip-color-frame}{HTML}{02b875}
+\definecolor{quarto-callout-caution-color-frame}{HTML}{fd7e14}
+\makeatother
+\makeatletter
+\@ifpackageloaded{bookmark}{}{\usepackage{bookmark}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={R 기반 보건학 시각화},
+  pdfauthor={보건학 R 시각화 팀},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{R 기반 보건학 시각화}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{역학 및 임상통계를 위한 실습 가이드}
+\author{보건학 R 시각화 팀}
+\date{2025-11-18}
+
+\begin{document}
+\frontmatter
+\maketitle
+
+\renewcommand*\contentsname{Table of contents}
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\mainmatter
+\bookmarksetup{startatroot}
+
+\chapter{R 기반 보건학
+시각화}\label{r-uxae30uxbc18-uxbcf4uxac74uxd559-uxc2dcuxac01uxd654}
+
+역학 및 임상통계를 위한 실습 가이드
+
+\hfill\break
+
+\bookmarksetup{startatroot}
+
+\chapter*{환영합니다!}\label{uxd658uxc601uxd569uxb2c8uxb2e4}
+\addcontentsline{toc}{chapter}{환영합니다!}
+
+\markboth{환영합니다!}{환영합니다!}
+
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, leftrule=.75mm, rightrule=.15mm, toprule=.15mm, left=2mm, colback=white, arc=.35mm, breakable, bottomrule=.15mm, opacityback=0]
+\begin{minipage}[t]{5.5mm}
+\textcolor{quarto-callout-note-color}{\faInfo}
+\end{minipage}%
+\begin{minipage}[t]{\textwidth - 5.5mm}
+
+\vspace{-3mm}\textbf{이 책에 대하여}\vspace{3mm}
+
+이 책은 \textbf{보건학, 역학, 임상 통계} 분야의 대학원생과 전문가를 위한
+R 시각화 실습 가이드입니다. ggplot2의 ``그래픽 문법(Grammar of
+Graphics)''을 기반으로, 데이터 탐색부터 학술지 출판, 대화형 대시보드
+구축까지 전 과정을 다룹니다.
+
+\end{minipage}%
+\end{tcolorbox}
+
+\section{📚 학습 목표}\label{uxd559uxc2b5-uxbaa9uxd45c}
+
+이 책을 완료하면 다음을 할 수 있습니다:
+
+✅ ggplot2의 7가지 핵심 구성 요소를 이해하고 활용 ✅ 역학 데이터(유행
+곡선, 연령 표준화 비율)를 올바르게 시각화 ✅ 공간 역학 데이터를 지도로
+표현 (코로플레스 맵) ✅ 생존 분석과 메타 분석 결과를 전문적으로 시각화
+✅ 학술지 출판 품질의 Figure를 제작 ✅ Shiny를 활용한 공중 보건 대시보드
+구축
+
+\section{🎯 대상 독자}\label{uxb300uxc0c1-uxb3c5uxc790}
+
+\begin{itemize}
+\tightlist
+\item
+  보건학, 역학, 임상통계 전공 \textbf{대학원생}
+\item
+  R을 처음 배우거나 시각화를 체계적으로 배우고 싶은 \textbf{연구자}
+\item
+  논문 작성을 위해 고품질 그래프가 필요한 \textbf{보건의료 전문가}
+\item
+  공중 보건 데이터를 대시보드로 만들고 싶은 \textbf{실무자}
+\end{itemize}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{사전 요구사항}, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-warning-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  R 기본 문법 이해 (변수, 함수, 데이터프레임)
+\item
+  RStudio 사용 경험 권장
+\item
+  통계학 기초 (평균, 표준편차, 신뢰구간)
+\end{itemize}
+
+R을 처음 접하신다면 \href{https://r4ds.hadley.nz/}{R for Data Science}
+1-5장을 먼저 읽어보시기를 권장합니다.
+
+\end{tcolorbox}
+
+\section{📖 책의 구성}\label{uxcc45uxc758-uxad6cuxc131}
+
+이 책은 \textbf{4개 파트 8개 챕터}로 구성되어 있습니다:
+
+\subsection{Part I: 기초편}\label{part-i-uxae30uxcd08uxd3b8}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Chapter 1}: R과 ggplot2 시작하기
+\item
+  \textbf{Chapter 2}: ggplot2 완벽 마스터 - 그래픽 문법의 7가지 구성
+  요소
+\end{itemize}
+
+\subsection{Part II: 역학편}\label{part-ii-uxc5eduxd559uxd3b8}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Chapter 3}: 역학 데이터 시각화 - 발병률, 유행곡선, 표준화
+\item
+  \textbf{Chapter 4}: 공간 역학 - GIS와 지도 제작
+\end{itemize}
+
+\subsection{Part III:
+임상통계편}\label{part-iii-uxc784uxc0c1uxd1b5uxacc4uxd3b8}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Chapter 5}: 생존 분석과 메타 분석 시각화
+\item
+  \textbf{Chapter 6}: 출판 품질 그래프 제작 전략
+\end{itemize}
+
+\subsection{Part IV: 고급편}\label{part-iv-uxace0uxae09uxd3b8}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Chapter 7}: 대화형 시각화와 Shiny 대시보드
+\item
+  \textbf{Chapter 8}: 효과적인 데이터 커뮤니케이션을 위한 제언
+\end{itemize}
+
+\section{💻 실습 환경
+준비}\label{uxc2e4uxc2b5-uxd658uxacbd-uxc900uxbe44}
+
+\subsection{1. R과 RStudio 설치}\label{ruxacfc-rstudio-uxc124uxce58}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# R 다운로드: https://cran.r{-}project.org/}
+\CommentTok{\# RStudio 다운로드: https://posit.co/download/rstudio{-}desktop/}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{권장 버전:}
+
+\begin{itemize}
+\tightlist
+\item
+  R ≥ 4.3.0
+\item
+  RStudio ≥ 2023.06.0
+\end{itemize}
+
+\subsection{2. 필수 패키지
+설치}\label{uxd544uxc218-uxd328uxd0a4uxc9c0-uxc124uxce58}
+
+모든 필요한 패키지는 \texttt{code/setup.R}에서 자동으로 설치됩니다:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 프로젝트 루트에서 실행}
+\FunctionTok{source}\NormalTok{(}\StringTok{"code/setup.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+주요 패키지:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Core}: \texttt{tidyverse}, \texttt{here}, \texttt{ggplot2}
+\item
+  \textbf{Epidemiology}: \texttt{incidence2}, \texttt{surveil}
+\item
+  \textbf{Spatial}: \texttt{sf}, \texttt{tmap}
+\item
+  \textbf{Clinical}: \texttt{survival}, \texttt{ggsurvfit},
+  \texttt{metafor}
+\item
+  \textbf{Interactive}: \texttt{plotly}, \texttt{shiny}
+\item
+  \textbf{Publication}: \texttt{patchwork}, \texttt{ggrepel},
+  \texttt{ggpubr}
+\end{itemize}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{패키지 설치 시간}, colbacktitle=quarto-callout-tip-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-tip-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+처음 실행 시 모든 패키지를 설치하는 데 \textbf{10-20분} 정도 소요됩니다.
+인터넷 연결을 확인하고 충분한 시간을 두고 실행하세요.
+
+\end{tcolorbox}
+
+\subsection{3. 실습 데이터
+준비}\label{uxc2e4uxc2b5-uxb370uxc774uxd130-uxc900uxbe44}
+
+\subsubsection{방법 1: 시뮬레이션 데이터 생성
+(권장)}\label{uxbc29uxbc95-1-uxc2dcuxbbacuxb808uxc774uxc158-uxb370uxc774uxd130-uxc0dduxc131-uxad8cuxc7a5}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 실습용 데이터 자동 생성}
+\FunctionTok{source}\NormalTok{(}\StringTok{"code/data{-}simulation.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+다음 파일이 \texttt{data/processed/}에 생성됩니다:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{health\_survey.csv} - 건강검진 데이터 (N=1,000)
+\item
+  \texttt{disease\_incidence.csv} - 월별 질병 발생률
+\item
+  \texttt{regional\_disease.csv} - 시도별 질병 데이터
+\item
+  \texttt{clinical\_trial.csv} - 임상시험 데이터
+\item
+  \texttt{meta\_analysis.csv} - 메타분석 데이터
+\item
+  \texttt{covid\_timeseries.csv} - COVID-19 유사 시계열
+\end{itemize}
+
+\subsubsection{방법 2: 패키지 내장 데이터
+사용}\label{uxbc29uxbc95-2-uxd328uxd0a4uxc9c0-uxb0b4uxc7a5-uxb370uxc774uxd130-uxc0acuxc6a9}
+
+별도 파일 없이 R 패키지에 내장된 데이터를 직접 사용합니다:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 예시}
+\FunctionTok{data}\NormalTok{(mtcars)      }\CommentTok{\# 기본 R}
+\FunctionTok{data}\NormalTok{(iris)        }\CommentTok{\# 기본 R}
+\FunctionTok{library}\NormalTok{(survival)}
+\FunctionTok{data}\NormalTok{(lung)        }\CommentTok{\# 생존 분석}
+
+\FunctionTok{library}\NormalTok{(outbreaks)}
+\FunctionTok{data}\NormalTok{(ebola\_sim)   }\CommentTok{\# 에볼라 유행 데이터}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{데이터 전략}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+이 책의 모든 실습은 \textbf{재현 가능성}을 최우선으로 합니다:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  ✅ \textbf{패키지 내장 데이터} 우선 사용
+\item
+  ✅ \textbf{시뮬레이션 데이터} (재현 가능한 \texttt{set.seed()})
+\item
+  ❌ 외부 다운로드 최소화 (Shapefile만 예외)
+\end{enumerate}
+
+따라서 인터넷이 없는 환경에서도 대부분의 실습이 가능합니다.
+
+\end{tcolorbox}
+
+\section{🗺️ 학습 로드맵}\label{uxd559uxc2b5-uxb85cuxb4dcuxb9f5}
+
+\subsection{초보자 (R 처음
+시작)}\label{uxcd08uxbcf4uxc790-r-uxcc98uxc74c-uxc2dcuxc791}
+
+\begin{verbatim}
+Ch 1 → Ch 2 (꼼꼼히) → Ch 3 (일부) → Ch 6 (기본)
+\end{verbatim}
+
+\subsection{중급자 (R 사용 경험
+있음)}\label{uxc911uxae09uxc790-r-uxc0acuxc6a9-uxacbduxd5d8-uxc788uxc74c}
+
+\begin{verbatim}
+Ch 2 (복습) → Ch 3-4 (본인 분야) → Ch 5-6 → Ch 7
+\end{verbatim}
+
+\subsection{고급자 (논문/프로젝트
+목적)}\label{uxace0uxae09uxc790-uxb17cuxbb38uxd504uxb85cuxc81duxd2b8-uxbaa9uxc801}
+
+\begin{verbatim}
+Ch 3-5 (필요 챕터) → Ch 6 (출판 전략) → Ch 7 (대시보드)
+\end{verbatim}
+
+\section{📊 실습 코드
+사용법}\label{uxc2e4uxc2b5-uxcf54uxb4dc-uxc0acuxc6a9uxbc95}
+
+\subsection{코드 블록
+종류}\label{uxcf54uxb4dc-uxbe14uxb85d-uxc885uxb958}
+
+\subsubsection{✍️ 직접 실행할
+코드}\label{uxc9c1uxc811-uxc2e4uxd589uxd560-uxcf54uxb4dc}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 여러분이 직접 RStudio에서 실행하세요}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{ggplot}\NormalTok{(mtcars, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ wt, }\AttributeTok{y =}\NormalTok{ mpg)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{📺 결과가 함께 표시되는
+코드}\label{uxacb0uxacfcuxac00-uxd568uxaed8-uxd45cuxc2dcuxb418uxb294-uxcf54uxb4dc}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 이 책에서 실행 결과까지 보여줍니다}
+\FunctionTok{summary}\NormalTok{(mtcars}\SpecialCharTok{$}\NormalTok{mpg)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>   10.40   15.43   19.20   20.09   22.80   33.90
+\end{verbatim}
+
+\subsubsection{💡 연습문제}\label{uxc5f0uxc2b5uxbb38uxc81c}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title={✏️ Exercise 1}, colbacktitle=quarto-callout-tip-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-tip-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\texttt{iris} 데이터로 꽃잎 길이(Petal.Length)와 너비(Petal.Width)의
+산점도를 그려보세요.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{ggplot}\NormalTok{(iris, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Petal.Length, }\AttributeTok{y =}\NormalTok{ Petal.Width, }\AttributeTok{color =}\NormalTok{ Species)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\end{tcolorbox}
+
+\section{🆘 도움이 필요할
+때}\label{uxb3c4uxc6c0uxc774-uxd544uxc694uxd560-uxb54c}
+
+\subsection{R 관련 질문}\label{r-uxad00uxb828-uxc9c8uxbb38}
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://stackoverflow.com/questions/tagged/r}{Stack Overflow (R
+  tag)}
+\item
+  \href{https://community.rstudio.com/}{RStudio Community}
+\item
+  \href{https://www.rfordatasci.com/}{R for Data Science Community}
+\end{itemize}
+
+\subsection{ggplot2 관련}\label{ggplot2-uxad00uxb828}
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://ggplot2.tidyverse.org/}{공식 문서}
+\item
+  \href{https://r-graph-gallery.com/}{R Graph Gallery}
+\item
+  \href{https://ggplot2-book.org/}{ggplot2 Book}
+\end{itemize}
+
+\subsection{역학/보건학
+특화}\label{uxc5eduxd559uxbcf4uxac74uxd559-uxd2b9uxd654}
+
+\begin{itemize}
+\tightlist
+\item
+  \href{https://epirhandbook.com/}{Epi R Handbook}
+\item
+  \href{https://www.appliedepi.org/}{Applied Epi Community}
+\end{itemize}
+
+\section{📝 이 책을 인용하는
+방법}\label{uxc774-uxcc45uxc744-uxc778uxc6a9uxd558uxb294-uxbc29uxbc95}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\VariableTok{@book}\NormalTok{\{}\OtherTok{rvis2024}\NormalTok{,}
+  \DataTypeTok{title}\NormalTok{ = \{R 기반 보건학 시각화: 역학 및 임상통계를 위한 실습 가이드\},}
+  \DataTypeTok{author}\NormalTok{ = \{보건학 R 시각화 팀\},}
+  \DataTypeTok{year}\NormalTok{ = \{2024\},}
+  \DataTypeTok{url}\NormalTok{ = \{https://your{-}url.com\},}
+  \DataTypeTok{note}\NormalTok{ = \{Accessed: 2024{-}11{-}18\}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{🤝 기여하기}\label{uxae30uxc5ecuxd558uxae30}
+
+이 책은 오픈 소스 프로젝트입니다. 오탈자, 코드 오류, 개선 제안은 언제든
+환영합니다!
+
+\begin{itemize}
+\tightlist
+\item
+  GitHub 이슈: \href{https://github.com}{github.com/your-repo/issues}
+\item
+  이메일: your-email@example.com
+\end{itemize}
+
+\section{📜 라이선스}\label{uxb77cuxc774uxc120uxc2a4}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{텍스트 및 코드}:
+  \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{CC BY-NC-SA
+  4.0}
+\item
+  \textbf{데이터}: CC0 (Public Domain)
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-important-color}{\faExclamation}\hspace{0.5em}{준비되셨나요?}, colbacktitle=quarto-callout-important-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-important-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+모든 준비가 끝났다면, \href{chapters/01-introduction.qmd}{Chapter 1: R과
+ggplot2 시작하기}로 이동하세요! 🚀
+
+\end{tcolorbox}
+
+\part{기초편}
+
+\chapter{R과 ggplot2
+시작하기}\label{ruxacfc-ggplot2-uxc2dcuxc791uxd558uxae30}
+
+\chapter{R과 ggplot2
+시작하기}\label{ruxacfc-ggplot2-uxc2dcuxc791uxd558uxae30-1}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{학습 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+이 챕터를 마치면 다음을 할 수 있습니다:
+
+\begin{itemize}
+\tightlist
+\item
+  R과 RStudio 환경을 이해하고 기본 조작
+\item
+  ggplot2 패키지의 철학과 장점 설명
+\item
+  첫 번째 ggplot 그래프 생성
+\item
+  R 프로젝트 구조 이해
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{1.1 왜 R인가?}\label{uxc65c-ruxc778uxac00}
+
+\subsection{1.1.1 보건학 연구에서 R의
+위치}\label{uxbcf4uxac74uxd559-uxc5f0uxad6cuxc5d0uxc11c-ruxc758-uxc704uxce58}
+
+(내용 추가 예정)
+
+\subsection{1.1.2 R vs.~다른 통계
+소프트웨어}\label{r-vs.-uxb2e4uxb978-uxd1b5uxacc4-uxc18cuxd504uxd2b8uxc6e8uxc5b4}
+
+(내용 추가 예정)
+
+\section{1.2 개발 환경
+설정}\label{uxac1cuxbc1c-uxd658uxacbd-uxc124uxc815}
+
+\subsection{1.2.1 R 설치}\label{r-uxc124uxce58}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# R 버전 확인}
+\NormalTok{R.version.string}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{1.2.2 RStudio
+인터페이스}\label{rstudio-uxc778uxd130uxd398uxc774uxc2a4}
+
+(내용 추가 예정)
+
+\subsection{1.2.3 패키지 설치}\label{uxd328uxd0a4uxc9c0-uxc124uxce58}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 프로젝트 패키지 일괄 설치}
+\FunctionTok{source}\NormalTok{(}\StringTok{"code/setup.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{1.3 R 기초 복습}\label{r-uxae30uxcd08-uxbcf5uxc2b5}
+
+\subsection{1.3.1 데이터 타입}\label{uxb370uxc774uxd130-uxd0c0uxc785}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 벡터}
+\NormalTok{ages }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{25}\NormalTok{, }\DecValTok{30}\NormalTok{, }\DecValTok{35}\NormalTok{, }\DecValTok{40}\NormalTok{, }\DecValTok{45}\NormalTok{)}
+\NormalTok{names }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Alice"}\NormalTok{, }\StringTok{"Bob"}\NormalTok{, }\StringTok{"Charlie"}\NormalTok{, }\StringTok{"David"}\NormalTok{, }\StringTok{"Eve"}\NormalTok{)}
+
+\CommentTok{\# 데이터프레임}
+\NormalTok{patients }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{name =}\NormalTok{ names,}
+  \AttributeTok{age =}\NormalTok{ ages,}
+  \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}
+\NormalTok{)}
+
+\NormalTok{patients}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{1.3.2 tidyverse 소개}\label{tidyverse-uxc18cuxac1c}
+
+(내용 추가 예정)
+
+\section{1.4 ggplot2: 그래픽
+문법}\label{ggplot2-uxadf8uxb798uxd53d-uxbb38uxbc95}
+
+\subsection{1.4.1 왜 ggplot2인가?}\label{uxc65c-ggplot2uxc778uxac00}
+
+(내용 추가 예정)
+
+\subsection{1.4.2 첫 번째 플롯}\label{uxccab-uxbc88uxc9f8-uxd50cuxb86f}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+
+\CommentTok{\# mtcars 데이터로 산점도 그리기}
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ mtcars, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ wt, }\AttributeTok{y =}\NormalTok{ mpg)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"자동차 무게와 연비의 관계"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"무게 (1000 lbs)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"연비 (mpg)"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{1.4.3 코드
+분해하기}\label{uxcf54uxb4dc-uxbd84uxd574uxd558uxae30}
+
+(내용 추가 예정)
+
+\section{1.5 프로젝트 구조}\label{uxd504uxb85cuxc81duxd2b8-uxad6cuxc870}
+
+\subsection{1.5.1 R 프로젝트
+(.Rproj)}\label{r-uxd504uxb85cuxc81duxd2b8-.rproj}
+
+(내용 추가 예정)
+
+\subsection{1.5.2 here 패키지로 경로
+관리}\label{here-uxd328uxd0a4uxc9c0uxb85c-uxacbduxb85c-uxad00uxb9ac}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(here)}
+
+\CommentTok{\# 프로젝트 루트 기준 경로}
+\NormalTok{data\_path }\OtherTok{\textless{}{-}} \FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"processed"}\NormalTok{, }\StringTok{"health\_survey.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{1.6 실습 1: 기본 그래프
+만들기}\label{uxc2e4uxc2b5-1-uxae30uxbcf8-uxadf8uxb798uxd504-uxb9ccuxb4e4uxae30}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title={✏️ Exercise 1.1}, colbacktitle=quarto-callout-tip-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-tip-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\texttt{iris} 데이터를 사용하여 꽃받침 길이(Sepal.Length)와
+너비(Sepal.Width)의 산점도를 그려보세요.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+
+\FunctionTok{ggplot}\NormalTok{(iris, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Sepal.Length, }\AttributeTok{y =}\NormalTok{ Sepal.Width)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"붓꽃 꽃받침 크기"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"길이 (cm)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"너비 (cm)"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\end{tcolorbox}
+
+\section{요약}\label{uxc694uxc57d}
+
+이 챕터에서 배운 내용:
+
+\begin{itemize}
+\tightlist
+\item
+  ✅ R과 RStudio 환경 설정
+\item
+  ✅ ggplot2의 기본 철학
+\item
+  ✅ 첫 번째 그래프 생성
+\item
+  ✅ 프로젝트 구조 이해
+\end{itemize}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-important-color}{\faExclamation}\hspace{0.5em}{다음 챕터}, colbacktitle=quarto-callout-important-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-important-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\href{02-ggplot2-basics.qmd}{Chapter 2: ggplot2 완벽 마스터하기}에서
+그래픽 문법의 7가지 구성 요소를 깊이 있게 배웁니다.
+
+\end{tcolorbox}
+
+\chapter{ggplot2 완벽
+마스터하기}\label{ggplot2-uxc644uxbcbd-uxb9c8uxc2a4uxd130uxd558uxae30}
+
+\chapter{ggplot2 완벽
+마스터하기}\label{ggplot2-uxc644uxbcbd-uxb9c8uxc2a4uxd130uxd558uxae30-1}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{학습 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  그래픽 문법(Grammar of Graphics)의 7가지 구성 요소 이해
+\item
+  aes() 함수를 활용한 변수 매핑
+\item
+  다양한 geom\_*() 함수로 그래프 유형 변경
+\item
+  facet으로 층화 분석 시각화
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{2.1 그래픽 문법의 7가지 구성
+요소}\label{uxadf8uxb798uxd53d-uxbb38uxbc95uxc758-7uxac00uxc9c0-uxad6cuxc131-uxc694uxc18c}
+
+(내용 추가 예정 - PDF 페이지 4-5 내용)
+
+\subsection{2.1.1 데이터 (Data)}\label{uxb370uxc774uxd130-data}
+
+\subsection{2.1.2 미학 매핑 (Aesthetic
+Mappings)}\label{uxbbf8uxd559-uxb9e4uxd551-aesthetic-mappings}
+
+\subsection{2.1.3 지오메트리
+(Geometries)}\label{uxc9c0uxc624uxba54uxd2b8uxb9ac-geometries}
+
+\subsection{2.1.4 통계 변환 (Statistical
+Transformations)}\label{uxd1b5uxacc4-uxbcc0uxd658-statistical-transformations}
+
+\subsection{2.1.5 스케일 (Scales)}\label{uxc2a4uxcf00uxc77c-scales}
+
+\subsection{2.1.6 좌표계 (Coordinate
+System)}\label{uxc88cuxd45cuxacc4-coordinate-system}
+
+\subsection{2.1.7 패싯 (Faceting)}\label{uxd328uxc2ef-faceting}
+
+\section{2.2 aes() 함수 완전
+정복}\label{aes-uxd568uxc218-uxc644uxc804-uxc815uxbcf5}
+
+(내용 추가 예정 - PDF 페이지 4-5)
+
+\section{2.3 기술 통계
+시각화}\label{uxae30uxc220-uxd1b5uxacc4-uxc2dcuxac01uxd654}
+
+(내용 추가 예정 - PDF 페이지 5-6)
+
+\subsection{2.3.1 히스토그램
+(geom\_histogram)}\label{uxd788uxc2a4uxd1a0uxadf8uxb7a8-geom_histogram}
+
+\subsection{2.3.2 막대 그래프
+(geom\_bar)}\label{uxb9c9uxb300-uxadf8uxb798uxd504-geom_bar}
+
+\subsection{2.3.3 박스플롯
+(geom\_boxplot)}\label{uxbc15uxc2a4uxd50cuxb86f-geom_boxplot}
+
+\subsection{2.3.4 산점도
+(geom\_point)}\label{uxc0b0uxc810uxb3c4-geom_point}
+
+\section{2.4 층화(Stratification)와 역학적
+사고}\label{uxce35uxd654stratificationuxc640-uxc5eduxd559uxc801-uxc0acuxace0}
+
+(내용 추가 예정 - PDF 페이지 6)
+
+\section{2.5 실습: 건강검진 데이터
+분석}\label{uxc2e4uxc2b5-uxac74uxac15uxac80uxc9c4-uxb370uxc774uxd130-uxbd84uxc11d}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+
+\CommentTok{\# 시뮬레이션 데이터 로드}
+\NormalTok{health\_survey }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"processed"}\NormalTok{, }\StringTok{"health\_survey.csv"}\NormalTok{))}
+
+\CommentTok{\# 데이터 구조 확인}
+\FunctionTok{glimpse}\NormalTok{(health\_survey)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{요약}\label{uxc694uxc57d-1}
+
+(내용 추가 예정)
+
+\part{역학편}
+
+\chapter{역학 데이터
+시각화}\label{uxc5eduxd559-uxb370uxc774uxd130-uxc2dcuxac01uxd654}
+
+\chapter{역학 데이터 시각화의 핵심
+기법}\label{uxc5eduxd559-uxb370uxc774uxd130-uxc2dcuxac01uxd654uxc758-uxd575uxc2ec-uxae30uxbc95}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{학습 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  발병률/유병률 시계열 추세 시각화
+\item
+  incidence2 패키지로 유행 곡선(Epicurve) 작성
+\item
+  연령 표준화 비율의 개념과 시각화
+\item
+  불확실성(신뢰구간) 표현
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{3.1 발병률 및 유병률
+추세}\label{uxbc1cuxbcd1uxb960-uxbc0f-uxc720uxbcd1uxb960-uxcd94uxc138}
+
+(내용 추가 예정 - PDF 페이지 7)
+
+\subsection{3.1.1 시계열
+추세선}\label{uxc2dcuxacc4uxc5f4-uxcd94uxc138uxc120}
+
+\subsection{3.1.2 누적 발병률}\label{uxb204uxc801-uxbc1cuxbcd1uxb960}
+
+\subsection{3.1.3 불확실성
+표현}\label{uxbd88uxd655uxc2e4uxc131-uxd45cuxd604}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+
+\NormalTok{disease\_incidence }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}
+\NormalTok{  here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"processed"}\NormalTok{, }\StringTok{"disease\_incidence.csv"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# 시계열 플롯 with 95\% CI}
+\FunctionTok{ggplot}\NormalTok{(disease\_incidence, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ date, }\AttributeTok{y =}\NormalTok{ rate)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{color =} \StringTok{"blue"}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{color =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_ribbon}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{ymin =}\NormalTok{ lower\_ci, }\AttributeTok{ymax =}\NormalTok{ upper\_ci),}
+              \AttributeTok{alpha =} \FloatTok{0.2}\NormalTok{, }\AttributeTok{fill =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Annual Incidence Rate (with 95\% CI)"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Incidence Rate per 100,000"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\section{3.2 감염병 유행 곡선
+(Epicurve)}\label{uxac10uxc5fcuxbcd1-uxc720uxd589-uxace1uxc120-epicurve}
+
+(내용 추가 예정 - PDF 페이지 7-9)
+
+\subsection{3.2.1 왜 incidence2
+패키지인가?}\label{uxc65c-incidence2-uxd328uxd0a4uxc9c0uxc778uxac00}
+
+\subsection{3.2.2 incidence2
+워크플로우}\label{incidence2-uxc6ccuxd06cuxd50cuxb85cuxc6b0}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(incidence2)}
+\FunctionTok{library}\NormalTok{(outbreaks)}
+
+\CommentTok{\# 에볼라 유행 데이터}
+\NormalTok{linelist }\OtherTok{\textless{}{-}}\NormalTok{ outbreaks}\SpecialCharTok{::}\NormalTok{ebola\_sim}\SpecialCharTok{$}\NormalTok{linelist}
+
+\CommentTok{\# incidence 객체 생성}
+\NormalTok{inc\_daily }\OtherTok{\textless{}{-}} \FunctionTok{incidence}\NormalTok{(}
+\NormalTok{  linelist,}
+  \AttributeTok{date\_index =} \StringTok{"date\_of\_onset"}\NormalTok{,}
+  \AttributeTok{interval =} \StringTok{"day"}
+\NormalTok{)}
+
+\CommentTok{\# 유행 곡선 플로팅}
+\FunctionTok{plot}\NormalTok{(inc\_daily) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Ebola Outbreak Epicurve (Daily)"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Date"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Daily Cases"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\section{3.3 연령 표준화
+비율}\label{uxc5f0uxb839-uxd45cuxc900uxd654-uxbe44uxc728}
+
+(내용 추가 예정 - PDF 페이지 9-11)
+
+\subsection{3.3.1 개념과
+필요성}\label{uxac1cuxb150uxacfc-uxd544uxc694uxc131}
+
+\subsection{3.3.2 surveil 패키지
+활용}\label{surveil-uxd328uxd0a4uxc9c0-uxd65cuxc6a9}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(surveil)}
+
+\CommentTok{\# 예제 데이터}
+\FunctionTok{data}\NormalTok{(cancer, }\AttributeTok{package =} \StringTok{"surveil"}\NormalTok{)}
+\FunctionTok{data}\NormalTok{(standard, }\AttributeTok{package =} \StringTok{"surveil"}\NormalTok{)}
+
+\CommentTok{\# 연령{-}표준화 비율 계산 및 시각화}
+\CommentTok{\# (실제 코드는 챕터에서 상세히)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{요약}\label{uxc694uxc57d-2}
+
+(내용 추가 예정)
+
+\chapter{공간 역학 데이터
+시각화}\label{uxacf5uxac04-uxc5eduxd559-uxb370uxc774uxd130-uxc2dcuxac01uxd654}
+
+\chapter{공간 역학 데이터
+시각화}\label{uxacf5uxac04-uxc5eduxd559-uxb370uxc774uxd130-uxc2dcuxac01uxd654-1}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{학습 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  sf 패키지로 공간 데이터 처리
+\item
+  역학 데이터와 지리 데이터 결합
+\item
+  ggplot2와 tmap으로 코로플레스 맵 제작
+\item
+  공간 패턴 해석
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{4.1 R 공간 데이터 처리의 혁명:
+sf}\label{r-uxacf5uxac04-uxb370uxc774uxd130-uxcc98uxb9acuxc758-uxd601uxba85-sf}
+
+(내용 추가 예정 - PDF 페이지 11-12)
+
+\subsection{4.1.1 Simple Features란?}\label{simple-featuresuxb780}
+
+\subsection{4.1.2 sf 객체 구조}\label{sf-uxac1duxccb4-uxad6cuxc870}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(sf)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+
+\CommentTok{\# Shapefile 읽기 (예시)}
+\CommentTok{\# korea\_map \textless{}{-} st\_read("data/external/sig.shp")}
+
+\CommentTok{\# 구조 확인}
+\CommentTok{\# glimpse(korea\_map)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{4.2 코로플레스 맵 (Choropleth
+Map)}\label{uxcf54uxb85cuxd50cuxb808uxc2a4-uxb9f5-choropleth-map}
+
+(내용 추가 예정 - PDF 페이지 12-13)
+
+\subsection{4.2.1 데이터 준비}\label{uxb370uxc774uxd130-uxc900uxbe44}
+
+\subsection{4.2.2 데이터 결합}\label{uxb370uxc774uxd130-uxacb0uxd569}
+
+\subsection{4.2.3 ggplot2로
+시각화}\label{ggplot2uxb85c-uxc2dcuxac01uxd654}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 지역별 질병 데이터}
+\NormalTok{regional\_disease }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}
+\NormalTok{  here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"processed"}\NormalTok{, }\StringTok{"regional\_disease.csv"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# 공간 데이터와 결합}
+\CommentTok{\# combined\_sf \textless{}{-} left\_join(korea\_map, regional\_disease, by = "region")}
+
+\CommentTok{\# 코로플레스 맵}
+\CommentTok{\# ggplot(data = combined\_sf) +}
+\CommentTok{\#   geom\_sf(aes(fill = incidence\_rate)) +}
+\CommentTok{\#   scale\_fill\_viridis\_c() +}
+\CommentTok{\#   theme\_minimal()}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{4.2.4 tmap으로
+시각화}\label{tmapuxc73cuxb85c-uxc2dcuxac01uxd654}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmap)}
+
+\CommentTok{\# tm\_shape(combined\_sf) +}
+\CommentTok{\#   tm\_fill("incidence\_rate",}
+\CommentTok{\#           style = "quantile",}
+\CommentTok{\#           palette = "Blues",}
+\CommentTok{\#           title = "Incidence Rate") +}
+\CommentTok{\#   tm\_borders(col = "grey50") +}
+\CommentTok{\#   tm\_layout(main.title = "Regional Disease Incidence")}
+\end{Highlighting}
+\end{Shaded}
+
+\section{4.3 ggplot2 vs tmap: 전략적
+선택}\label{ggplot2-vs-tmap-uxc804uxb7b5uxc801-uxc120uxd0dd}
+
+(내용 추가 예정 - PDF 페이지 13)
+
+\section{요약}\label{uxc694uxc57d-3}
+
+(내용 추가 예정)
+
+\part{임상통계편}
+
+\chapter{임상 통계
+시각화}\label{uxc784uxc0c1-uxd1b5uxacc4-uxc2dcuxac01uxd654}
+
+\chapter{임상 통계 및 분석 역학
+시각화}\label{uxc784uxc0c1-uxd1b5uxacc4-uxbc0f-uxbd84uxc11d-uxc5eduxd559-uxc2dcuxac01uxd654}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{학습 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  ggsurvfit로 생존 곡선과 위험 테이블 제작
+\item
+  metafor로 메타 분석 및 포레스트 플롯
+\item
+  오차 막대의 올바른 사용 (SE vs CI)
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{5.1 생존 분석:
+ggsurvfit}\label{uxc0dduxc874-uxbd84uxc11d-ggsurvfit}
+
+(내용 추가 예정 - PDF 페이지 14-15)
+
+\subsection{5.1.1 Kaplan-Meier 곡선의
+중요성}\label{kaplan-meier-uxace1uxc120uxc758-uxc911uxc694uxc131}
+
+\subsection{5.1.2 ggsurvfit
+워크플로우}\label{ggsurvfit-uxc6ccuxd06cuxd50cuxb85cuxc6b0}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggsurvfit)}
+\FunctionTok{library}\NormalTok{(survival)}
+
+\CommentTok{\# survival 패키지의 lung 데이터}
+\NormalTok{fit }\OtherTok{\textless{}{-}} \FunctionTok{survfit2}\NormalTok{(}\FunctionTok{Surv}\NormalTok{(time, status) }\SpecialCharTok{\textasciitilde{}}\NormalTok{ sex, }\AttributeTok{data =}\NormalTok{ lung)}
+
+\CommentTok{\# 생존 곡선 + 위험 테이블}
+\NormalTok{fit }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{ggsurvfit}\NormalTok{(}\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{x =} \StringTok{"Days"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Overall survival probability"}\NormalTok{,}
+    \AttributeTok{title =} \StringTok{"Kaplan{-}Meier Survival Plot by Sex"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{add\_confidence\_interval}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{add\_risktable}\NormalTok{(}
+    \AttributeTok{risktable\_stats =} \StringTok{"n.risk"}\NormalTok{,}
+    \AttributeTok{title =} \StringTok{"Number at Risk"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{scale\_ggsurvfit}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\section{5.2 메타 분석:
+metafor}\label{uxba54uxd0c0-uxbd84uxc11d-metafor}
+
+(내용 추가 예정 - PDF 페이지 15-16)
+
+\subsection{5.2.1 메타 분석의
+의의}\label{uxba54uxd0c0-uxbd84uxc11duxc758-uxc758uxc758}
+
+\subsection{5.2.2 포레스트 플롯 (Forest
+Plot)}\label{uxd3ecuxb808uxc2a4uxd2b8-uxd50cuxb86f-forest-plot}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(metafor)}
+
+\CommentTok{\# BCG 백신 메타 분석 예제}
+\NormalTok{dat }\OtherTok{\textless{}{-}} \FunctionTok{escalc}\NormalTok{(}
+  \AttributeTok{measure =} \StringTok{"RR"}\NormalTok{,}
+  \AttributeTok{ai =}\NormalTok{ tpos, }\AttributeTok{bi =}\NormalTok{ tneg,}
+  \AttributeTok{ci =}\NormalTok{ cpos, }\AttributeTok{di =}\NormalTok{ cneg,}
+  \AttributeTok{data =}\NormalTok{ dat.bcg,}
+  \AttributeTok{slab =} \FunctionTok{paste}\NormalTok{(author, year, }\AttributeTok{sep =} \StringTok{", "}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# 랜덤 효과 모델}
+\NormalTok{res }\OtherTok{\textless{}{-}} \FunctionTok{rma}\NormalTok{(yi, vi, }\AttributeTok{data =}\NormalTok{ dat)}
+
+\CommentTok{\# 포레스트 플롯}
+\FunctionTok{forest}\NormalTok{(res,}
+       \AttributeTok{atransf =}\NormalTok{ exp,}
+       \AttributeTok{at =} \FunctionTok{log}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FloatTok{0.05}\NormalTok{, }\FloatTok{0.25}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{4}\NormalTok{)),}
+       \AttributeTok{header =} \StringTok{"Author(s) and Year"}\NormalTok{,}
+       \AttributeTok{xlab =} \StringTok{"Risk Ratio (95\% CI)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{5.3 임상시험 결과
+시각화}\label{uxc784uxc0c1uxc2dcuxd5d8-uxacb0uxacfc-uxc2dcuxac01uxd654}
+
+(내용 추가 예정 - PDF 페이지 16-17)
+
+\subsection{5.3.1 geom\_errorbar의 올바른
+사용}\label{geom_errorbaruxc758-uxc62cuxbc14uxb978-uxc0acuxc6a9}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{⚠️ 통계적 책임}, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-warning-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\texttt{geom\_errorbar()}는 통계적 지식이 없습니다. ymin/ymax에 무엇을
+넣을지는 \textbf{분석가의 책임}입니다.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{SE (Standard Error)}: 평균의 정밀도
+\item
+  \textbf{95\% CI (Confidence Interval)}: 모평균에 대한 신뢰
+\end{itemize}
+
+적절한 것을 선택하세요!
+
+\end{tcolorbox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 임상시험 데이터}
+\NormalTok{clinical\_trial }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}
+\NormalTok{  here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"processed"}\NormalTok{, }\StringTok{"clinical\_trial.csv"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# 그룹별 요약}
+\NormalTok{summary\_data }\OtherTok{\textless{}{-}}\NormalTok{ clinical\_trial }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{(treatment) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{summarise}\NormalTok{(}
+    \AttributeTok{mean\_improvement =} \FunctionTok{mean}\NormalTok{(improvement),}
+    \AttributeTok{se =} \FunctionTok{sd}\NormalTok{(improvement) }\SpecialCharTok{/} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{n}\NormalTok{()),}
+    \AttributeTok{ci\_lower =}\NormalTok{ mean\_improvement }\SpecialCharTok{{-}} \FloatTok{1.96} \SpecialCharTok{*}\NormalTok{ se,}
+    \AttributeTok{ci\_upper =}\NormalTok{ mean\_improvement }\SpecialCharTok{+} \FloatTok{1.96} \SpecialCharTok{*}\NormalTok{ se}
+\NormalTok{  )}
+
+\CommentTok{\# 평균 + 95\% CI}
+\FunctionTok{ggplot}\NormalTok{(summary\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ treatment, }\AttributeTok{y =}\NormalTok{ mean\_improvement)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_errorbar}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{ymin =}\NormalTok{ ci\_lower, }\AttributeTok{ymax =}\NormalTok{ ci\_upper), }\AttributeTok{width =} \FloatTok{0.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Treatment Effect with 95\% CI"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Treatment Group"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Mean Improvement"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\section{요약}\label{uxc694uxc57d-4}
+
+(내용 추가 예정)
+
+\chapter{출판용 시각화}\label{uxcd9cuxd310uxc6a9-uxc2dcuxac01uxd654}
+
+\chapter{출판 및 발표를 위한 고급 시각화
+전략}\label{uxcd9cuxd310-uxbc0f-uxbc1cuxd45cuxb97c-uxc704uxd55c-uxace0uxae09-uxc2dcuxac01uxd654-uxc804uxb7b5}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{학습 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  ggrepel로 텍스트 라벨 겹침 방지
+\item
+  patchwork로 다중 패널 Figure 조합
+\item
+  ggthemes와 ggpubr로 학술지 스타일 적용
+\item
+  출판 품질 그래프 체크리스트
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{6.1 가독성 향상:
+ggrepel}\label{uxac00uxb3c5uxc131-uxd5a5uxc0c1-ggrepel}
+
+(내용 추가 예정 - PDF 페이지 18)
+
+\subsection{6.1.1 텍스트 라벨 겹침
+문제}\label{uxd14duxc2a4uxd2b8-uxb77cuxbca8-uxacb9uxce68-uxbb38uxc81c}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggrepel)}
+
+\CommentTok{\# 산점도에 라벨 추가 (겹치지 않게)}
+\FunctionTok{ggplot}\NormalTok{(mtcars, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ wt, }\AttributeTok{y =}\NormalTok{ mpg, }\AttributeTok{label =} \FunctionTok{rownames}\NormalTok{(mtcars))) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{color =} \StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text\_repel}\NormalTok{() }\SpecialCharTok{+}  \CommentTok{\# geom\_text() 대신}
+  \FunctionTok{theme\_classic}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{16}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{6.2 다중 플롯 조합:
+patchwork}\label{uxb2e4uxc911-uxd50cuxb86f-uxc870uxd569-patchwork}
+
+(내용 추가 예정 - PDF 페이지 19)
+
+\subsection{6.2.1 patchwork의 혁신}\label{patchworkuxc758-uxd601uxc2e0}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(patchwork)}
+
+\CommentTok{\# 여러 플롯 생성}
+\NormalTok{p1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(mtcars, }\FunctionTok{aes}\NormalTok{(mpg, disp)) }\SpecialCharTok{+} \FunctionTok{geom\_point}\NormalTok{()}
+\NormalTok{p2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(mtcars, }\FunctionTok{aes}\NormalTok{(gear, disp, }\AttributeTok{group =}\NormalTok{ gear)) }\SpecialCharTok{+} \FunctionTok{geom\_boxplot}\NormalTok{()}
+\NormalTok{p3 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(mtcars, }\FunctionTok{aes}\NormalTok{(disp, qsec)) }\SpecialCharTok{+} \FunctionTok{geom\_smooth}\NormalTok{()}
+
+\CommentTok{\# 조합: (p1과 p2를 나란히) / 그 아래 p3}
+\NormalTok{(p1 }\SpecialCharTok{|}\NormalTok{ p2) }\SpecialCharTok{/}\NormalTok{ p3 }\SpecialCharTok{+}
+  \FunctionTok{plot\_annotation}\NormalTok{(}\AttributeTok{tag\_levels =} \StringTok{\textquotesingle{}A\textquotesingle{}}\NormalTok{)  }\CommentTok{\# A), B), C) 태그}
+\end{Highlighting}
+\end{Shaded}
+
+\section{6.3 학술지 스타일: ggthemes \&
+ggpubr}\label{uxd559uxc220uxc9c0-uxc2a4uxd0c0uxc77c-ggthemes-ggpubr}
+
+(내용 추가 예정 - PDF 페이지 19-21)
+
+\subsection{6.3.1 내장 테마}\label{uxb0b4uxc7a5-uxd14cuxb9c8}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 깔끔한 내장 테마들}
+\NormalTok{p }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{()}
+\NormalTok{p }\SpecialCharTok{+} \FunctionTok{theme\_classic}\NormalTok{()}
+\NormalTok{p }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{6.3.2 ggthemes}\label{ggthemes}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggthemes)}
+
+\NormalTok{p }\SpecialCharTok{+} \FunctionTok{theme\_economist}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{scale\_colour\_economist}\NormalTok{()}
+\NormalTok{p }\SpecialCharTok{+} \FunctionTok{theme\_wsj}\NormalTok{()}
+\NormalTok{p }\SpecialCharTok{+} \FunctionTok{scale\_color\_colorblind}\NormalTok{()  }\CommentTok{\# 색맹 친화적}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{6.3.3 ggpubr: P-값 추가}\label{ggpubr-p-uxac12-uxcd94uxac00}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggpubr)}
+
+\FunctionTok{ggboxplot}\NormalTok{(ToothGrowth, }\AttributeTok{x =} \StringTok{"dose"}\NormalTok{, }\AttributeTok{y =} \StringTok{"len"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"dose"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{stat\_compare\_means}\NormalTok{(}
+    \AttributeTok{comparisons =} \FunctionTok{list}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"0.5"}\NormalTok{, }\StringTok{"1"}\NormalTok{), }\FunctionTok{c}\NormalTok{(}\StringTok{"1"}\NormalTok{, }\StringTok{"2"}\NormalTok{), }\FunctionTok{c}\NormalTok{(}\StringTok{"0.5"}\NormalTok{, }\StringTok{"2"}\NormalTok{)),}
+    \AttributeTok{label =} \StringTok{"p.signif"}  \CommentTok{\# *, **, *** 표시}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{stat\_compare\_means}\NormalTok{(}\AttributeTok{label.y =} \DecValTok{50}\NormalTok{)  }\CommentTok{\# 전체 그룹 비교 p{-}value}
+\end{Highlighting}
+\end{Shaded}
+
+\section{6.4 출판 품질
+체크리스트}\label{uxcd9cuxd310-uxd488uxc9c8-uxccb4uxd06cuxb9acuxc2a4uxd2b8}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{✅ 학술지 제출 전 체크리스트}, colbacktitle=quarto-callout-tip-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-tip-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\textbf{필수 요소:}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  모든 축에 명확한 레이블 + 단위
+\item[$\square$]
+  그림 캡션 (Figure legend)
+\item[$\square$]
+  글꼴 크기 적절 (최소 10pt)
+\item[$\square$]
+  해상도 충분 (≥300 DPI)
+\item[$\square$]
+  색상 색맹 친화적
+\item[$\square$]
+  통계 정보 명시 (SE? CI? P-value?)
+\end{itemize}
+
+\textbf{권장 사항:}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  theme 일관성 유지
+\item[$\square$]
+  범례 위치 최적화
+\item[$\square$]
+  불필요한 격자선 제거
+\item[$\square$]
+  파일 형식: PDF (벡터) 또는 PNG (고해상도)
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{요약}\label{uxc694uxc57d-5}
+
+(내용 추가 예정)
+
+\part{고급편}
+
+\chapter{대화형 시각화}\label{uxb300uxd654uxd615-uxc2dcuxac01uxd654}
+
+\chapter{대화형 시각화 및 공중 보건
+대시보드}\label{uxb300uxd654uxd615-uxc2dcuxac01uxd654-uxbc0f-uxacf5uxc911-uxbcf4uxac74-uxb300uxc2dcuxbcf4uxb4dc}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{학습 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  ggplotly()로 정적 그래프를 동적으로 변환
+\item
+  Shiny의 UI와 Server 구조 이해
+\item
+  반응성(Reactivity) 개념
+\item
+  공중 보건 대시보드 구축
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{7.1 정적 → 동적: plotly와
+ggplotly()}\label{uxc815uxc801-uxb3d9uxc801-plotlyuxc640-ggplotly}
+
+(내용 추가 예정 - PDF 페이지 21-22)
+
+\subsection{7.1.1 plotly의
+강력함}\label{plotlyuxc758-uxac15uxb825uxd568}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(plotly)}
+
+\CommentTok{\# 1. 일반 ggplot 객체 생성}
+\NormalTok{p\_static }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(mtcars, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ wt, }\AttributeTok{y =}\NormalTok{ mpg, }\AttributeTok{color =} \FunctionTok{factor}\NormalTok{(cyl))) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Static ggplot"}\NormalTok{)}
+
+\CommentTok{\# 2. ggplotly()로 변환 (단 한 줄!)}
+\NormalTok{p\_interactive }\OtherTok{\textless{}{-}} \FunctionTok{ggplotly}\NormalTok{(p\_static)}
+
+\CommentTok{\# RStudio Viewer나 RMarkdown HTML에서 실행}
+\NormalTok{p\_interactive}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{💡 투자 대비 수익(ROI) 최고!}, colbacktitle=quarto-callout-tip-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-tip-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+ggplot2 문법을 마스터했다면, \texttt{ggplotly(p)}라는 \textbf{단 한
+줄}로 강력한 인터랙티브 그래프로 변환됩니다!
+
+\begin{itemize}
+\tightlist
+\item
+  ✅ 마우스 오버 → 툴팁 자동
+\item
+  ✅ 확대/축소 가능
+\item
+  ✅ 데이터 탐색 용이
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{7.2 Shiny 대시보드
+구축}\label{shiny-uxb300uxc2dcuxbcf4uxb4dc-uxad6cuxcd95}
+
+(내용 추가 예정 - PDF 페이지 22-24)
+
+\subsection{7.2.1 Shiny의 핵심: UI와
+Server}\label{shinyuxc758-uxd575uxc2ec-uiuxc640-server}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(shiny)}
+
+\CommentTok{\# UI: 사용자가 보는 화면}
+\NormalTok{ui }\OtherTok{\textless{}{-}} \FunctionTok{fluidPage}\NormalTok{(}
+  \FunctionTok{titlePanel}\NormalTok{(}\StringTok{"Public Health Dashboard"}\NormalTok{),}
+
+  \FunctionTok{sidebarLayout}\NormalTok{(}
+    \FunctionTok{sidebarPanel}\NormalTok{(}
+      \FunctionTok{selectInput}\NormalTok{(}\StringTok{"district"}\NormalTok{, }\StringTok{"Select District:"}\NormalTok{,}
+                  \AttributeTok{choices =} \FunctionTok{c}\NormalTok{(}\StringTok{"All"}\NormalTok{, }\StringTok{"District A"}\NormalTok{, }\StringTok{"District B"}\NormalTok{))}
+\NormalTok{    ),}
+
+    \FunctionTok{mainPanel}\NormalTok{(}
+      \FunctionTok{plotOutput}\NormalTok{(}\StringTok{"epicurve"}\NormalTok{)}
+\NormalTok{    )}
+\NormalTok{  )}
+\NormalTok{)}
+
+\CommentTok{\# Server: 실제 연산이 일어나는 곳}
+\NormalTok{server }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(input, output) \{}
+
+  \CommentTok{\# 반응형 플롯}
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{epicurve }\OtherTok{\textless{}{-}} \FunctionTok{renderPlot}\NormalTok{(\{}
+    \CommentTok{\# input$district 값에 따라 자동으로 재실행됨!}
+\NormalTok{    filtered\_data }\OtherTok{\textless{}{-}} \FunctionTok{filter\_by\_district}\NormalTok{(data, input}\SpecialCharTok{$}\NormalTok{district)}
+
+    \FunctionTok{ggplot}\NormalTok{(filtered\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ date, }\AttributeTok{y =}\NormalTok{ cases)) }\SpecialCharTok{+}
+      \FunctionTok{geom\_col}\NormalTok{() }\SpecialCharTok{+}
+      \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Epicurve {-}"}\NormalTok{, input}\SpecialCharTok{$}\NormalTok{district))}
+\NormalTok{  \})}
+\NormalTok{\}}
+
+\CommentTok{\# 앱 실행}
+\FunctionTok{shinyApp}\NormalTok{(}\AttributeTok{ui =}\NormalTok{ ui, }\AttributeTok{server =}\NormalTok{ server)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{7.2.2 반응성(Reactivity)
+이해}\label{uxbc18uxc751uxc131reactivity-uxc774uxd574}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-important-color}{\faExclamation}\hspace{0.5em}{🔄 Shiny의 핵심: 반응성}, colbacktitle=quarto-callout-important-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-important-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  사용자가 UI 위젯 변경 (예: \texttt{input\$district})
+\item
+  Shiny가 자동 감지
+\item
+  해당 \texttt{input}에 의존하는 모든 코드 \textbf{자동 재실행}
+\item
+  UI 업데이트
+\end{enumerate}
+
+코드를 \textbf{선언}하면, Shiny가 \textbf{자동으로 관리}합니다!
+
+\end{tcolorbox}
+
+\subsection{7.2.3 실전 예제: 말라리아
+대시보드}\label{uxc2e4uxc804-uxc608uxc81c-uxb9d0uxb77cuxb9acuxc544-uxb300uxc2dcuxbcf4uxb4dc}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# app.R}
+\FunctionTok{library}\NormalTok{(shiny)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(plotly)}
+
+\CommentTok{\# (데이터 로딩 및 plot\_epicurve 함수 정의 생략)}
+
+\NormalTok{ui }\OtherTok{\textless{}{-}} \FunctionTok{fluidPage}\NormalTok{(}
+  \FunctionTok{titlePanel}\NormalTok{(}\StringTok{"Malaria Surveillance Dashboard"}\NormalTok{),}
+
+  \FunctionTok{sidebarLayout}\NormalTok{(}
+    \FunctionTok{sidebarPanel}\NormalTok{(}
+      \FunctionTok{selectInput}\NormalTok{(}\StringTok{"select\_district"}\NormalTok{,}
+                  \AttributeTok{label =} \StringTok{"Select District:"}\NormalTok{,}
+                  \AttributeTok{choices =} \FunctionTok{c}\NormalTok{(}\StringTok{"All"}\NormalTok{, }\StringTok{"District A"}\NormalTok{, }\StringTok{"District B"}\NormalTok{)),}
+
+      \FunctionTok{selectInput}\NormalTok{(}\StringTok{"select\_agegroup"}\NormalTok{,}
+                  \AttributeTok{label =} \StringTok{"Select Age Group:"}\NormalTok{,}
+                  \AttributeTok{choices =} \FunctionTok{c}\NormalTok{(}\StringTok{"All ages"} \OtherTok{=} \StringTok{"total"}\NormalTok{,}
+                              \StringTok{"\textless{}5"} \OtherTok{=} \StringTok{"u5"}\NormalTok{,}
+                              \StringTok{"\textgreater{}=5"} \OtherTok{=} \StringTok{"o5"}\NormalTok{))}
+\NormalTok{    ),}
+
+    \FunctionTok{mainPanel}\NormalTok{(}
+      \FunctionTok{plotlyOutput}\NormalTok{(}\StringTok{"malaria\_epicurve"}\NormalTok{)}
+\NormalTok{    )}
+\NormalTok{  )}
+\NormalTok{)}
+
+\NormalTok{server }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(input, output) \{}
+
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{malaria\_epicurve }\OtherTok{\textless{}{-}} \FunctionTok{renderPlotly}\NormalTok{(\{}
+
+    \CommentTok{\# input 값에 따라 플롯 생성}
+\NormalTok{    p }\OtherTok{\textless{}{-}} \FunctionTok{plot\_epicurve}\NormalTok{(}
+\NormalTok{      malaria\_data,}
+      \AttributeTok{district =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{select\_district,}
+      \AttributeTok{agegroup =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{select\_agegroup}
+\NormalTok{    )}
+
+    \CommentTok{\# ggplot → plotly 변환}
+    \FunctionTok{ggplotly}\NormalTok{(p)}
+\NormalTok{  \})}
+\NormalTok{\}}
+
+\FunctionTok{shinyApp}\NormalTok{(}\AttributeTok{ui =}\NormalTok{ ui, }\AttributeTok{server =}\NormalTok{ server)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{7.3 Shiny 앱 배포}\label{shiny-uxc571-uxbc30uxd3ec}
+
+(내용 추가 예정)
+
+\subsection{7.3.1 shinyapps.io}\label{shinyapps.io}
+
+\subsection{7.3.2 Shiny Server}\label{shiny-server}
+
+\subsection{7.3.3 Docker}\label{docker}
+
+\section{요약}\label{uxc694uxc57d-6}
+
+(내용 추가 예정)
+
+\chapter{결론 및 제언}\label{uxacb0uxb860-uxbc0f-uxc81cuxc5b8}
+
+\chapter{효과적인 보건 데이터 커뮤니케이션을 위한
+제언}\label{uxd6a8uxacfcuxc801uxc778-uxbcf4uxac74-uxb370uxc774uxd130-uxcee4uxbba4uxb2c8uxcf00uxc774uxc158uxc744-uxc704uxd55c-uxc81cuxc5b8}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{이 챕터의 목표}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  R 시각화 학습 여정 회고
+\item
+  효과적인 데이터 커뮤니케이션 원칙
+\item
+  추가 학습 자료 및 커뮤니티
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{8.1 학습 여정
+회고}\label{uxd559uxc2b5-uxc5ecuxc815-uxd68cuxace0}
+
+(내용 추가 예정 - PDF 페이지 24-25)
+
+우리는 다음 여정을 거쳤습니다:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{ggplot2 기본 문법} (Ch 1-2)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    그래픽 문법의 7가지 구성 요소
+  \item
+    aes(), geom, facet
+  \end{itemize}
+\item
+  \textbf{역학 특화 시각화} (Ch 3-4)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    유행 곡선 (incidence2)
+  \item
+    연령 표준화 비율 (surveil)
+  \item
+    공간 역학 (sf, tmap)
+  \end{itemize}
+\item
+  \textbf{임상통계 시각화} (Ch 5)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    생존 분석 (ggsurvfit)
+  \item
+    메타 분석 (metafor)
+  \end{itemize}
+\item
+  \textbf{출판 및 공유} (Ch 6-7)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    출판 품질 (patchwork, ggpubr)
+  \item
+    대화형 대시보드 (Shiny)
+  \end{itemize}
+\end{enumerate}
+
+\section{8.2 효과적인 데이터 커뮤니케이션
+원칙}\label{uxd6a8uxacfcuxc801uxc778-uxb370uxc774uxd130-uxcee4uxbba4uxb2c8uxcf00uxc774uxc158-uxc6d0uxce59}
+
+(내용 추가 예정 - PDF 페이지 25)
+
+\subsection{8.2.1 목적에 맞는 도구
+선택}\label{uxbaa9uxc801uxc5d0-uxb9deuxb294-uxb3c4uxad6c-uxc120uxd0dd}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-tip-color}{\faLightbulb}\hspace{0.5em}{🎯 시각화 목적에 따른 선택}, colbacktitle=quarto-callout-tip-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-tip-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+목적 & 도구 & 예시 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{탐색} (Exploration) & 빠른 ggplot & EDA, 데이터 이해 \\
+\textbf{설명} (Explanation) & 출판 품질 ggplot & 논문 Figure \\
+\textbf{상호작용} (Interaction) & Plotly, Shiny & 대시보드, 웹앱 \\
+\end{longtable}
+
+\end{tcolorbox}
+
+\subsection{8.2.2 통계적
+정확성}\label{uxd1b5uxacc4uxc801-uxc815uxd655uxc131}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{⚠️ 반드시 피해야 할 함정}, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-warning-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{연령 구조 미보정}: 조(Crude) 비율의 함정
+
+  \begin{itemize}
+  \tightlist
+  \item
+    ✅ 해결: 연령 표준화 비율 (Ch 3.3)
+  \end{itemize}
+\item
+  \textbf{SE vs CI 혼동}: geom\_errorbar의 책임
+
+  \begin{itemize}
+  \tightlist
+  \item
+    ✅ 해결: 올바른 통계량 선택 (Ch 5.3)
+  \end{itemize}
+\item
+  \textbf{축 조작}: 0부터 시작하지 않는 y축
+
+  \begin{itemize}
+  \tightlist
+  \item
+    ✅ 해결: \texttt{scale\_y\_continuous(limits\ =\ c(0,\ ...))}
+  \end{itemize}
+\end{enumerate}
+
+\end{tcolorbox}
+
+\subsection{8.2.3 재현 가능한
+연구}\label{uxc7acuxd604-uxac00uxb2a5uxd55c-uxc5f0uxad6c}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ✅ Good: 재현 가능}
+\FunctionTok{source}\NormalTok{(}\StringTok{"code/setup.R"}\NormalTok{)}
+\FunctionTok{source}\NormalTok{(}\StringTok{"code/data{-}simulation.R"}\NormalTok{)}
+
+\CommentTok{\# 모든 분석이 스크립트로 기록됨}
+\CommentTok{\# → 다른 연구자가 재현 가능}
+
+\CommentTok{\# ❌ Bad: 클릭 기반 소프트웨어}
+\CommentTok{\# → 재현 불가}
+\end{Highlighting}
+\end{Shaded}
+
+\section{8.3 추가 학습
+자료}\label{uxcd94uxac00-uxd559uxc2b5-uxc790uxb8cc}
+
+\subsection{8.3.1 필수 도서}\label{uxd544uxc218-uxb3c4uxc11c}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Wickham, H. \& Grolemund, G.} (2017). \emph{R for Data
+  Science}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \url{https://r4ds.hadley.nz/}
+  \item
+    📌 데이터 과학 전반
+  \end{itemize}
+\item
+  \textbf{Wickham, H.} (2016). \emph{ggplot2 Book}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \url{https://ggplot2-book.org/}
+  \item
+    📌 ggplot2 완전 정복
+  \end{itemize}
+\item
+  \textbf{Batra, N. et al.} (2021). \emph{The Epidemiologist R Handbook}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \url{https://epirhandbook.com/}
+  \item
+    📌 역학 실무 R
+  \end{itemize}
+\end{enumerate}
+
+\subsection{8.3.2 온라인
+리소스}\label{uxc628uxb77cuxc778-uxb9acuxc18cuxc2a4}
+
+\textbf{시각화 갤러리:} - \href{https://r-graph-gallery.com/}{R Graph
+Gallery} - \href{https://www.data-to-viz.com/}{From Data to Viz}
+
+\textbf{커뮤니티:} - \href{https://community.rstudio.com/}{RStudio
+Community} - \href{https://stackoverflow.com/questions/tagged/r}{Stack
+Overflow - R tag}
+
+\textbf{블로그:} - \href{https://www.r-bloggers.com/}{R-Bloggers} -
+\href{https://www.cedricscherer.com/}{Cedric Scherer's ggplot2
+Tutorials}
+
+\subsection{8.3.3 특화 패키지}\label{uxd2b9uxd654-uxd328uxd0a4uxc9c0}
+
+계속 발전하는 R 생태계:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 최신 패키지 탐색}
+\FunctionTok{browseURL}\NormalTok{(}\StringTok{"https://cran.r{-}project.org/web/packages/"}\NormalTok{)}
+\FunctionTok{browseURL}\NormalTok{(}\StringTok{"https://www.tidyverse.org/packages/"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{8.4 커뮤니티 참여}\label{uxcee4uxbba4uxb2c8uxd2f0-uxcc38uxc5ec}
+
+\subsection{8.4.1 질문하기}\label{uxc9c8uxbb38uxd558uxae30}
+
+\begin{itemize}
+\tightlist
+\item
+  Stack Overflow에 \href{https://www.tidyverse.org/help/}{재현 가능한
+  예제(reprex)} 제공
+\item
+  RStudio Community에서 토론
+\item
+  GitHub Issues에 버그 리포트
+\end{itemize}
+
+\subsection{8.4.2 기여하기}\label{uxae30uxc5ecuxd558uxae30-1}
+
+\begin{itemize}
+\tightlist
+\item
+  오픈소스 패키지 개발 참여
+\item
+  블로그 글 작성
+\item
+  튜토리얼 번역
+\end{itemize}
+
+\section{8.5 최종
+체크리스트}\label{uxcd5cuxc885-uxccb4uxd06cuxb9acuxc2a4uxd2b8}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title={✅ R 시각화 마스터 체크리스트}, colbacktitle=quarto-callout-tip-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-tip-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\textbf{기초:}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  ggplot2의 7가지 구성 요소 이해
+\item[$\square$]
+  aes() 매핑 자유자재로 활용
+\item[$\square$]
+  geom 선택 및 조합
+\end{itemize}
+
+\textbf{역학:}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  유행 곡선 (incidence2)
+\item[$\square$]
+  연령 표준화 비율 (surveil)
+\item[$\square$]
+  공간 지도 (sf, tmap)
+\end{itemize}
+
+\textbf{임상:}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  생존 곡선 (ggsurvfit)
+\item[$\square$]
+  포레스트 플롯 (metafor)
+\item[$\square$]
+  SE vs CI 구분
+\end{itemize}
+
+\textbf{출판:}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  다중 패널 (patchwork)
+\item[$\square$]
+  학술지 스타일 (ggthemes, ggpubr)
+\item[$\square$]
+  고해상도 저장 (ggsave)
+\end{itemize}
+
+\textbf{고급:}
+
+\begin{itemize}
+\tightlist
+\item[$\square$]
+  인터랙티브 (plotly)
+\item[$\square$]
+  대시보드 (Shiny)
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{8.6 마치며}\label{uxb9c8uxce58uxba70}
+
+데이터 시각화는 \textbf{기술}이자 \textbf{예술}이며, 무엇보다
+\textbf{소통}입니다.
+
+이 책에서 배운 R 시각화 기법들이 여러분의 연구 결과를:
+
+\begin{itemize}
+\tightlist
+\item
+  🔍 \textbf{더 명확하게} 이해하고
+\item
+  📊 \textbf{더 설득력 있게} 전달하며
+\item
+  🌍 \textbf{더 많은 사람들에게} 공유하는 데
+\end{itemize}
+
+도움이 되기를 바랍니다.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{📬 연락하기}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{이메일}: your-email@example.com
+\item
+  \textbf{GitHub}: \href{https://github.com}{github.com/your-repo}
+\item
+  \textbf{웹사이트}: \href{https://your-website.com}{your-website.com}
+\end{itemize}
+
+질문, 피드백, 개선 제안을 언제든 환영합니다!
+
+\end{tcolorbox}
+
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-important-color-frame, leftrule=.75mm, rightrule=.15mm, toprule=.15mm, left=2mm, colback=white, arc=.35mm, breakable, bottomrule=.15mm, opacityback=0]
+\begin{minipage}[t]{5.5mm}
+\textcolor{quarto-callout-important-color}{\faExclamation}
+\end{minipage}%
+\begin{minipage}[t]{\textwidth - 5.5mm}
+
+\vspace{-3mm}\textbf{🎉 축하합니다!}\vspace{3mm}
+
+\textbf{R 기반 보건학 시각화} 과정을 완료하셨습니다!
+
+이제 여러분은 ggplot2부터 Shiny까지, 보건학 데이터를 전문적으로 시각화할
+수 있는 역량을 갖추셨습니다.
+
+계속해서 배우고, 실습하고, 공유하세요! 🚀
+
+\end{minipage}%
+\end{tcolorbox}
+
+\bookmarksetup{startatroot}
+
+\chapter{참고문헌}\label{uxcc38uxace0uxbb38uxd5cc}
+
+\bookmarksetup{startatroot}
+
+\chapter*{참고문헌}\label{uxcc38uxace0uxbb38uxd5cc-1}
+\addcontentsline{toc}{chapter}{참고문헌}
+
+\markboth{참고문헌}{참고문헌}
+
+이 책은 다음 자료들을 참고하여 작성되었습니다.
+
+\section{주요 참고 도서}\label{uxc8fcuxc694-uxcc38uxace0-uxb3c4uxc11c}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Wickham, H., \& Grolemund, G. (2017). \emph{R for Data Science}.
+  O'Reilly Media. \url{https://r4ds.hadley.nz/}
+\item
+  Wickham, H. (2016). \emph{ggplot2: Elegant Graphics for Data Analysis}
+  (3rd ed.). Springer. \url{https://ggplot2-book.org/}
+\item
+  Healy, K. (2018). \emph{Data Visualization: A Practical Introduction}.
+  Princeton University Press.
+\item
+  Moraga, P. (2019). \emph{Geospatial Health Data: Modeling and
+  Visualization with R-INLA and Shiny}. Chapman and Hall/CRC.
+\item
+  Batra, N., et al.~(2021). \emph{The Epidemiologist R Handbook}.
+  \url{https://epirhandbook.com/}
+\end{enumerate}
+
+\section{R 패키지}\label{r-uxd328uxd0a4uxc9c0}
+
+\subsection{시각화}\label{uxc2dcuxac01uxd654}
+
+\begin{itemize}
+\item
+  Wickham, H. (2016). ggplot2: Create Elegant Data Visualisations Using
+  the Grammar of Graphics.
+  \url{https://CRAN.R-project.org/package=ggplot2}
+\item
+  Pedersen, T. L. (2024). patchwork: The Composer of Plots.
+  \url{https://CRAN.R-project.org/package=patchwork}
+\item
+  Slowikowski, K. (2024). ggrepel: Automatically Position
+  Non-Overlapping Text Labels.
+  \url{https://CRAN.R-project.org/package=ggrepel}
+\item
+  Kassambara, A. (2023). ggpubr: `ggplot2' Based Publication Ready
+  Plots. \url{https://CRAN.R-project.org/package=ggpubr}
+\end{itemize}
+
+\subsection{역학 분석}\label{uxc5eduxd559-uxbd84uxc11d}
+
+\begin{itemize}
+\item
+  Jombart, T., et al.~(2022). incidence2: Compute, Handle and Plot
+  Incidence. \url{https://CRAN.R-project.org/package=incidence2}
+\item
+  Donegan, C. (2022). surveil: Public Health Surveillance.
+  \url{https://CRAN.R-project.org/package=surveil}
+\end{itemize}
+
+\subsection{공간 분석}\label{uxacf5uxac04-uxbd84uxc11d}
+
+\begin{itemize}
+\item
+  Pebesma, E. (2018). Simple Features for R: Standardized Support for
+  Spatial Vector Data. \emph{The R Journal}, 10(1), 439-446.
+  \url{https://doi.org/10.32614/RJ-2018-009}
+\item
+  Tennekes, M. (2018). tmap: Thematic Maps in R. \emph{Journal of
+  Statistical Software}, 84(6), 1-39.
+  \url{https://doi.org/10.18637/jss.v084.i06}
+\end{itemize}
+
+\subsection{임상 통계}\label{uxc784uxc0c1-uxd1b5uxacc4}
+
+\begin{itemize}
+\item
+  Therneau, T. (2024). survival: Survival Analysis.
+  \url{https://CRAN.R-project.org/package=survival}
+\item
+  Sjoberg, D. D., et al.~(2023). ggsurvfit: Flexible Time-to-Event
+  Figures. \url{https://CRAN.R-project.org/package=ggsurvfit}
+\item
+  Viechtbauer, W. (2010). Conducting Meta-Analyses in R with the metafor
+  Package. \emph{Journal of Statistical Software}, 36(3), 1-48.
+  \url{https://doi.org/10.18637/jss.v036.i03}
+\end{itemize}
+
+\subsection{대화형
+시각화}\label{uxb300uxd654uxd615-uxc2dcuxac01uxd654-1}
+
+\begin{itemize}
+\item
+  Sievert, C. (2020). \emph{Interactive Web-Based Data Visualization
+  with R, plotly, and shiny}. Chapman and Hall/CRC.
+  \url{https://plotly-r.com/}
+\item
+  Chang, W., et al.~(2024). shiny: Web Application Framework for R.
+  \url{https://CRAN.R-project.org/package=shiny}
+\end{itemize}
+
+\section{웹 리소스}\label{uxc6f9-uxb9acuxc18cuxc2a4}
+
+\subsection{튜토리얼}\label{uxd29cuxd1a0uxb9acuxc5bc}
+
+\begin{itemize}
+\tightlist
+\item
+  R Graph Gallery. \url{https://r-graph-gallery.com/}
+\item
+  From Data to Viz. \url{https://www.data-to-viz.com/}
+\item
+  Cedric Scherer's ggplot2 Tutorial.
+  \url{https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/}
+\end{itemize}
+
+\subsection{커뮤니티}\label{uxcee4uxbba4uxb2c8uxd2f0}
+
+\begin{itemize}
+\tightlist
+\item
+  RStudio Community. \url{https://community.rstudio.com/}
+\item
+  Stack Overflow (R tag).
+  \url{https://stackoverflow.com/questions/tagged/r}
+\item
+  R-Bloggers. \url{https://www.r-bloggers.com/}
+\end{itemize}
+
+\subsection{데이터 소스}\label{uxb370uxc774uxd130-uxc18cuxc2a4}
+
+\begin{itemize}
+\tightlist
+\item
+  통계지리정보서비스(SGIS). \url{https://sgis.kostat.go.kr/}
+\item
+  질병관리청 감염병포털. \url{https://npt.kdca.go.kr/}
+\item
+  Our World in Data. \url{https://ourworldindata.org/}
+\end{itemize}
+
+\section{학술 논문}\label{uxd559uxc220-uxb17cuxbb38}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Wilkinson, L. (2005). \emph{The Grammar of Graphics} (2nd ed.).
+  Springer.
+\item
+  Tufte, E. R. (2001). \emph{The Visual Display of Quantitative
+  Information} (2nd ed.). Graphics Press.
+\item
+  Cleveland, W. S., \& McGill, R. (1984). Graphical Perception: Theory,
+  Experimentation, and Application to the Development of Graphical
+  Methods. \emph{Journal of the American Statistical Association},
+  79(387), 531-554.
+\item
+  Friendly, M. (2008). A Brief History of Data Visualization. In C.
+  Chen, W. Härdle, \& A. Unwin (Eds.), \emph{Handbook of Data
+  Visualization} (pp.~15-56). Springer.
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{BibTeX 파일}, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomtitle=1mm, toprule=.15mm, opacityback=0, colback=white, rightrule=.15mm, left=2mm, bottomrule=.15mm, titlerule=0mm]
+
+전체 참고문헌 목록은 \texttt{references.bib} 파일에서 확인할 수
+있습니다.
+
+\end{tcolorbox}
+
+
+\backmatter
+
+\end{document}

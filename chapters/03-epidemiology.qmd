@@ -1,0 +1,1034 @@
+---
+title: "역학 데이터 시각화"
+author: "연세대 산업보건 연구소"
+date: today
+---
+
+```{r setup, include=FALSE}
+# 한글 폰트 설정
+library(showtext)
+library(sysfonts)
+font_add_google("Noto Sans KR", "noto")
+showtext_auto()
+
+library(ggplot2)
+theme_set(theme_grey(base_family = "noto"))
+showtext_opts(dpi = 96)
+
+knitr::opts_chunk$set(
+  fig.showtext = TRUE,
+  dev = "png",
+  dpi = 96
+)
+```
+
+# 역학 데이터 시각화의 핵심 기법
+
+::: {.callout-note}
+## 🎯 학습 목표
+
+이 챕터를 마치면 다음을 할 수 있습니다:
+
+- 발병률(incidence)과 유병률(prevalence)의 차이 이해
+- 시계열 데이터로 역학적 추세 시각화
+- `incidence2` 패키지로 감염병 유행 곡선(epicurve) 작성
+- 연령 표준화 비율(age-standardized rate) 계산 및 시각화
+- 신뢰구간과 불확실성을 효과적으로 표현
+- 인구 피라미드 제작
+:::
+
+::: {.callout-tip}
+## 📚 이 챕터의 실습 데이터
+
+```r
+library(tidyverse)
+library(incidence2)
+library(outbreaks)
+
+# 실습 데이터 1: 질병 발생률
+disease <- read_csv(here("data", "processed", "disease_incidence.csv"))
+
+# 실습 데이터 2: 에볼라 유행 (outbreaks 패키지)
+data("ebola_sim", package = "outbreaks")
+linelist <- ebola_sim$linelist
+
+# 실습 데이터 3: 지역별 질병 데이터
+regional <- read_csv(here("data", "processed", "regional_disease.csv"))
+```
+:::
+
+## 3.1 역학 지표의 이해
+
+### 3.1.1 발병률 vs. 유병률
+
+역학 연구에서 가장 기본이 되는 두 지표입니다.
+
+**발병률 (Incidence)**
+- **정의**: 일정 기간 동안 새롭게 발생한 질병 사례의 비율
+- **분자**: 새로운 환자 수
+- **분모**: 위험 인구 (at-risk population)
+- **의미**: 질병의 **발생 속도** (동적)
+- **예시**: "2024년 한 해 동안 인구 10만 명당 50명이 당뇨병으로 새롭게 진단"
+
+**유병률 (Prevalence)**
+- **정의**: 특정 시점에 질병을 가진 사람의 비율
+- **분자**: 기존 + 신규 환자 수
+- **분모**: 전체 인구
+- **의미**: 질병의 **부담** (정적)
+- **예시**: "2024년 12월 31일 현재, 인구의 8%가 당뇨병 환자"
+
+**관계:**
+```
+유병률 ≈ 발병률 × 평균 질병 기간
+```
+
+::: {.callout-note}
+## 💡 언제 어떤 지표를 사용할까?
+
+| 상황 | 사용 지표 | 이유 |
+|------|-----------|------|
+| 급성 감염병 (독감, COVID-19) | **발병률** | 빠른 발생 & 회복/사망 |
+| 만성 질환 (당뇨, 고혈압) | **유병률** | 장기간 지속 |
+| 병인 연구 (원인 탐색) | **발병률** | 시간 순서 파악 |
+| 보건 자원 계획 | **유병률** | 현재 부담 측정 |
+| 백신 효과 평가 | **발병률** | 새로운 감염 예방 |
+:::
+
+### 3.1.2 발병률의 종류
+
+**1) 누적 발병률 (Cumulative Incidence)**
+
+일정 기간 동안 질병에 걸린 사람의 비율입니다.
+
+```
+누적 발병률 = (새로운 환자 수) / (관찰 시작 시점의 위험 인구)
+```
+
+**예제:**
+```r
+1,000명을 1년간 추적 → 50명 발병
+누적 발병률 = 50/1,000 = 5% (또는 0.05)
+```
+
+**2) 발병 밀도 (Incidence Density / Incidence Rate)**
+
+인구-시간(person-time)을 고려한 발병률입니다.
+
+```
+발병 밀도 = (새로운 환자 수) / (관찰 인년, person-years)
+```
+
+**예제:**
+```r
+1,000명을 추적했는데:
+- 500명: 1년 전체 → 500 person-years
+- 300명: 6개월만 → 150 person-years
+- 200명: 3개월만 → 50 person-years
+총 인년 = 700 person-years
+
+50명 발병 → 발병 밀도 = 50/700 = 7.14 per 100 person-years
+```
+
+::: {.callout-tip}
+## 🔥 Person-Years가 왜 필요한가?
+
+코호트 연구에서 모든 참가자를 같은 기간 추적하기 어렵습니다:
+- 중도 탈락 (lost to follow-up)
+- 사망
+- 이사
+- 연구 중간 참여
+
+**Person-time**은 이를 정확하게 반영합니다.
+:::
+
+## 3.2 발병률 및 유병률 시계열 시각화
+
+### 3.2.1 기본 시계열 플롯
+
+```{r}
+#| eval: true
+#| echo: true
+
+library(tidyverse)
+
+disease <- read_csv(here::here("data", "processed", "disease_incidence.csv")) %>%
+  mutate(date = as.Date(date))
+
+# 방법 1: 전체 시계열 (날짜 축 사용)
+ggplot(disease, aes(x = date, y = cases)) +
+  geom_line(linewidth = 1, color = "darkblue") +
+  geom_point(size = 2, color = "darkblue") +
+  labs(title = "월별 감염병 발생 건수 (2019-2023)",
+       x = "날짜",
+       y = "발생 건수 (명)") +
+  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**연도별 색상 구분:**
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 방법 2: 연도별 색상으로 구분
+ggplot(disease, aes(x = month, y = cases, color = factor(year), group = year)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  labs(title = "월별 감염병 발생 건수 (연도별 비교)",
+       x = "월",
+       y = "발생 건수 (명)",
+       color = "연도") +
+  scale_x_continuous(breaks = 1:12) +
+  scale_color_viridis_d() +
+  theme_minimal()
+```
+
+### 3.2.2 신뢰구간과 불확실성 표현
+
+역학 데이터는 항상 불확실성을 동반합니다. 신뢰구간(Confidence Interval)을 시각화하는 것이 중요합니다.
+
+**방법 1: 리본 (geom_ribbon) - 전체 시계열**
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 발병률 + 95% 신뢰구간
+disease_with_ci <- disease %>%
+  mutate(
+    rate = cases / population * 100000,  # 인구 10만 명당
+    # 포아송 분포 가정 95% CI
+    se = sqrt(cases) / population * 100000,
+    lower_ci = rate - 1.96 * se,
+    upper_ci = rate + 1.96 * se
+  )
+
+# 날짜를 x축으로 사용하여 겹침 방지
+ggplot(disease_with_ci, aes(x = date, y = rate)) +
+  geom_ribbon(aes(ymin = lower_ci, ymax = upper_ci),
+              fill = "steelblue", alpha = 0.3) +
+  geom_line(linewidth = 1, color = "darkblue") +
+  geom_point(size = 1.5, color = "darkblue") +
+  labs(title = "월별 발병률 (95% 신뢰구간, 2019-2023)",
+       x = "날짜",
+       y = "발병률 (per 100,000)") +
+  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**방법 2: 에러 바 (geom_errorbar) - 연도별 Facet**
+
+```{r}
+#| eval: true
+#| echo: true
+
+# Facet으로 연도별 분리하여 명확하게 표시
+ggplot(disease_with_ci, aes(x = month, y = rate)) +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci),
+                width = 0.3, color = "gray50") +
+  geom_line(linewidth = 0.8, color = "darkblue") +
+  geom_point(size = 2, color = "darkblue") +
+  facet_wrap(~ year, ncol = 2) +
+  labs(title = "월별 발병률 (95% CI, 연도별)",
+       x = "월",
+       y = "발병률 (per 100,000)") +
+  scale_x_continuous(breaks = 1:12) +
+  theme_minimal()
+```
+
+**방법 3: 연도별 색상 구분 + 신뢰구간**
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 최근 2년 데이터만 비교 (너무 많으면 복잡)
+disease_recent <- disease_with_ci %>%
+  filter(year >= 2022)
+
+ggplot(disease_recent, aes(x = month, y = rate,
+                           color = factor(year), fill = factor(year))) +
+  geom_ribbon(aes(ymin = lower_ci, ymax = upper_ci, group = year),
+              alpha = 0.2, color = NA) +
+  geom_line(aes(group = year), linewidth = 1) +
+  geom_point(size = 2) +
+  labs(title = "월별 발병률 비교 (2022 vs 2023, 95% CI)",
+       x = "월",
+       y = "발병률 (per 100,000)",
+       color = "연도",
+       fill = "연도") +
+  scale_x_continuous(breaks = 1:12) +
+  scale_color_manual(values = c("2022" = "#E64B35", "2023" = "#4DBBD5")) +
+  scale_fill_manual(values = c("2022" = "#E64B35", "2023" = "#4DBBD5")) +
+  theme_minimal()
+```
+
+::: {.callout-note}
+## 💡 신뢰구간 계산 방법
+
+**작은 발생 건수 (< 30):** 정확한 포아송 분포 사용
+```r
+library(epitools)
+pois.exact(x = cases, pt = person_time)
+```
+
+**큰 발생 건수 (≥ 30):** 정규 근사
+```r
+rate ± 1.96 × SE
+SE = sqrt(cases) / person_time
+```
+
+**비율 (proportion):** Wilson 점수 구간
+```r
+library(binom)
+binom.confint(x, n, method = "wilson")
+```
+:::
+
+### 3.2.3 누적 발병률 시각화
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 누적 발병 건수
+disease_cumulative <- disease %>%
+  arrange(month) %>%
+  mutate(cumulative_cases = cumsum(cases))
+
+ggplot(disease_cumulative, aes(x = month, y = cumulative_cases)) +
+  geom_area(fill = "steelblue", alpha = 0.5) +
+  geom_line(linewidth = 1, color = "darkblue") +
+  labs(title = "누적 발병 건수",
+       x = "월",
+       y = "누적 환자 수 (명)") +
+  scale_x_continuous(breaks = 1:12) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_minimal()
+```
+
+### 3.2.4 여러 질병 비교
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 여러 질병을 long 형식으로 변환
+multi_disease <- tribble(
+  ~month, ~disease_a, ~disease_b, ~disease_c,
+  1, 120, 80, 40,
+  2, 150, 85, 45,
+  3, 180, 95, 50,
+  # ... (생략)
+) %>%
+  pivot_longer(cols = starts_with("disease"),
+               names_to = "disease",
+               values_to = "cases")
+
+ggplot(multi_disease, aes(x = month, y = cases, color = disease)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_color_brewer(palette = "Set1",
+                     labels = c("disease_a" = "질병 A",
+                                "disease_b" = "질병 B",
+                                "disease_c" = "질병 C")) +
+  labs(title = "여러 질병의 월별 발생 추이",
+       x = "월",
+       y = "발생 건수 (명)",
+       color = "질병") +
+  theme_minimal()
+```
+
+## 3.3 감염병 유행 곡선 (Epidemic Curve)
+
+**유행 곡선(Epicurve)**은 감염병 발생의 시간적 분포를 보여주는 히스토그램입니다. WHO와 CDC가 권장하는 표준 시각화 방법입니다.
+
+### 3.3.1 왜 incidence2 패키지인가?
+
+`incidence2`는 역학 전문 패키지로, 유행 곡선 작성에 최적화되어 있습니다.
+
+**장점:**
+1. **표준화된 워크플로우**: WHO/CDC 가이드라인 준수
+2. **자동 집계**: 일/주/월 단위 자동 계산
+3. **그룹별 분석**: 성별, 지역별 등 층화 가능
+4. **통계 분석**: 성장률, 배가 시간 등 자동 계산
+5. **ggplot2 호환**: 추가 커스터마이징 용이
+
+### 3.3.2 기본 사용법
+
+**Step 1: 데이터 준비**
+
+```{r}
+#| eval: true
+#| echo: true
+
+library(incidence2)
+library(outbreaks)
+
+# 에볼라 유행 데이터
+linelist <- ebola_sim$linelist
+
+# 데이터 구조 확인
+head(linelist, 3)
+```
+
+**Step 2: incidence 객체 생성**
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 일별 유행 곡선
+inc_daily <- incidence(
+  linelist,
+  date_index = "date_of_onset",  # 증상 발현일
+  interval = "day"                # 집계 단위: 일
+)
+
+# 객체 확인
+inc_daily
+```
+
+**Step 3: 기본 플롯**
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-ebola-daily
+#| fig-cap: "에볼라 유행 곡선 (일별)"
+#| warning: false
+
+library(ggplot2)
+
+# incidence2 기본 플롯
+plot(inc_daily) +
+  labs(title = "에볼라 유행 곡선 (일별)",
+       x = "날짜",
+       y = "일일 발생 건수") +
+  theme_minimal()
+```
+
+### 3.3.3 시간 단위 조정
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 주별 유행 곡선 (더 부드러운 패턴)
+inc_weekly <- incidence(
+  linelist,
+  date_index = "date_of_onset",
+  interval = "week"  # 주 단위
+)
+
+plot(inc_weekly) +
+  labs(title = "에볼라 유행 곡선 (주별)",
+       x = "주",
+       y = "주간 발생 건수") +
+  theme_minimal()
+
+# 월별 유행 곡선
+inc_monthly <- incidence(
+  linelist,
+  date_index = "date_of_onset",
+  interval = "month"
+)
+
+plot(inc_monthly) +
+  labs(title = "에볼라 유행 곡선 (월별)",
+       x = "월",
+       y = "월간 발생 건수") +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+## 💡 시간 단위 선택 가이드
+
+| 시간 단위 | 적합한 상황 | 예시 |
+|-----------|-------------|------|
+| **일 (day)** | 급성 발병, 짧은 유행 | 식중독, 단기 감염병 |
+| **주 (week)** | 일반적 감염병 | 인플루엔자, COVID-19 |
+| **월 (month)** | 장기 추세, 만성 질환 | 결핵, 암 발생률 |
+
+**경험 법칙**: 전체 유행 기간을 50-100개 막대로 나타낼 수 있는 단위 선택
+:::
+
+### 3.3.4 그룹별 층화 분석
+
+**성별로 구분:**
+
+```{r}
+#| eval: true
+#| echo: true
+
+inc_by_gender <- incidence(
+  linelist,
+  date_index = "date_of_onset",
+  interval = "week",
+  groups = "gender"  # 성별로 그룹화
+)
+
+plot(inc_by_gender, fill = "gender") +
+  scale_fill_brewer(palette = "Set1",
+                    labels = c("F" = "여성", "M" = "남성")) +
+  labs(title = "에볼라 유행 곡선 (성별)",
+       x = "주",
+       y = "주간 발생 건수",
+       fill = "성별") +
+  theme_minimal()
+```
+
+**지역별로 구분 + Facet:**
+
+```{r}
+#| eval: true
+#| echo: true
+
+inc_by_hospital <- incidence(
+  linelist,
+  date_index = "date_of_onset",
+  interval = "week",
+  groups = "hospital"
+)
+
+# 상위 4개 병원만 표시
+top_hospitals <- linelist %>%
+  count(hospital, sort = TRUE) %>%
+  head(4) %>%
+  pull(hospital)
+
+inc_by_hospital %>%
+  as_tibble() %>%
+  filter(hospital %in% top_hospitals) %>%
+  ggplot(aes(x = date_index, y = count)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~ hospital, ncol = 2, scales = "free_y") +
+  labs(title = "에볼라 유행 곡선 (병원별)",
+       x = "날짜",
+       y = "주간 발생 건수") +
+  theme_minimal()
+```
+
+### 3.3.5 유행 단계 표시
+
+많은 감염병 유행은 **상승기 - 정점 - 하강기** 패턴을 보입니다. 이를 시각적으로 구분하면 유용합니다.
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 유행 정점 찾기
+inc_weekly_df <- as_tibble(inc_weekly)
+peak_date <- inc_weekly_df$date_index[which.max(inc_weekly_df$count)]
+
+# 상승기/하강기 구분
+inc_weekly_df <- inc_weekly_df %>%
+  mutate(phase = if_else(date_index < peak_date, "상승기", "하강기"))
+
+ggplot(inc_weekly_df, aes(x = date_index, y = count, fill = phase)) +
+  geom_col() +
+  geom_vline(xintercept = peak_date, linetype = "dashed",
+             color = "red", linewidth = 1) +
+  annotate("text", x = peak_date, y = max(inc_weekly_df$count) * 0.9,
+           label = paste("정점:", format(peak_date, "%Y-%m-%d")),
+           color = "red", hjust = -0.1) +
+  scale_fill_manual(values = c("상승기" = "#FF6B6B", "하강기" = "#4ECDC4")) +
+  labs(title = "에볼라 유행 단계",
+       x = "주",
+       y = "주간 발생 건수",
+       fill = "유행 단계") +
+  theme_minimal()
+```
+
+### 3.3.6 배가 시간 (Doubling Time) 계산
+
+유행 초기의 성장 속도를 평가합니다.
+
+```{r}
+#| eval: true
+#| echo: true
+
+library(incidence2)
+
+# 상승기 데이터만 추출
+growth_phase <- inc_weekly_df %>%
+  filter(phase == "상승기", count > 0)
+
+# 로그-선형 회귀
+model <- lm(log(count) ~ as.numeric(date_index), data = growth_phase)
+growth_rate <- coef(model)[2]  # 일일 성장률
+
+# 배가 시간 (일)
+doubling_time <- log(2) / growth_rate
+cat("배가 시간:", round(doubling_time), "일\n")
+```
+
+## 3.4 연령 표준화 비율 (Age-Standardized Rate)
+
+### 3.4.1 왜 표준화가 필요한가?
+
+두 지역의 암 사망률을 비교한다고 가정합시다:
+
+| 지역 | 조사망률 (crude rate) | 65세 이상 비율 |
+|------|----------------------|----------------|
+| A 지역 | 500 per 100,000 | 15% |
+| B 지역 | 600 per 100,000 | 30% |
+
+**질문**: B 지역이 더 위험한가?
+
+**답**: 아닙니다! B 지역은 고령 인구가 많아서 조사망률이 높을 수 있습니다.
+
+**해결책**: 연령 구조의 영향을 제거한 **연령 표준화 비율** 사용
+
+### 3.4.2 직접 표준화 (Direct Standardization)
+
+**원리**: 모든 인구를 동일한 표준 인구 구조로 가정
+
+```
+ASR = Σ(연령군별 발생률 × 표준 인구 비율)
+```
+
+**예제: 수동 계산**
+
+```{r}
+#| eval: true
+#| echo: true
+#| warning: false
+
+library(tidyverse)
+
+# 두 지역의 연령별 발생 데이터
+region_data <- tribble(
+  ~region, ~age_group, ~cases, ~population,
+  "A", "0-19",    10,  50000,
+  "A", "20-39",   30,  40000,
+  "A", "40-59",   50,  30000,
+  "A", "60+",    100,  20000,
+  "B", "0-19",    15,  30000,
+  "B", "20-39",   40,  35000,
+  "B", "40-59",   80,  40000,
+  "B", "60+",    150,  45000
+)
+
+# WHO 세계 표준 인구 (간소화 버전)
+standard_pop <- tribble(
+  ~age_group, ~std_pop,
+  "0-19",     0.30,
+  "20-39",    0.28,
+  "40-59",    0.25,
+  "60+",      0.17
+)
+
+# 연령별 발생률 계산
+region_data <- region_data %>%
+  mutate(rate = cases / population * 100000)
+
+# 표준화 비율 계산
+asr <- region_data %>%
+  left_join(standard_pop, by = "age_group") %>%
+  group_by(region) %>%
+  summarize(asr = sum(rate * std_pop))
+
+print(asr)
+```
+
+이제 B 지역이 실제로 더 높은 발생률을 보입니다 (연령 구조 조정 후).
+
+### 3.4.3 간접 표준화 (Indirect Standardization)
+
+표준 인구의 연령별 발생률을 사용합니다. **표준화 사망비(SMR)**로 표현됩니다.
+
+```
+SMR = 관찰 사례 수 / 기대 사례 수
+```
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 표준 발생률 (전국 평균)
+standard_rates <- tribble(
+  ~age_group, ~std_rate,
+  "0-19",     20,
+  "20-39",    75,
+  "40-59",    167,
+  "60+",      588
+)
+
+# 기대 사례 수 계산
+expected <- region_data %>%
+  left_join(standard_rates, by = "age_group") %>%
+  mutate(expected_cases = population * std_rate / 100000) %>%
+  group_by(region) %>%
+  summarize(
+    observed = sum(cases),
+    expected = sum(expected_cases),
+    smr = observed / expected
+  )
+
+print(expected)
+```
+
+**SMR 해석:**
+- SMR = 1.0: 표준과 동일
+- SMR > 1.0: 표준보다 높음 (과잉 사망)
+- SMR < 1.0: 표준보다 낮음
+
+### 3.4.4 시각화: 연령 표준화 비율 비교
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 여러 지역의 ASR 비교
+regions_asr <- tribble(
+  ~region, ~asr, ~lower_ci, ~upper_ci,
+  "서울",   120,  115,       125,
+  "부산",   135,  128,       142,
+  "대구",   110,  104,       116,
+  "인천",   125,  119,       131,
+  "광주",   105,  99,        111
+)
+
+ggplot(regions_asr, aes(x = reorder(region, asr), y = asr)) +
+  geom_point(size = 3, color = "darkblue") +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci),
+                width = 0.2, color = "darkblue") +
+  geom_hline(yintercept = 120, linetype = "dashed",
+             color = "red", linewidth = 1) +
+  annotate("text", x = 1, y = 122, label = "전국 평균",
+           color = "red", hjust = 0) +
+  coord_flip() +
+  labs(title = "지역별 암 발생률 (연령 표준화)",
+       subtitle = "per 100,000 population (95% CI)",
+       x = "지역",
+       y = "연령 표준화 발생률") +
+  theme_minimal()
+```
+
+## 3.5 인구 피라미드 (Population Pyramid)
+
+인구 구조를 한눈에 파악하는 데 유용합니다.
+
+### 3.5.1 기본 인구 피라미드
+
+```{r}
+#| eval: true
+#| echo: true
+
+library(tidyverse)
+
+# 연령-성별 인구 데이터
+pop_pyramid_data <- tribble(
+  ~age_group, ~male, ~female,
+  "0-9",     5000,  4800,
+  "10-19",   5200,  5000,
+  "20-29",   5500,  5300,
+  "30-39",   5800,  5600,
+  "40-49",   5300,  5100,
+  "50-59",   4500,  4400,
+  "60-69",   3500,  3600,
+  "70-79",   2000,  2200,
+  "80+",      800,  1000
+) %>%
+  mutate(male = -male) %>%  # 남성은 음수로 (왼쪽 표시)
+  pivot_longer(cols = c(male, female),
+               names_to = "gender",
+               values_to = "population")
+
+ggplot(pop_pyramid_data, aes(x = age_group, y = population, fill = gender)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = function(x) abs(x),
+                     breaks = seq(-6000, 6000, 2000)) +
+  scale_fill_manual(values = c("male" = "#2196F3", "female" = "#E91E63"),
+                    labels = c("male" = "남성", "female" = "여성")) +
+  labs(title = "인구 피라미드 (2024)",
+       x = "연령군",
+       y = "인구 (명)",
+       fill = "성별") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+### 3.5.2 질병 발생 인구 피라미드
+
+환자의 연령-성별 분포를 표현합니다.
+
+```{r}
+#| eval: true
+#| echo: true
+
+# COVID-19 환자 연령-성별 분포
+covid_pyramid <- tribble(
+  ~age_group, ~male, ~female,
+  "0-9",      50,   45,
+  "10-19",    80,   75,
+  "20-29",   200,  180,
+  "30-39",   250,  230,
+  "40-49",   300,  280,
+  "50-59",   350,  320,
+  "60-69",   400,  380,
+  "70-79",   300,  320,
+  "80+",     150,  200
+) %>%
+  mutate(male = -male) %>%
+  pivot_longer(cols = c(male, female),
+               names_to = "gender",
+               values_to = "cases")
+
+ggplot(covid_pyramid, aes(x = age_group, y = cases, fill = gender)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = function(x) abs(x)) +
+  scale_fill_manual(values = c("male" = "#64B5F6", "female" = "#F48FB1"),
+                    labels = c("male" = "남성", "female" = "여성")) +
+  labs(title = "COVID-19 확진자 연령-성별 분포",
+       x = "연령군",
+       y = "확진자 수 (명)",
+       fill = "성별") +
+  theme_minimal()
+```
+
+## 3.6 실전 연습문제
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 3.1: 신뢰구간 시각화
+
+`disease_incidence.csv` 데이터를 사용하여:
+
+1. 월별 발병률 계산 (per 100,000)
+2. 95% 신뢰구간 계산
+3. `geom_ribbon()`으로 신뢰구간 표현
+4. 선 그래프 추가
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "💡 정답 보기"
+
+library(tidyverse)
+
+disease <- read_csv(here::here("data", "processed", "disease_incidence.csv"))
+
+disease_ci <- disease %>%
+  mutate(
+    rate = cases / 100000 * 100000,  # per 100,000
+    se = sqrt(cases) / 100000 * 100000,
+    lower_ci = rate - 1.96 * se,
+    upper_ci = rate + 1.96 * se,
+    lower_ci = pmax(lower_ci, 0)  # 음수 방지
+  )
+
+ggplot(disease_ci, aes(x = month, y = rate)) +
+  geom_ribbon(aes(ymin = lower_ci, ymax = upper_ci),
+              fill = "steelblue", alpha = 0.3) +
+  geom_line(linewidth = 1, color = "darkblue") +
+  geom_point(size = 2, color = "darkblue") +
+  labs(title = "월별 발병률 (95% 신뢰구간)",
+       x = "월",
+       y = "발병률 (per 100,000)") +
+  scale_x_continuous(breaks = 1:12) +
+  theme_minimal()
+```
+:::
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 3.2: incidence2로 유행 곡선
+
+`outbreaks::ebola_sim` 데이터를 사용하여:
+
+1. 월별 유행 곡선 생성
+2. 성별로 색상 구분
+3. Stacked bar chart로 표현
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "💡 정답 보기"
+
+library(incidence2)
+library(outbreaks)
+
+linelist <- ebola_sim$linelist
+
+inc_monthly_gender <- incidence(
+  linelist,
+  date_index = "date_of_onset",
+  interval = "month",
+  groups = "gender"
+)
+
+plot(inc_monthly_gender, fill = "gender", stack = TRUE) +
+  scale_fill_brewer(palette = "Set1",
+                    labels = c("F" = "여성", "M" = "남성")) +
+  labs(title = "에볼라 유행 곡선 (월별, 성별)",
+       x = "월",
+       y = "월간 발생 건수",
+       fill = "성별") +
+  theme_minimal()
+```
+:::
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 3.3: 인구 피라미드 (도전!)
+
+다음 데이터로 COVID-19 환자의 인구 피라미드를 만드세요:
+
+```r
+covid_data <- tribble(
+  ~age_group, ~male, ~female,
+  "0-9",      30,   25,
+  "10-19",    60,   55,
+  "20-29",   150,  140,
+  "30-39",   200,  190,
+  "40-49",   250,  240,
+  "50-59",   300,  290,
+  "60-69",   280,  300,
+  "70-79",   200,  230,
+  "80+",     100,  150
+)
+```
+
+**요구사항:**
+- 남성은 왼쪽, 여성은 오른쪽
+- 축 레이블을 절대값으로
+- 색상: 남성 파랑, 여성 분홍
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: "💡 정답 보기"
+
+library(tidyverse)
+
+covid_data <- tribble(
+  ~age_group, ~male, ~female,
+  "0-9",      30,   25,
+  "10-19",    60,   55,
+  "20-29",   150,  140,
+  "30-39",   200,  190,
+  "40-49",   250,  240,
+  "50-59",   300,  290,
+  "60-69",   280,  300,
+  "70-79",   200,  230,
+  "80+",     100,  150
+)
+
+covid_pyramid <- covid_data %>%
+  mutate(male = -male) %>%
+  pivot_longer(cols = c(male, female),
+               names_to = "gender",
+               values_to = "cases")
+
+ggplot(covid_pyramid, aes(x = age_group, y = cases, fill = gender)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = function(x) abs(x),
+                     breaks = seq(-300, 300, 100)) +
+  scale_fill_manual(values = c("male" = "#2196F3", "female" = "#E91E63"),
+                    labels = c("male" = "남성", "female" = "여성")) +
+  labs(title = "COVID-19 확진자 연령-성별 분포",
+       x = "연령군",
+       y = "확진자 수 (명)",
+       fill = "성별") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+:::
+
+## 3.7 요약 및 다음 단계
+
+### 3.7.1 이 챕터에서 배운 내용
+
+✅ **역학 지표**
+- 발병률 vs. 유병률
+- 누적 발병률 vs. 발병 밀도
+- Person-years 개념
+
+✅ **시계열 시각화**
+- 기본 선 그래프
+- 신뢰구간 표현 (ribbon, errorbar)
+- 누적 발병률
+- 여러 질병 비교
+
+✅ **감염병 유행 곡선**
+- `incidence2` 패키지 사용
+- 일/주/월 단위 조정
+- 그룹별 층화 (성별, 지역)
+- 유행 단계 구분
+- 배가 시간 계산
+
+✅ **연령 표준화**
+- 표준화 필요성
+- 직접 표준화 (ASR)
+- 간접 표준화 (SMR)
+- 지역 간 비교 시각화
+
+✅ **인구 피라미드**
+- 기본 구조
+- 질병 발생 분포
+
+### 3.7.2 핵심 코드 템플릿
+
+**신뢰구간 리본:**
+```r
+ggplot(data, aes(x = time, y = rate)) +
+  geom_ribbon(aes(ymin = lower_ci, ymax = upper_ci),
+              fill = "steelblue", alpha = 0.3) +
+  geom_line(linewidth = 1)
+```
+
+**incidence2 유행 곡선:**
+```r
+inc <- incidence(data, date_index = "date", interval = "week", groups = "group")
+plot(inc, fill = "group")
+```
+
+**인구 피라미드:**
+```r
+data %>%
+  mutate(male = -male) %>%
+  pivot_longer(c(male, female), names_to = "gender", values_to = "pop") %>%
+  ggplot(aes(x = age_group, y = pop, fill = gender)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = function(x) abs(x))
+```
+
+::: {.callout-important}
+## 📖 다음 챕터
+
+**[Chapter 5: 임상통계 시각화](05-clinical-stats.qmd)**
+
+Chapter 5에서는 임상 연구와 임상시험에 특화된 시각화를 배웁니다:
+
+1. **생존 분석**: Kaplan-Meier 곡선, Log-rank 검정
+2. **Forest Plot**: 메타분석 결과 시각화
+3. **ROC 곡선**: 진단 검사 성능 평가
+4. **Funnel Plot**: 출판 편향 탐지
+
+임상 의사결정에 직접 활용할 수 있는 실전 기법을 다룹니다!
+:::
+
+::: {.callout-note}
+## 🔗 추가 학습 자료
+
+### 역학 패키지
+- **incidence2**: [공식 문서](https://www.reconverse.org/incidence2/)
+- **outbreaks**: [감염병 예제 데이터](https://www.reconverse.org/outbreaks/)
+- **surveil**: [연령 표준화 비율](https://connordonegan.github.io/surveil/)
+
+### 역학 시각화 가이드
+- **CDC Epi Curves**: [가이드라인](https://www.cdc.gov/training/quicklearns/epimode/)
+- **WHO Outbreak Toolkit**: [https://www.who.int/](https://www.who.int/)
+- **Epi R Handbook**: [https://epirhandbook.com/](https://epirhandbook.com/)
+
+### 데이터 출처
+- **Our World in Data**: [https://ourworldindata.org/](https://ourworldindata.org/)
+- **KCDC**: [질병관리청](https://www.kdca.go.kr/)
+- **Global Health Data Exchange**: [GHDx](http://ghdx.healthdata.org/)
+:::

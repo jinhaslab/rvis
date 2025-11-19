@@ -1,0 +1,1142 @@
+---
+title: "ggplot2 완벽 마스터하기"
+author: "연세대 산업보건 연구소"
+date: today
+---
+
+```{r setup, include=FALSE}
+# 한글 폰트 설정
+library(showtext)
+library(sysfonts)
+font_add_google("Noto Sans KR", "noto")
+showtext_auto()
+
+library(ggplot2)
+theme_set(theme_grey(base_family = "noto"))
+showtext_opts(dpi = 96)
+
+knitr::opts_chunk$set(
+  fig.showtext = TRUE,
+  dev = "png",
+  dpi = 96
+)
+```
+
+# ggplot2 완벽 마스터하기
+
+::: {.callout-note}
+## 🎯 학습 목표
+
+이 챕터를 마치면 다음을 할 수 있습니다:
+
+- 그래픽 문법(Grammar of Graphics)의 **7가지 구성 요소** 완벽 이해
+- `aes()` 함수로 변수를 시각적 속성에 매핑
+- 20개 이상의 `geom_*()` 함수 활용
+- `facet_wrap()`과 `facet_grid()`로 다차원 시각화
+- `scale_*()` 함수로 축과 색상 조정
+- 보건학 데이터에 적합한 그래프 유형 선택
+:::
+
+::: {.callout-tip}
+## 📚 이 챕터의 실습 데이터
+
+```r
+library(tidyverse)
+library(here)
+
+# 건강검진 데이터 (N=1,000)
+health <- read_csv(here("data", "processed", "health_survey.csv"))
+
+# 질병 발생률 데이터
+disease <- read_csv(here("data", "processed", "disease_incidence.csv"))
+```
+
+데이터가 없다면 [Chapter 1 Section 1.2.6](01-introduction.html#실습-데이터-생성-1-2분)을 참고하세요.
+:::
+
+## 2.1 그래픽 문법의 7가지 구성 요소
+
+Chapter 1에서 간략히 소개한 **Grammar of Graphics**를 이제 깊이 있게 배웁니다. Leland Wilkinson의 이론을 Hadley Wickham이 ggplot2로 구현한 이 체계는 모든 그래프를 7가지 구성 요소의 조합으로 이해합니다.
+
+### 2.1.1 데이터 (Data)
+
+**정의**: 시각화할 데이터프레임 또는 tibble
+
+ggplot2는 **tidy data** 형식을 선호합니다:
+- 각 변수는 열(column)
+- 각 관측치는 행(row)
+- 각 값은 셀(cell)
+
+**예제: 건강검진 데이터**
+
+```{r}
+#| eval: false
+#| echo: true
+
+library(tidyverse)
+
+# Tidy 형식의 데이터
+health <- tibble(
+  id = 1:5,
+  age = c(25, 30, 35, 40, 45),
+  bmi = c(22.5, 25.3, 28.1, 23.7, 26.4),
+  gender = c("F", "M", "M", "F", "F")
+)
+
+# ggplot에 데이터 전달
+ggplot(data = health)  # 빈 캔버스
+```
+
+::: {.callout-note}
+## 💡 Wide vs. Long 형식
+
+보건학 데이터는 종종 **wide 형식**으로 제공되지만, ggplot2는 **long 형식**을 선호합니다.
+
+**Wide 형식 (측정 시점이 열로):**
+```
+id   baseline_bp   month3_bp   month6_bp
+1    120           118         115
+2    140           135         130
+```
+
+**Long 형식 (ggplot2 선호):**
+```
+id   time       blood_pressure
+1    baseline   120
+1    month3     118
+1    month6     115
+2    baseline   140
+2    month3     135
+2    month6     130
+```
+
+**변환:**
+```r
+library(tidyr)
+
+# Wide → Long
+long_data <- wide_data %>%
+  pivot_longer(cols = contains("_bp"),
+               names_to = "time",
+               values_to = "blood_pressure")
+
+# Long → Wide
+wide_data <- long_data %>%
+  pivot_wider(names_from = time,
+              values_from = blood_pressure)
+```
+:::
+
+### 2.1.2 미학 매핑 (Aesthetic Mappings)
+
+**정의**: 데이터의 변수를 그래프의 시각적 속성에 연결
+
+`aes()` 함수는 "어떤 변수를 어디에 표현할지"를 정의합니다.
+
+**주요 Aesthetics:**
+
+| Aesthetic | 역할 | 적합한 변수 타입 | 예시 |
+|-----------|------|------------------|------|
+| `x`, `y` | 축 위치 | 연속형, 범주형 | `aes(x = age, y = bmi)` |
+| `color` | 점/선 색상 | 범주형, 연속형 | `aes(color = gender)` |
+| `fill` | 면 채우기 색상 | 범주형, 연속형 | `aes(fill = treatment)` |
+| `size` | 크기 | 연속형 | `aes(size = population)` |
+| `shape` | 점 모양 | 범주형 (최대 6개) | `aes(shape = disease_type)` |
+| `alpha` | 투명도 | 연속형 | `aes(alpha = confidence)` |
+| `linetype` | 선 유형 | 범주형 | `aes(linetype = group)` |
+
+**예제 1: 기본 매핑**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# x축에 나이, y축에 BMI
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point()
+```
+
+**예제 2: 색상으로 그룹 구분**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 성별로 색상 구분
+ggplot(health, aes(x = age, y = bmi, color = gender)) +
+  geom_point(size = 3)
+```
+
+**예제 3: 다중 매핑**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 색상 + 크기 + 모양
+ggplot(health, aes(x = age, y = bmi,
+                   color = gender,      # 성별로 색상
+                   size = glucose,      # 혈당으로 크기
+                   shape = smoking)) +  # 흡연 여부로 모양
+  geom_point(alpha = 0.7)
+```
+
+::: {.callout-warning}
+## ⚠️ aes() 안 vs. 밖
+
+**핵심 규칙**: 데이터 변수는 `aes()` **안**에, 고정값은 `aes()` **밖**에
+
+```r
+# ✅ 올바른 예
+ggplot(health, aes(x = age, y = bmi, color = gender)) +  # 변수 → aes 안
+  geom_point(size = 3, alpha = 0.7)  # 고정값 → aes 밖
+
+# ❌ 잘못된 예
+ggplot(health, aes(x = age, y = bmi, color = "blue")) +  # 모든 점이 빨강!
+  geom_point(aes(size = 3))  # 에러 발생
+```
+
+**왜 틀렸나요?**
+- `color = "blue"`를 `aes()` 안에 넣으면 ggplot은 "blue"라는 새로운 범주로 해석
+- `size = 3`은 변수가 아니므로 `aes()` 밖에 있어야 함
+:::
+
+### 2.1.3 기하학적 객체 (Geometries)
+
+**정의**: 데이터를 어떤 모양으로 표현할지 결정 (`geom_*` 함수)
+
+ggplot2는 40개 이상의 geom을 제공합니다. 보건학 연구에서 자주 사용하는 geom들:
+
+#### **1) 단변량 분포 (Univariate Distribution)**
+
+**A. 히스토그램 (`geom_histogram`)**
+
+연속형 변수의 분포를 막대로 표현합니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 나이 분포
+ggplot(health, aes(x = age)) +
+  geom_histogram(bins = 20, fill = "steelblue", color = "black") +
+  labs(title = "연구 대상자 나이 분포",
+       x = "나이 (세)",
+       y = "빈도 (명)") +
+  theme_minimal()
+```
+
+**주요 옵션:**
+- `bins`: 막대 개수 (기본값 30)
+- `binwidth`: 막대 너비 (예: `binwidth = 5`는 5세 단위)
+- `fill`: 채우기 색상
+- `color`: 테두리 색상
+
+::: {.callout-tip}
+## 💡 bins vs. binwidth
+
+```r
+# bins: 막대 개수 지정
+geom_histogram(bins = 10)  # 10개 막대
+
+# binwidth: 막대 너비 지정
+geom_histogram(binwidth = 5)  # 5세 단위로 묶기
+```
+
+**권장**: 데이터 범위에 따라 실험하며 최적값 찾기
+:::
+
+**B. 밀도 곡선 (`geom_density`)**
+
+히스토그램의 부드러운 버전으로, 확률 밀도 함수를 추정합니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+# BMI 분포 (성별 비교)
+ggplot(health, aes(x = bmi, fill = gender)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "BMI 분포 (성별)",
+       x = "체질량지수 (BMI)",
+       y = "밀도",
+       fill = "성별") +
+  theme_minimal()
+```
+
+**C. 박스플롯 (`geom_boxplot`)**
+
+5가지 요약 통계를 한눈에 보여줍니다:
+- 중앙값 (median)
+- Q1 (25th percentile)
+- Q3 (75th percentile)
+- 최소값 (Q1 - 1.5×IQR)
+- 최대값 (Q3 + 1.5×IQR)
+- 이상치 (outliers)
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 치료군별 혈압 비교
+ggplot(health, aes(x = treatment_group, y = blood_pressure, fill = treatment_group)) +
+  geom_boxplot() +
+  labs(title = "치료군별 혈압 분포",
+       x = "치료군",
+       y = "수축기 혈압 (mmHg)") +
+  theme_minimal() +
+  theme(legend.position = "none")  # 범례 제거 (x축에 이미 표시)
+```
+
+**D. 바이올린 플롯 (`geom_violin`)**
+
+박스플롯 + 밀도 곡선의 조합입니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+ggplot(health, aes(x = treatment_group, y = blood_pressure, fill = treatment_group)) +
+  geom_violin(alpha = 0.7) +
+  geom_boxplot(width = 0.2, fill = "white") +  # 박스플롯 추가
+  labs(title = "치료군별 혈압 분포 (Violin Plot)",
+       x = "치료군",
+       y = "수축기 혈압 (mmHg)") +
+  theme_minimal()
+```
+
+#### **2) 이변량 관계 (Bivariate Relationships)**
+
+**A. 산점도 (`geom_point`)**
+
+두 연속형 변수의 관계를 점으로 표현합니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 나이와 BMI의 관계
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point(alpha = 0.5, size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +  # 회귀선
+  labs(title = "나이와 BMI의 관계",
+       x = "나이 (세)",
+       y = "체질량지수 (BMI)") +
+  theme_minimal()
+```
+
+**B. 선 그래프 (`geom_line`)**
+
+시계열 데이터나 연속적인 추세를 표현합니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 월별 감염병 발생 추이
+disease <- read_csv(here("data", "processed", "disease_incidence.csv"))
+
+ggplot(disease, aes(x = month, y = cases)) +
+  geom_line(linewidth = 1, color = "darkblue") +
+  geom_point(size = 2, color = "darkblue") +
+  labs(title = "월별 감염병 발생 건수",
+       x = "월",
+       y = "발생 건수 (명)") +
+  theme_minimal()
+```
+
+**C. 막대 그래프 (`geom_bar` / `geom_col`)**
+
+범주형 데이터의 빈도 또는 값을 표현합니다.
+
+```r
+# geom_bar(): 자동으로 빈도 계산
+ggplot(health, aes(x = gender)) +
+  geom_bar()
+
+# geom_col(): y값을 직접 지정
+ggplot(summary_data, aes(x = category, y = mean_value)) +
+  geom_col()
+```
+
+**실전 예제:**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 성별 및 흡연 여부별 인원수
+health %>%
+  count(gender, smoking) %>%
+  ggplot(aes(x = gender, y = n, fill = smoking)) +
+  geom_col(position = "dodge") +  # 막대를 나란히 배치
+  labs(title = "성별 및 흡연 여부별 분포",
+       x = "성별",
+       y = "인원 (명)",
+       fill = "흡연 여부") +
+  theme_minimal()
+```
+
+**position 옵션:**
+- `position = "stack"`: 쌓기 (기본값)
+- `position = "dodge"`: 나란히
+- `position = "fill"`: 100% 누적
+
+#### **3) 통계 요약 시각화**
+
+**A. 평균과 오차 막대 (`stat_summary` + `geom_errorbar`)**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 치료군별 평균 혈압 ± 표준오차
+ggplot(health, aes(x = treatment_group, y = blood_pressure)) +
+  stat_summary(fun = mean, geom = "bar", fill = "steelblue") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  labs(title = "치료군별 평균 혈압 (Mean ± SE)",
+       x = "치료군",
+       y = "수축기 혈압 (mmHg)") +
+  theme_minimal()
+```
+
+**B. 회귀선 (`geom_smooth`)**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 선형 회귀
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  theme_minimal()
+
+# LOESS (국소 회귀)
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "loess", se = TRUE, color = "blue") +
+  theme_minimal()
+```
+
+**method 옵션:**
+- `"lm"`: 선형 회귀
+- `"loess"`: 국소 회귀 (비선형)
+- `"gam"`: 일반화 가법 모델
+
+### 2.1.4 통계 변환 (Statistical Transformations)
+
+**정의**: 원본 데이터를 요약하거나 변환
+
+모든 geom은 내부적으로 stat 함수를 사용합니다:
+
+| geom | 기본 stat | 변환 |
+|------|-----------|------|
+| `geom_bar()` | `stat_count()` | 빈도 계산 |
+| `geom_histogram()` | `stat_bin()` | 구간별 빈도 |
+| `geom_smooth()` | `stat_smooth()` | 회귀선 추정 |
+| `geom_boxplot()` | `stat_boxplot()` | 5-수 요약 |
+
+**예제: stat 직접 사용**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# geom_bar()와 동일
+ggplot(health, aes(x = gender)) +
+  stat_count(geom = "bar")
+
+# 백분율로 변환
+ggplot(health, aes(x = gender, y = after_stat(count)/sum(after_stat(count)))) +
+  geom_bar() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(y = "비율 (%)")
+```
+
+### 2.1.5 스케일 (Scales)
+
+**정의**: 데이터 값을 시각적 속성으로 변환하는 규칙
+
+`scale_<aes>_<type>()` 형식:
+- `<aes>`: x, y, color, fill, size 등
+- `<type>`: continuous, discrete, manual 등
+
+#### **A. 연속형 스케일**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# x축 범위 조정
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point() +
+  scale_x_continuous(limits = c(20, 60),
+                     breaks = seq(20, 60, by = 10)) +
+  scale_y_continuous(limits = c(15, 35),
+                     breaks = seq(15, 35, by = 5))
+```
+
+#### **B. 색상 스케일**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 수동 색상 지정
+ggplot(health, aes(x = age, y = bmi, color = gender)) +
+  geom_point() +
+  scale_color_manual(values = c("F" = "#E91E63", "M" = "#2196F3"))
+
+# ColorBrewer 팔레트
+ggplot(health, aes(x = age, y = bmi, color = treatment_group)) +
+  geom_point() +
+  scale_color_brewer(palette = "Set1")
+
+# Viridis (색맹 친화적)
+ggplot(health, aes(x = age, y = bmi, color = glucose)) +
+  geom_point() +
+  scale_color_viridis_c(option = "plasma")
+```
+
+**보건학 연구 권장 색상 팔레트:**
+- **범주형**: ColorBrewer "Set1", "Dark2"
+- **연속형**: Viridis "viridis", "plasma" (색맹 친화적)
+- **발산형**: ColorBrewer "RdBu" (위험도 표현)
+
+#### **C. 로그 스케일**
+
+역학 데이터에서 자주 사용됩니다 (발생률, 오즈비 등).
+
+```{r}
+#| eval: false
+#| echo: true
+
+# y축을 로그 스케일로
+ggplot(disease, aes(x = month, y = cases)) +
+  geom_line() +
+  scale_y_log10() +
+  labs(y = "발생 건수 (log scale)")
+```
+
+### 2.1.6 좌표계 (Coordinate System)
+
+**정의**: 데이터를 평면에 배치하는 방식
+
+#### **A. 축 뒤집기 (`coord_flip`)**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 수평 막대 그래프
+ggplot(health, aes(x = reorder(region, -cases), y = cases)) +
+  geom_col() +
+  coord_flip() +  # x와 y 축 교환
+  labs(x = "지역", y = "발생 건수")
+```
+
+#### **B. 고정 비율 (`coord_fixed`)**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# x축과 y축 비율 1:1 고정
+ggplot(health, aes(x = predicted_bmi, y = actual_bmi)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color = "red") +  # y=x 선
+  coord_fixed(ratio = 1) +
+  labs(title = "예측 BMI vs. 실제 BMI")
+```
+
+#### **C. 극좌표 (`coord_polar`)**
+
+파이 차트나 방사형 그래프에 사용됩니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 파이 차트
+health %>%
+  count(gender) %>%
+  ggplot(aes(x = "", y = n, fill = gender)) +
+  geom_col() +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "성별 분포")
+```
+
+::: {.callout-warning}
+## ⚠️ 파이 차트 사용 주의
+
+파이 차트는 시각적으로 매력적이지만, 인간의 눈은 **각도보다 길이를 더 정확하게 비교**합니다.
+
+**추천**: 3개 이하의 범주만 있을 때 사용. 그 외에는 막대 그래프 권장.
+:::
+
+### 2.1.7 면분할 (Faceting)
+
+**정의**: 하나의 변수로 여러 개의 하위 그래프로 분할
+
+#### **A. `facet_wrap()`: 1차원 분할**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 성별로 분할
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point() +
+  facet_wrap(~ gender) +
+  labs(title = "나이와 BMI의 관계 (성별)")
+```
+
+**주요 옵션:**
+- `ncol`: 열 개수
+- `nrow`: 행 개수
+- `scales`: 축 스케일 ("fixed", "free", "free_x", "free_y")
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 치료군별로 4열로 배치
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point() +
+  facet_wrap(~ treatment_group, ncol = 4, scales = "free_y")
+```
+
+#### **B. `facet_grid()`: 2차원 분할**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 성별(행) × 흡연 여부(열)
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point() +
+  facet_grid(gender ~ smoking) +
+  labs(title = "나이와 BMI (성별 × 흡연 여부)")
+```
+
+**문법:**
+- `facet_grid(rows ~ cols)`
+- `facet_grid(. ~ cols)`: 행만
+- `facet_grid(rows ~ .)`: 열만
+
+::: {.callout-note}
+## 💡 facet_wrap vs. facet_grid
+
+| 특징 | `facet_wrap()` | `facet_grid()` |
+|------|----------------|----------------|
+| 차원 | 1차원 | 2차원 |
+| 레이아웃 | 자동 감싸기 | 격자 구조 |
+| 축 공유 | 선택 가능 | 행/열별 공유 |
+| 사용 예 | 여러 지역 비교 | 성별×연령군 교차 분석 |
+
+**경험 법칙**: 변수 1개 → `facet_wrap`, 변수 2개 → `facet_grid`
+:::
+
+## 2.2 aes() 함수 완전 정복
+
+### 2.2.1 Global vs. Local Aesthetics
+
+**Global aes**: `ggplot()`에 정의 → 모든 레이어에 적용
+
+```{r}
+#| eval: false
+#| echo: true
+
+ggplot(health, aes(x = age, y = bmi)) +  # Global
+  geom_point() +
+  geom_smooth()  # 둘 다 age와 bmi 사용
+```
+
+**Local aes**: 특정 geom에만 정의 → 해당 레이어에만 적용
+
+```{r}
+#| eval: false
+#| echo: true
+
+ggplot(health, aes(x = age, y = bmi)) +
+  geom_point(aes(color = gender)) +  # 점만 색상
+  geom_smooth()  # 전체 데이터로 회귀선
+```
+
+### 2.2.2 Aesthetic 우선순위
+
+Local aes가 Global aes를 덮어씁니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+ggplot(health, aes(x = age, y = bmi, color = gender)) +  # Global: 성별로 색상
+  geom_point() +
+  geom_smooth(aes(color = NULL))  # Local: 색상 무시, 전체 데이터로 회귀선
+```
+
+### 2.2.3 계산된 변수 (Computed Variables)
+
+일부 geom은 계산된 변수를 제공합니다. `after_stat()`로 접근합니다.
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 히스토그램에서 밀도로 변환
+ggplot(health, aes(x = bmi)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30) +
+  geom_density(color = "red", linewidth = 1) +
+  labs(y = "밀도")
+```
+
+**자주 사용되는 계산 변수:**
+- `geom_histogram`: `count`, `density`, `ncount`, `ndensity`
+- `geom_smooth`: `y`, `ymin`, `ymax`, `se`
+- `stat_summary`: `y`, `ymin`, `ymax`
+
+## 2.3 보건학 데이터 시각화 실전
+
+### 2.3.1 연속형 변수의 분포
+
+**목표**: 데이터의 중심, 산포, 이상치 파악
+
+```{r}
+#| eval: false
+#| echo: true
+
+library(tidyverse)
+library(patchwork)  # 그래프 조합
+
+health <- read_csv(here::here("data", "processed", "health_survey.csv"))
+
+# 1) 히스토그램
+p1 <- ggplot(health, aes(x = bmi)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "black") +
+  labs(title = "BMI 분포 (히스토그램)",
+       x = "BMI", y = "빈도") +
+  theme_minimal()
+
+# 2) 밀도 곡선
+p2 <- ggplot(health, aes(x = bmi)) +
+  geom_density(fill = "steelblue", alpha = 0.5) +
+  labs(title = "BMI 분포 (밀도 곡선)",
+       x = "BMI", y = "밀도") +
+  theme_minimal()
+
+# 3) 박스플롯
+p3 <- ggplot(health, aes(y = bmi)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(title = "BMI 분포 (박스플롯)",
+       y = "BMI") +
+  theme_minimal()
+
+# 4) 바이올린 플롯
+p4 <- ggplot(health, aes(x = "", y = bmi)) +
+  geom_violin(fill = "steelblue", alpha = 0.5) +
+  geom_boxplot(width = 0.2, fill = "white") +
+  labs(title = "BMI 분포 (바이올린)",
+       x = "", y = "BMI") +
+  theme_minimal()
+
+# 4개 그래프 조합
+(p1 + p2) / (p3 + p4) +
+  plot_annotation(title = "BMI 분포의 다양한 시각화",
+                  tag_levels = "A")
+```
+
+### 2.3.2 범주형 × 연속형 변수
+
+**목표**: 그룹 간 차이 비교
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 성별 × BMI
+ggplot(health, aes(x = gender, y = bmi, fill = gender)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.2) +  # 개별 데이터 점 추가
+  stat_summary(fun = mean, geom = "point",
+               shape = 18, size = 3, color = "red") +  # 평균값 표시
+  labs(title = "성별에 따른 BMI 분포",
+       x = "성별",
+       y = "체질량지수 (BMI)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+### 2.3.3 시계열 데이터
+
+**목표**: 시간에 따른 변화 추이 파악
+
+```{r}
+#| eval: false
+#| echo: true
+
+disease <- read_csv(here::here("data", "processed", "disease_incidence.csv"))
+
+# 월별 발생 추이
+ggplot(disease, aes(x = month, y = cases)) +
+  geom_line(linewidth = 1, color = "darkblue") +
+  geom_point(size = 2, color = "darkblue") +
+  geom_smooth(method = "loess", se = TRUE, color = "red", alpha = 0.2) +
+  labs(title = "월별 감염병 발생 추이",
+       x = "월",
+       y = "발생 건수 (명)") +
+  scale_x_continuous(breaks = 1:12) +
+  theme_minimal()
+```
+
+### 2.3.4 상관관계 시각화
+
+**목표**: 두 연속형 변수 간 관계 탐색
+
+```{r}
+#| eval: false
+#| echo: true
+
+# BMI와 혈당의 관계
+ggplot(health, aes(x = bmi, y = glucose)) +
+  geom_point(alpha = 0.5, size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  geom_hline(yintercept = 126, linetype = "dashed", color = "orange") +  # 당뇨 기준선
+  annotate("text", x = 20, y = 130, label = "당뇨 기준 (126 mg/dL)",
+           color = "orange", hjust = 0) +
+  labs(title = "BMI와 공복 혈당의 관계",
+       subtitle = paste0("상관계수 r = ",
+                         round(cor(health$bmi, health$glucose, use = "complete.obs"), 2)),
+       x = "체질량지수 (BMI)",
+       y = "공복 혈당 (mg/dL)") +
+  theme_minimal()
+```
+
+## 2.4 층화(Stratification)와 역학적 사고
+
+**층화(Stratification)**는 역학 연구의 핵심 개념입니다. 혼란 변수(confounders)의 영향을 파악하고 제거하기 위해 사용됩니다.
+
+### 2.4.1 Simpson의 역설 (Simpson's Paradox)
+
+전체 데이터에서 보이는 관계가 하위 그룹에서는 반대로 나타나는 현상입니다.
+
+**예제: 치료 효과 평가**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 시뮬레이션 데이터
+simpsons_data <- tibble(
+  age_group = rep(c("Young", "Old"), each = 100),
+  treatment = rep(c("A", "B"), 100),
+  recovery_rate = c(
+    rnorm(50, mean = 80, sd = 10),  # Young + A
+    rnorm(50, mean = 75, sd = 10),  # Young + B
+    rnorm(50, mean = 60, sd = 10),  # Old + A
+    rnorm(50, mean = 55, sd = 10)   # Old + B
+  )
+)
+
+# 1) 전체 데이터 (층화 없음)
+p1 <- simpsons_data %>%
+  group_by(treatment) %>%
+  summarize(mean_recovery = mean(recovery_rate)) %>%
+  ggplot(aes(x = treatment, y = mean_recovery, fill = treatment)) +
+  geom_col() +
+  labs(title = "전체 평균 (층화 X)",
+       y = "회복률 (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# 2) 연령군별 층화
+p2 <- simpsons_data %>%
+  ggplot(aes(x = treatment, y = recovery_rate, fill = treatment)) +
+  geom_boxplot() +
+  facet_wrap(~ age_group) +
+  labs(title = "연령군별 회복률 (층화 O)",
+       y = "회복률 (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+library(patchwork)
+p1 + p2 +
+  plot_annotation(title = "Simpson's Paradox: 층화의 중요성")
+```
+
+### 2.4.2 혼란 변수 통제
+
+```{r}
+#| eval: false
+#| echo: true
+
+# BMI와 혈압의 관계 (연령 층화)
+health %>%
+  mutate(age_group = cut(age, breaks = c(0, 30, 40, 50, 100),
+                         labels = c("20대", "30대", "40대", "50대+"))) %>%
+  ggplot(aes(x = bmi, y = sbp, color = age_group)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ age_group, ncol = 2) +
+  labs(title = "BMI와 수축기 혈압의 관계 (연령군별)",
+       x = "체질량지수 (BMI)",
+       y = "수축기 혈압 (mmHg)",
+       color = "연령군") +
+  theme_minimal()
+```
+
+### 2.4.3 교호작용(Interaction) 탐색
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 성별에 따라 BMI-혈압 관계가 다른가?
+ggplot(health, aes(x = bmi, y = sbp, color = gender)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 1.5) +
+  labs(title = "BMI와 혈압의 관계 (성별 비교)",
+       subtitle = "기울기가 다르다 → 교호작용 존재",
+       x = "체질량지수 (BMI)",
+       y = "수축기 혈압 (mmHg)",
+       color = "성별") +
+  theme_minimal()
+```
+
+## 2.5 실전 연습문제
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 2.1: 기본 geom 마스터
+
+`health_survey.csv` 데이터를 사용하여:
+
+1. 혈당(glucose) 분포 히스토그램 (bins = 30)
+2. 성별(gender)로 구분한 혈당 밀도 곡선
+3. 성별(gender)에 따른 혈압(sbp) 박스플롯
+4. 나이(age)와 콜레스테롤(cholesterol)의 산점도 + 회귀선
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "💡 정답 보기"
+
+library(tidyverse)
+library(patchwork)
+
+health <- read_csv(here::here("data", "processed", "health_survey.csv"))
+
+# 1. 히스토그램
+p1 <- ggplot(health, aes(x = glucose)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "black") +
+  labs(title = "혈당 분포", x = "혈당 (mg/dL)", y = "빈도") +
+  theme_minimal()
+
+# 2. 밀도 곡선 (성별)
+p2 <- ggplot(health, aes(x = glucose, fill = gender)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "혈당 분포 (성별)", x = "혈당 (mg/dL)", y = "밀도") +
+  theme_minimal()
+
+# 3. 박스플롯
+p3 <- ggplot(health, aes(x = gender, y = sbp, fill = gender)) +
+  geom_boxplot() +
+  labs(title = "혈압 분포 (성별)", x = "성별", y = "수축기 혈압 (mmHg)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# 4. 산점도 + 회귀선
+p4 <- ggplot(health, aes(x = age, y = cholesterol)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "나이와 콜레스테롤", x = "나이 (세)", y = "총 콜레스테롤 (mg/dL)") +
+  theme_minimal()
+
+# 조합
+(p1 + p2) / (p3 + p4) +
+  plot_annotation(tag_levels = "A")
+```
+:::
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 2.2: Faceting 실습
+
+`health_survey.csv` 데이터에서:
+
+1. 성별(gender)과 흡연 여부(smoking)로 2차원 facet
+2. 각 facet에 BMI 히스토그램 표시
+3. 각 facet마다 축 스케일 자유롭게 조정
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "💡 정답 보기"
+
+health %>%
+  ggplot(aes(x = bmi)) +
+  geom_histogram(bins = 20, fill = "steelblue", color = "black") +
+  facet_grid(gender ~ smoking, scales = "free_y") +
+  labs(title = "BMI 분포 (성별 × 흡연 여부)",
+       x = "체질량지수 (BMI)",
+       y = "빈도 (명)") +
+  theme_minimal()
+```
+:::
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 2.3: 색상 스케일 조정
+
+`health_survey.csv` 데이터에서:
+
+1. BMI와 혈당의 산점도
+2. 점 색상을 나이(age)에 매핑
+3. Viridis "plasma" 색상 팔레트 사용
+4. 색상 범례 제목을 "나이 (세)"로 변경
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "💡 정답 보기"
+
+ggplot(health, aes(x = bmi, y = glucose, color = age)) +
+  geom_point(size = 2, alpha = 0.7) +
+  scale_color_viridis_c(option = "plasma", name = "나이 (세)") +
+  labs(title = "BMI, 혈당, 나이의 관계",
+       x = "체질량지수 (BMI)",
+       y = "공복 혈당 (mg/dL)") +
+  theme_minimal()
+```
+:::
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 2.4: 층화 분석 (도전!)
+
+`health_survey.csv` 데이터에서:
+
+1. BMI(x)와 수축기 혈압(y)의 관계 시각화
+2. 성별(color)로 구분
+3. 연령군(age_group: 20대, 30대, 40대, 50대+)으로 facet
+4. 각 그룹별 회귀선 추가
+
+**힌트**: `cut()` 함수로 연령군 생성
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "💡 정답 보기"
+
+health %>%
+  mutate(age_group = cut(age,
+                         breaks = c(0, 30, 40, 50, 100),
+                         labels = c("20대", "30대", "40대", "50대+"))) %>%
+  ggplot(aes(x = bmi, y = sbp, color = gender)) +
+  geom_point(alpha = 0.4, size = 1.5) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1) +
+  facet_wrap(~ age_group, ncol = 2) +
+  scale_color_manual(values = c("F" = "#E91E63", "M" = "#2196F3"),
+                     labels = c("F" = "여성", "M" = "남성")) +
+  labs(title = "BMI와 수축기 혈압의 관계 (성별 × 연령군)",
+       x = "체질량지수 (BMI)",
+       y = "수축기 혈압 (mmHg)",
+       color = "성별") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+:::
+
+## 2.6 요약 및 다음 단계
+
+### 2.6.1 이 챕터에서 배운 내용
+
+✅ **그래픽 문법의 7가지 구성 요소**
+1. Data: Tidy data 형식
+2. Aesthetics: `aes()` 함수로 변수 매핑
+3. Geometries: 20개 이상의 `geom_*` 함수
+4. Statistics: 데이터 변환과 요약
+5. Scales: 연속형/범주형/색상 스케일
+6. Coordinates: 축 조정, flip, polar
+7. Facets: `facet_wrap()`, `facet_grid()`
+
+✅ **보건학 데이터 시각화 실전**
+- 단변량 분포: 히스토그램, 밀도, 박스플롯
+- 이변량 관계: 산점도, 회귀선
+- 시계열: 선 그래프
+- 층화 분석: facet을 활용한 혼란 변수 통제
+
+✅ **역학적 사고**
+- Simpson의 역설
+- 혼란 변수 통제
+- 교호작용 탐색
+
+### 2.6.2 핵심 코드 템플릿
+
+**기본 구조:**
+```r
+ggplot(data = <DATA>, mapping = aes(<MAPPINGS>)) +
+  <GEOM_FUNCTION>() +
+  <SCALE_FUNCTION>() +
+  <FACET_FUNCTION>() +
+  <COORD_FUNCTION>() +
+  labs(<LABELS>) +
+  theme_<THEME>()
+```
+
+**층화 분석 템플릿:**
+```r
+data %>%
+  mutate(strata_var = cut(...)) %>%
+  ggplot(aes(x = exposure, y = outcome, color = confounder)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ strata_var) +
+  theme_minimal()
+```
+
+### 2.6.3 자주 사용하는 geom 정리
+
+| 목적 | geom | 예제 |
+|------|------|------|
+| 단변량 분포 | `geom_histogram()` | 나이 분포 |
+| 단변량 분포 | `geom_density()` | BMI 분포 (부드러운) |
+| 그룹 비교 | `geom_boxplot()` | 치료군별 혈압 |
+| 그룹 비교 | `geom_violin()` | 성별 BMI 분포 |
+| 상관관계 | `geom_point()` | BMI vs. 혈당 |
+| 추세선 | `geom_smooth()` | 회귀선, LOESS |
+| 시계열 | `geom_line()` | 월별 발생률 |
+| 범주형 빈도 | `geom_bar()` | 성별 분포 |
+| 평균 비교 | `geom_col()` + `geom_errorbar()` | 평균 ± SE |
+
+::: {.callout-important}
+## 📖 다음 챕터
+
+**[Chapter 3: 역학 데이터 시각화](03-epidemiology.qmd)**
+
+Chapter 3에서는 역학 연구에 특화된 시각화를 배웁니다:
+
+1. **유행 곡선 (Epidemic Curve)**: `incidence2` 패키지
+2. **발생률과 유병률**: 시계열 분석
+3. **연령 표준화 비율**: 인구 피라미드
+4. **생존 곡선 기초**: Kaplan-Meier 곡선 미리보기
+
+실제 감염병 데이터와 코호트 연구 데이터를 활용합니다!
+:::
+
+::: {.callout-note}
+## 🔗 추가 학습 자료
+
+### ggplot2 심화
+- **ggplot2 Book**: [https://ggplot2-book.org/](https://ggplot2-book.org/)
+- **R Graph Gallery**: [https://r-graph-gallery.com/](https://r-graph-gallery.com/)
+- **ggplot2 Cheat Sheet**: [RStudio Cheat Sheets](https://posit.co/resources/cheatsheets/)
+
+### 색상 선택
+- **ColorBrewer**: [https://colorbrewer2.org/](https://colorbrewer2.org/)
+- **Viridis**: [Viridis 패키지 문서](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html)
+- **색맹 시뮬레이터**: [Coblis](https://www.color-blindness.com/coblis-color-blindness-simulator/)
+
+### 보건학 시각화 예제
+- **Our World in Data**: [https://ourworldindata.org/](https://ourworldindata.org/)
+- **CDC Data Visualizations**: [https://www.cdc.gov/](https://www.cdc.gov/)
+- **Epi R Handbook**: [https://epirhandbook.com/](https://epirhandbook.com/)
+:::

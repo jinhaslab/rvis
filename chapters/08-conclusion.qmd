@@ -1,0 +1,207 @@
+---
+title: "결론 및 제언"
+---
+
+# 효과적인 보건 데이터 커뮤니케이션을 위한 제언
+
+::: {.callout-note}
+## 이 챕터의 목표
+
+- R 시각화 학습 여정 회고
+- 효과적인 데이터 커뮤니케이션 원칙
+- 추가 학습 자료 및 커뮤니티
+:::
+
+## 8.1 학습 여정 회고
+
+(내용 추가 예정 - PDF 페이지 24-25)
+
+우리는 다음 여정을 거쳤습니다:
+
+1. **ggplot2 기본 문법** (Ch 1-2)
+   - 그래픽 문법의 7가지 구성 요소
+   - aes(), geom, facet
+
+2. **역학 특화 시각화** (Ch 3-4)
+   - 유행 곡선 (incidence2)
+   - 연령 표준화 비율 (surveil)
+   - 공간 역학 (sf, tmap)
+
+3. **임상통계 시각화** (Ch 5)
+   - 생존 분석 (ggsurvfit)
+   - 메타 분석 (metafor)
+
+4. **출판 및 공유** (Ch 6-7)
+   - 출판 품질 (patchwork, ggpubr)
+   - 대화형 대시보드 (Shiny)
+
+## 8.2 효과적인 데이터 커뮤니케이션 원칙
+
+(내용 추가 예정 - PDF 페이지 25)
+
+### 8.2.1 목적에 맞는 도구 선택
+
+::: {.callout-tip}
+## 🎯 시각화 목적에 따른 선택
+
+| 목적 | 도구 | 예시 |
+|------|------|------|
+| **탐색** (Exploration) | 빠른 ggplot | EDA, 데이터 이해 |
+| **설명** (Explanation) | 출판 품질 ggplot | 논문 Figure |
+| **상호작용** (Interaction) | Plotly, Shiny | 대시보드, 웹앱 |
+:::
+
+### 8.2.2 통계적 정확성
+
+::: {.callout-warning}
+## ⚠️ 반드시 피해야 할 함정
+
+1. **연령 구조 미보정**: 조(Crude) 비율의 함정
+   - ✅ 해결: 연령 표준화 비율 (Ch 3.3)
+
+2. **SE vs CI 혼동**: geom_errorbar의 책임
+   - ✅ 해결: 올바른 통계량 선택 (Ch 5.3)
+
+3. **축 조작**: 0부터 시작하지 않는 y축
+   - ✅ 해결: `scale_y_continuous(limits = c(0, ...))`
+:::
+
+### 8.2.3 재현 가능한 연구
+
+```{r}
+#| eval: false
+#| echo: true
+
+# ✅ Good: 재현 가능
+source("code/setup.R")
+source("code/data-simulation.R")
+
+# 모든 분석이 스크립트로 기록됨
+# → 다른 연구자가 재현 가능
+
+# ❌ Bad: 클릭 기반 소프트웨어
+# → 재현 불가
+```
+
+## 8.3 추가 학습 자료
+
+### 8.3.1 필수 도서
+
+1. **Wickham, H. & Grolemund, G.** (2017). *R for Data Science*
+   - <https://r4ds.hadley.nz/>
+   - 📌 데이터 과학 전반
+
+2. **Wickham, H.** (2016). *ggplot2 Book*
+   - <https://ggplot2-book.org/>
+   - 📌 ggplot2 완전 정복
+
+3. **Batra, N. et al.** (2021). *The Epidemiologist R Handbook*
+   - <https://epirhandbook.com/>
+   - 📌 역학 실무 R
+
+### 8.3.2 온라인 리소스
+
+**시각화 갤러리:**
+- [R Graph Gallery](https://r-graph-gallery.com/)
+- [From Data to Viz](https://www.data-to-viz.com/)
+
+**커뮤니티:**
+- [RStudio Community](https://community.rstudio.com/)
+- [Stack Overflow - R tag](https://stackoverflow.com/questions/tagged/r)
+
+**블로그:**
+- [R-Bloggers](https://www.r-bloggers.com/)
+- [Cedric Scherer's ggplot2 Tutorials](https://www.cedricscherer.com/)
+
+### 8.3.3 특화 패키지
+
+계속 발전하는 R 생태계:
+
+```r
+# 최신 패키지 탐색
+browseURL("https://cran.r-project.org/web/packages/")
+browseURL("https://www.tidyverse.org/packages/")
+```
+
+## 8.4 커뮤니티 참여
+
+### 8.4.1 질문하기
+
+- Stack Overflow에 [재현 가능한 예제(reprex)](https://www.tidyverse.org/help/) 제공
+- RStudio Community에서 토론
+- GitHub Issues에 버그 리포트
+
+### 8.4.2 기여하기
+
+- 오픈소스 패키지 개발 참여
+- 블로그 글 작성
+- 튜토리얼 번역
+
+## 8.5 최종 체크리스트
+
+::: {.callout-tip icon="false"}
+## ✅ R 시각화 마스터 체크리스트
+
+**기초:**
+
+- [ ] ggplot2의 7가지 구성 요소 이해
+- [ ] aes() 매핑 자유자재로 활용
+- [ ] geom 선택 및 조합
+
+**역학:**
+
+- [ ] 유행 곡선 (incidence2)
+- [ ] 연령 표준화 비율 (surveil)
+- [ ] 공간 지도 (sf, tmap)
+
+**임상:**
+
+- [ ] 생존 곡선 (ggsurvfit)
+- [ ] 포레스트 플롯 (metafor)
+- [ ] SE vs CI 구분
+
+**출판:**
+
+- [ ] 다중 패널 (patchwork)
+- [ ] 학술지 스타일 (ggthemes, ggpubr)
+- [ ] 고해상도 저장 (ggsave)
+
+**고급:**
+
+- [ ] 인터랙티브 (plotly)
+- [ ] 대시보드 (Shiny)
+:::
+
+## 8.6 마치며
+
+데이터 시각화는 **기술**이자 **예술**이며, 무엇보다 **소통**입니다.
+
+이 책에서 배운 R 시각화 기법들이 여러분의 연구 결과를:
+
+- 🔍 **더 명확하게** 이해하고
+- 📊 **더 설득력 있게** 전달하며
+- 🌍 **더 많은 사람들에게** 공유하는 데
+
+도움이 되기를 바랍니다.
+
+---
+
+::: {.callout-note}
+## 📬 연락하기
+
+- **이메일**: your-email@example.com
+- **GitHub**: [github.com/your-repo](https://github.com)
+- **웹사이트**: [your-website.com](https://your-website.com)
+
+질문, 피드백, 개선 제안을 언제든 환영합니다!
+:::
+
+::: {.callout-important appearance="simple"}
+## 🎉 축하합니다!
+
+**R 기반 보건학 시각화** 과정을 완료하셨습니다!
+
+이제 여러분은 ggplot2부터 Shiny까지, 보건학 데이터를 전문적으로 시각화할 수 있는 역량을 갖추셨습니다.
+
+계속해서 배우고, 실습하고, 공유하세요! 🚀
+:::

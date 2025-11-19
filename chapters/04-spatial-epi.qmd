@@ -1,0 +1,372 @@
+---
+title: "공간 역학 데이터 시각화"
+author: "연세대 산업보건 연구소"
+date: today
+---
+
+```{r setup, include=FALSE}
+# 한글 폰트 설정
+library(showtext)
+library(sysfonts)
+font_add_google("Noto Sans KR", "noto")
+showtext_auto()
+
+library(ggplot2)
+theme_set(theme_grey(base_family = "noto"))
+showtext_opts(dpi = 96)
+
+knitr::opts_chunk$set(
+  fig.showtext = TRUE,
+  dev = "png",
+  dpi = 96
+)
+```
+
+# 공간 역학 데이터 시각화
+
+::: {.callout-note}
+## 🎯 학습 목표
+
+이 챕터를 마치면 다음을 할 수 있습니다:
+
+- **sf 패키지**로 공간 데이터를 R에서 처리
+- 역학 데이터와 지리 데이터 결합하여 코로플레스 맵 제작
+- **ggplot2**와 **tmap**으로 전문적인 지도 시각화
+- 공간 패턴을 해석하고 클러스터 탐지
+- 지역별 질병 부담 비교 및 표준화
+:::
+
+::: {.callout-tip}
+## 📦 필요한 패키지
+
+```r
+install.packages(c("sf", "rnaturalearth", "rnaturalearthdata", "tmap"))
+```
+:::
+
+## 4.1 공간 데이터의 기초
+
+### 4.1.1 Simple Features (sf)란?
+
+**sf (Simple Features for R)**는 공간 데이터를 다루는 현대적인 R 패키지입니다.
+
+**주요 특징:**
+- tidyverse와 완벽 호환 (dplyr, ggplot2 등)
+- GDAL/GEOS 기반으로 빠르고 안정적
+- 데이터프레임처럼 다룰 수 있는 직관적 구조
+
+**좌표계 (CRS, Coordinate Reference System):**
+- **WGS84 (EPSG:4326)**: 경도/위도 좌표계 (GPS 표준)
+- **Korea 2000 (EPSG:5179)**: 한국 평면직각좌표계
+- **Web Mercator (EPSG:3857)**: 웹 지도용
+
+### 4.1.2 한국 지도 데이터 가져오기
+
+```{r}
+#| eval: true
+#| echo: true
+#| warning: false
+
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+
+# 세계 지도에서 한국 추출
+korea <- ne_countries(scale = "medium", country = "South Korea", returnclass = "sf")
+
+# 구조 확인
+glimpse(korea)
+```
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-korea-basic
+#| fig-cap: "한국 기본 지도"
+
+# 기본 플롯
+ggplot(data = korea) +
+  geom_sf(fill = "lightblue", color = "black") +
+  theme_minimal() +
+  labs(title = "대한민국")
+```
+
+## 4.2 시뮬레이션 데이터로 코로플레스 맵 제작
+
+실습을 위해 시도별 가상 질병 데이터를 만들겠습니다.
+
+### 4.2.1 시뮬레이션 데이터 생성
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 한국 17개 시도 데이터 생성
+set.seed(123)
+regional_disease <- tibble(
+  region = c("서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+             "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"),
+  population = c(9700000, 3400000, 2400000, 3000000, 1500000, 1500000, 1100000, 360000,
+                 13500000, 1500000, 1600000, 2100000, 1800000, 1800000, 2600000, 3300000, 670000),
+  cases = c(980, 340, 245, 305, 155, 152, 112, 37,
+            1360, 153, 163, 214, 183, 185, 265, 335, 68),
+  deaths = c(98, 34, 25, 31, 16, 15, 11, 4,
+             136, 15, 16, 21, 18, 19, 27, 34, 7)
+) %>%
+  mutate(
+    incidence_rate = (cases / population) * 100000,  # 인구 10만명당
+    case_fatality = (deaths / cases) * 100  # 치명률 (%)
+  )
+
+# 데이터 확인
+head(regional_disease)
+```
+
+### 4.2.2 간단한 점 지도 (Point Map)
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-point-map
+#| fig-cap: "시도별 발생률 (원 크기 비례)"
+
+# 시도별 대략적인 좌표 (중심점)
+region_coords <- tibble(
+  region = c("서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+             "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"),
+  lon = c(126.98, 129.08, 128.60, 126.71, 126.85, 127.38, 129.31, 127.29,
+          127.18, 128.21, 127.70, 126.80, 127.15, 126.99, 128.89, 128.25, 126.53),
+  lat = c(37.57, 35.18, 35.87, 37.46, 35.16, 36.35, 35.54, 36.48,
+          37.41, 37.82, 36.64, 36.52, 35.72, 34.86, 36.25, 35.46, 33.49)
+)
+
+# 데이터 결합
+map_data <- regional_disease %>%
+  left_join(region_coords, by = "region")
+
+# 점 지도
+ggplot() +
+  geom_sf(data = korea, fill = "grey95", color = "black") +
+  geom_point(data = map_data,
+             aes(x = lon, y = lat, size = incidence_rate, color = incidence_rate),
+             alpha = 0.7) +
+  scale_size_continuous(name = "발생률\n(인구 10만명당)", range = c(3, 15)) +
+  scale_color_viridis_c(name = "발생률\n(인구 10만명당)", option = "plasma") +
+  theme_minimal() +
+  labs(title = "시도별 질병 발생률 분포",
+       subtitle = "원의 크기와 색상이 발생률에 비례") +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(face = "bold", size = 14)
+  )
+```
+
+### 4.2.3 막대 그래프로 지역 비교
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-regional-bar
+#| fig-cap: "시도별 발생률 순위"
+
+# 발생률 순위
+regional_disease %>%
+  arrange(desc(incidence_rate)) %>%
+  mutate(region = fct_reorder(region, incidence_rate)) %>%
+  ggplot(aes(x = region, y = incidence_rate, fill = incidence_rate)) +
+  geom_col(alpha = 0.8) +
+  geom_text(aes(label = round(incidence_rate, 1)),
+            hjust = -0.1, size = 3) +
+  scale_fill_viridis_c(option = "plasma") +
+  coord_flip() +
+  labs(
+    title = "시도별 질병 발생률 (인구 10만명당)",
+    x = NULL,
+    y = "발생률 (per 100,000)",
+    fill = "발생률"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14)
+  )
+```
+
+## 4.3 치명률 (Case Fatality Rate) 분석
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-cfr-comparison
+#| fig-cap: "발생률 vs 치명률 산점도"
+
+ggplot(regional_disease, aes(x = incidence_rate, y = case_fatality)) +
+  geom_point(aes(size = population, color = region), alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, color = "red", linetype = "dashed") +
+  geom_text(aes(label = region), vjust = -0.8, size = 3, check_overlap = TRUE) +
+  scale_size_continuous(name = "인구", labels = scales::comma) +
+  labs(
+    title = "발생률과 치명률의 관계",
+    x = "발생률 (인구 10만명당)",
+    y = "치명률 (%)",
+    color = "시도"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "bottom"
+  )
+```
+
+## 4.4 인구 표준화: 공정한 비교를 위해
+
+**문제**: 인구가 많은 지역이 발생 건수가 많을 수 있음
+
+**해결**: **표준화 발생비 (SIR, Standardized Incidence Ratio)** 사용
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 전국 평균 발생률
+national_rate <- sum(regional_disease$cases) / sum(regional_disease$population) * 100000
+
+# SIR 계산
+regional_disease_sir <- regional_disease %>%
+  mutate(
+    expected_cases = (population / 100000) * national_rate,
+    SIR = (cases / expected_cases) * 100,
+    SIR_category = case_when(
+      SIR < 80 ~ "매우 낮음",
+      SIR < 95 ~ "낮음",
+      SIR < 105 ~ "평균",
+      SIR < 120 ~ "높음",
+      TRUE ~ "매우 높음"
+    )
+  )
+
+# SIR 결과
+regional_disease_sir %>%
+  select(region, cases, expected_cases, SIR, SIR_category) %>%
+  arrange(desc(SIR))
+```
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-sir-map
+#| fig-cap: "표준화 발생비 (SIR) - 전국 평균 대비"
+
+# SIR 점 지도
+map_data_sir <- regional_disease_sir %>%
+  left_join(region_coords, by = "region")
+
+ggplot() +
+  geom_sf(data = korea, fill = "grey95", color = "black") +
+  geom_point(data = map_data_sir,
+             aes(x = lon, y = lat, size = abs(SIR - 100), color = SIR),
+             alpha = 0.7) +
+  scale_size_continuous(name = "전국 평균과의\n차이", range = c(3, 15)) +
+  scale_color_gradient2(
+    name = "SIR",
+    low = "blue", mid = "white", high = "red",
+    midpoint = 100,
+    breaks = c(80, 90, 100, 110, 120)
+  ) +
+  theme_minimal() +
+  labs(
+    title = "표준화 발생비 (SIR)",
+    subtitle = "100 = 전국 평균, >100 = 평균보다 높음, <100 = 평균보다 낮음"
+  ) +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(face = "bold", size = 14)
+  )
+```
+
+## 4.5 공간 데이터 분석 워크플로우
+
+### 4.5.1 실전 분석 단계
+
+**1단계: 데이터 수집**
+- 질병 발생 데이터 (보건소, 질병관리청)
+- 인구 데이터 (통계청)
+- 공간 경계 파일 (Shapefile, GeoJSON)
+
+**2단계: 데이터 전처리**
+```r
+# 표준화
+- 인구 10만명당 발생률
+- 연령 표준화 (직접/간접 표준화)
+- SIR 계산
+```
+
+**3단계: 공간 결합**
+```r
+# sf 객체와 데이터 결합
+combined_data <- left_join(spatial_data, disease_data, by = "region_id")
+```
+
+**4단계: 시각화**
+- 코로플레스 맵: `geom_sf()` + `scale_fill_*`
+- 점 지도: `geom_point()` with coordinates
+- 복합 레이어: 지도 + 점 + 라벨
+
+**5단계: 해석**
+- 공간 클러스터 탐지
+- 핫스팟 분석
+- 시계열 공간 변화
+
+## 4.6 유용한 팁과 트러블슈팅
+
+### 4.6.1 좌표계 변환
+
+```{r}
+#| eval: false
+#| echo: true
+
+# WGS84 → UTM-K (EPSG:5179) 변환
+korea_utm <- st_transform(korea, crs = 5179)
+
+# 좌표계 확인
+st_crs(korea_utm)
+```
+
+### 4.6.2 공간 데이터 소스
+
+**무료 공간 데이터:**
+- **대한민국 행정구역**: [국가공간정보포털](http://data.nsdi.go.kr)
+- **세계 지도**: `rnaturalearth` 패키지
+- **OpenStreetMap**: `osmdata` 패키지
+- **통계청**: [SGIS](https://sgis.kostat.go.kr)
+
+### 4.6.3 ggplot2 vs tmap 선택 가이드
+
+| 기준 | ggplot2 + geom_sf() | tmap |
+|------|---------------------|------|
+| **학습 곡선** | tidyverse 사용자에게 쉬움 | 전용 문법 필요 |
+| **커스터마이징** | 매우 유연 | 템플릿 기반 |
+| **인터랙티브** | plotly로 변환 가능 | 내장 지원 (`tmap_mode("view")`) |
+| **출판 품질** | 완벽 제어 | 빠른 프로토타입 |
+| **권장 용도** | 논문, 세밀한 조정 | 탐색적 분석, 대시보드 |
+
+## 요약
+
+✅ **sf 패키지**로 공간 데이터를 데이터프레임처럼 다룸
+✅ **발생률 계산**: 인구 10만명당 표준화 필수
+✅ **SIR (표준화 발생비)**: 공정한 지역 간 비교
+✅ **시각화 전략**: 점 지도 vs 코로플레스 맵
+✅ **데이터 소스**: 국가공간정보포털, rnaturalearth
+
+::: {.callout-tip}
+## 📚 더 배우기
+
+**고급 공간 분석:**
+- `spdep` 패키지: 공간 자기상관, Moran's I
+- `spatstat` 패키지: 점 패턴 분석
+- `ggspatial` 패키지: 북쪽 화살표, 축척 추가
+
+**인터랙티브 지도:**
+- `leaflet` 패키지: 웹 인터랙티브 지도
+- `mapview` 패키지: 빠른 탐색용 지도
+:::

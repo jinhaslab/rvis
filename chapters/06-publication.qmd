@@ -1,0 +1,1140 @@
+---
+title: "논문 출판 수준 시각화"
+author: "연세대 산업보건 연구소"
+date: today
+---
+
+```{r setup, include=FALSE}
+# 한글 폰트 설정
+library(showtext)
+library(sysfonts)
+font_add_google("Noto Sans KR", "noto")
+showtext_auto()
+
+library(ggplot2)
+theme_set(theme_grey(base_family = "noto"))
+showtext_opts(dpi = 96)
+
+knitr::opts_chunk$set(
+  fig.showtext = TRUE,
+  dev = "png",
+  dpi = 96
+)
+```
+
+# 논문 출판 수준 시각화
+
+::: {.callout-note}
+## 🎯 학습 목표
+
+이 챕터를 마치면 다음을 할 수 있습니다:
+
+- **ggrepel**로 텍스트 라벨 겹침 방지 및 가독성 향상
+- **patchwork**로 다중 패널 Figure 조합 (A, B, C 라벨링)
+- **ggthemes**와 **ggpubr**로 학술지 스타일 적용
+- **ggsave**로 고해상도 그래프 저장 (300+ DPI)
+- 색맹 친화적 색상 팔레트 사용
+- Nature, Science, NEJM 등 주요 학술지 요구사항 준수
+- 출판 품질 체크리스트로 최종 검증
+:::
+
+::: {.callout-tip}
+## 📚 이 챕터의 핵심
+
+학술 논문이나 학회 발표를 위해서는 단순히 "예쁜" 그래프가 아닌, **재현 가능하고 정확하며 전문적인** 시각화가 필요합니다. 이 챕터에서는 ggplot2를 출판 수준으로 끌어올리는 고급 기법을 배웁니다.
+
+**학습 순서:**
+1. 텍스트 라벨 최적화 (ggrepel)
+2. 다중 플롯 조합 (patchwork)
+3. 학술지 스타일 테마 (ggthemes, ggpubr)
+4. 고해상도 저장 및 포맷
+5. 색상 접근성 (colorblind-friendly)
+6. 출판 체크리스트
+:::
+
+## 6.1 텍스트 라벨 최적화: ggrepel
+
+### 6.1.1 텍스트 라벨 겹침 문제
+
+보건학 연구에서 산점도나 volcano plot에 유전자 이름, 환자 ID, 지역명 등의 라벨을 추가할 때 겹침 문제가 자주 발생합니다.
+
+**문제 예시: geom_text()의 한계**
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-text-overlap
+#| fig-cap: "geom_text()의 텍스트 겹침 문제"
+#| warning: false
+
+library(tidyverse)
+
+# 상위 10개 차량만 라벨링
+mtcars_labeled <- mtcars %>%
+  tibble::rownames_to_column("model") %>%
+  arrange(desc(mpg)) %>%
+  slice(1:10)
+
+# 문제: 라벨이 서로 겹침
+ggplot(mtcars_labeled, aes(x = wt, y = mpg, label = model)) +
+  geom_point(color = "steelblue", size = 3) +
+  geom_text(size = 3, vjust = -0.5) +  # 텍스트가 겹침!
+  labs(
+    title = "연비 상위 10개 차량 (geom_text - 겹침 발생)",
+    x = "무게 (1000 lbs)",
+    y = "연비 (mpg)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 6.1.2 ggrepel 패키지 활용
+
+**ggrepel**은 라벨이 점과 서로 겹치지 않도록 자동으로 위치를 조정합니다.
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-text-repel
+#| fig-cap: "ggrepel로 해결한 텍스트 배치"
+#| warning: false
+
+library(ggrepel)
+
+# 해결: 라벨이 자동으로 위치 조정
+ggplot(mtcars_labeled, aes(x = wt, y = mpg, label = model)) +
+  geom_point(color = "steelblue", size = 3) +
+  geom_text_repel(
+    size = 3,
+    box.padding = 0.5,      # 라벨 주변 여백
+    point.padding = 0.3,    # 점 주변 여백
+    segment.color = "grey50",  # 연결선 색상
+    max.overlaps = 20       # 최대 겹침 허용 수
+  ) +
+  labs(
+    title = "연비 상위 10개 차량 (geom_text_repel - 겹침 없음)",
+    x = "무게 (1000 lbs)",
+    y = "연비 (mpg)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 6.1.3 실전 예제: Volcano Plot
+
+역학 및 유전체 연구에서 자주 사용되는 volcano plot에 유의미한 유전자만 라벨링:
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-volcano-plot
+#| fig-cap: "Volcano Plot with ggrepel (유전체 연구 스타일)"
+#| warning: false
+
+# 모의 유전체 데이터 생성
+set.seed(42)
+gene_data <- tibble(
+  gene = paste0("Gene", 1:100),
+  log2FC = rnorm(100, mean = 0, sd = 1.5),
+  pvalue = runif(100, 0, 0.1)
+) %>%
+  mutate(
+    neg_log10p = -log10(pvalue),
+    significant = ifelse(abs(log2FC) > 1 & pvalue < 0.05, "Significant", "NS"),
+    label = ifelse(abs(log2FC) > 1.5 & pvalue < 0.01, gene, "")
+  )
+
+# Volcano plot
+ggplot(gene_data, aes(x = log2FC, y = neg_log10p)) +
+  geom_point(aes(color = significant), alpha = 0.6, size = 2) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed", color = "blue") +
+  geom_text_repel(
+    aes(label = label),
+    size = 3,
+    max.overlaps = 15,
+    box.padding = 0.5
+  ) +
+  scale_color_manual(values = c("NS" = "gray", "Significant" = "red")) +
+  labs(
+    title = "Volcano Plot: 유전자 발현 차이",
+    x = "Log2 Fold Change",
+    y = "-Log10(P-value)",
+    color = "Significance"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(legend.position = "top")
+```
+
+::: {.callout-tip}
+## 💡 ggrepel 주요 옵션
+
+| 옵션 | 설명 | 기본값 |
+|------|------|--------|
+| `box.padding` | 라벨 박스 주변 여백 | 0.25 |
+| `point.padding` | 점 주변 여백 | 1e-06 |
+| `segment.color` | 연결선 색상 | "black" |
+| `segment.size` | 연결선 두께 | 0.5 |
+| `max.overlaps` | 허용 최대 겹침 수 | 10 |
+| `min.segment.length` | 최소 연결선 길이 | 0.5 |
+| `force` | 반발력 강도 | 1 |
+
+**실전 팁**: 라벨이 많을 때는 `max.overlaps`를 늘리고, `force`를 조정하여 배치를 최적화하세요.
+:::
+
+## 6.2 다중 플롯 조합: patchwork
+
+### 6.2.1 왜 patchwork인가?
+
+학술 논문에서는 여러 그래프를 하나의 Figure로 조합해야 합니다 (e.g., Figure 1A, 1B, 1C). **patchwork** 패키지는 직관적인 연산자로 이를 가능하게 합니다:
+
+- `+`: 나란히 또는 순서대로 배치
+- `|`: 옆으로 나란히
+- `/`: 위아래로 쌓기
+- `()`: 그룹화
+
+**기존 방법 (gridExtra, cowplot)의 문제점:**
+- 복잡한 문법
+- 축 정렬 어려움
+- 라벨링 불편
+
+**patchwork의 장점:**
+- 간결한 문법 (`|`, `/` 연산자)
+- 자동 축 정렬
+- 자동 Figure 라벨 (A, B, C)
+
+### 6.2.2 기본 사용법
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-patchwork-basic
+#| fig-cap: "patchwork로 조합한 다중 패널 Figure"
+#| fig-width: 10
+#| fig-height: 4
+#| warning: false
+
+library(patchwork)
+
+# 3개의 독립적인 플롯 생성
+p1 <- ggplot(mtcars, aes(x = mpg, y = disp)) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "연비 vs. 배기량", x = "MPG", y = "Displacement") +
+  theme_bw()
+
+p2 <- ggplot(mtcars, aes(x = factor(cyl), y = mpg, fill = factor(cyl))) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(title = "실린더별 연비", x = "Cylinders", y = "MPG") +
+  theme_bw()
+
+p3 <- ggplot(mtcars, aes(x = hp)) +
+  geom_histogram(bins = 15, fill = "coral", color = "black") +
+  labs(title = "마력 분포", x = "Horsepower", y = "Count") +
+  theme_bw()
+
+# 조합: p1과 p2를 나란히, 그 아래 p3
+(p1 | p2) / p3 +
+  plot_annotation(
+    title = "자동차 성능 분석 종합",
+    tag_levels = "A",  # A, B, C 자동 라벨
+    theme = theme(plot.title = element_text(size = 14, face = "bold"))
+  )
+```
+
+### 6.2.3 고급 레이아웃
+
+**예제 1: 복잡한 레이아웃**
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-patchwork-advanced
+#| fig-cap: "복잡한 레이아웃 예제"
+#| fig-width: 10
+#| fig-height: 8
+#| warning: false
+
+# 보건학 데이터 시뮬레이션
+set.seed(123)
+health_sim <- tibble(
+  age = rnorm(200, mean = 45, sd = 15),
+  bmi = rnorm(200, mean = 25, sd = 4),
+  sbp = rnorm(200, mean = 130, sd = 20),
+  gender = sample(c("M", "F"), 200, replace = TRUE)
+)
+
+# 4개 플롯 생성
+p_age_bmi <- ggplot(health_sim, aes(x = age, y = bmi, color = gender)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "나이와 BMI", x = "Age", y = "BMI") +
+  theme_minimal()
+
+p_age_sbp <- ggplot(health_sim, aes(x = age, y = sbp, color = gender)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "나이와 혈압", x = "Age", y = "SBP (mmHg)") +
+  theme_minimal()
+
+p_bmi_dist <- ggplot(health_sim, aes(x = bmi, fill = gender)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "BMI 분포", x = "BMI", y = "Density") +
+  theme_minimal()
+
+p_sbp_box <- ggplot(health_sim, aes(x = gender, y = sbp, fill = gender)) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(title = "성별 혈압", x = "Gender", y = "SBP (mmHg)") +
+  theme_minimal()
+
+# 레이아웃: 2x2 그리드
+(p_age_bmi | p_age_sbp) / (p_bmi_dist | p_sbp_box) +
+  plot_annotation(
+    title = "건강검진 데이터 종합 분석",
+    tag_levels = "A",
+    tag_suffix = ")",
+    theme = theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5))
+  )
+```
+
+**예제 2: 불균등 배치 (한 플롯이 2열 차지)**
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-patchwork-unequal
+#| fig-cap: "불균등 패널 배치"
+#| fig-width: 10
+#| fig-height: 6
+#| warning: false
+
+# 플롯 생성
+p_main <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point(size = 2) +
+  labs(title = "붓꽃 꽃받침 크기", x = "Sepal Length", y = "Sepal Width") +
+  theme_bw()
+
+p_hist_x <- ggplot(iris, aes(x = Sepal.Length, fill = Species)) +
+  geom_histogram(bins = 20, alpha = 0.7) +
+  labs(title = "Sepal Length 분포") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+p_hist_y <- ggplot(iris, aes(x = Sepal.Width, fill = Species)) +
+  geom_histogram(bins = 20, alpha = 0.7) +
+  labs(title = "Sepal Width 분포") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+# 레이아웃: p_main이 더 큰 공간 차지
+p_main / (p_hist_x | p_hist_y) +
+  plot_layout(heights = c(2, 1)) +  # 높이 비율 2:1
+  plot_annotation(tag_levels = "A")
+```
+
+::: {.callout-tip}
+## 💡 patchwork 주요 함수
+
+| 함수 | 기능 | 예시 |
+|------|------|------|
+| `plot_annotation()` | 전체 제목, 라벨 추가 | `tag_levels = "A"` |
+| `plot_layout()` | 배치 설정 | `ncol = 2, heights = c(2, 1)` |
+| `&` | 모든 플롯에 테마 일괄 적용 | `(p1 | p2) & theme_bw()` |
+| `*` | 중첩 배치 | `p1 + inset_element(p2, ...)` |
+
+**tag_levels 옵션:**
+- `"A"`: A, B, C (대문자)
+- `"a"`: a, b, c (소문자)
+- `"1"`: 1, 2, 3 (숫자)
+- `"I"`: I, II, III (로마 숫자)
+:::
+
+## 6.3 학술지 스타일: ggthemes & ggpubr
+
+### 6.3.1 ggplot2 내장 테마
+
+ggplot2는 기본적으로 8가지 테마를 제공합니다:
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-builtin-themes
+#| fig-cap: "ggplot2 내장 테마 비교"
+#| fig-width: 10
+#| fig-height: 10
+#| warning: false
+
+library(patchwork)
+
+# 기본 플롯
+base_plot <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point(color = "steelblue", size = 2) +
+  labs(title = "테마별 비교", x = "Weight", y = "MPG")
+
+# 8가지 테마 적용
+p_gray <- base_plot + theme_gray() + labs(subtitle = "theme_gray() [기본값]")
+p_bw <- base_plot + theme_bw() + labs(subtitle = "theme_bw()")
+p_minimal <- base_plot + theme_minimal() + labs(subtitle = "theme_minimal()")
+p_classic <- base_plot + theme_classic() + labs(subtitle = "theme_classic()")
+p_light <- base_plot + theme_light() + labs(subtitle = "theme_light()")
+p_dark <- base_plot + theme_dark() + labs(subtitle = "theme_dark()")
+p_void <- base_plot + theme_void() + labs(subtitle = "theme_void()")
+p_linedraw <- base_plot + theme_linedraw() + labs(subtitle = "theme_linedraw()")
+
+# 조합
+(p_gray | p_bw | p_minimal | p_classic) /
+(p_light | p_dark | p_void | p_linedraw) +
+  plot_annotation(
+    title = "ggplot2 내장 테마 8종",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+```
+
+**학술지별 추천 테마:**
+
+| 학술지 | 추천 테마 | 특징 |
+|--------|-----------|------|
+| **Nature, Science** | `theme_classic()` | 축만 표시, 격자 없음 |
+| **NEJM, Lancet** | `theme_bw()` | 흰색 배경, 검은 테두리 |
+| **PLOS ONE** | `theme_minimal()` | 최소한의 요소 |
+| **프레젠테이션** | `theme_minimal()` | 깔끔하고 가독성 높음 |
+
+### 6.3.2 ggthemes 패키지
+
+**ggthemes**는 Economist, Wall Street Journal 등 유명 출판물의 스타일을 제공합니다.
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-ggthemes
+#| fig-cap: "ggthemes 패키지 스타일"
+#| fig-width: 10
+#| fig-height: 6
+#| warning: false
+
+library(ggthemes)
+
+base_plot <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
+  geom_point(size = 3) +
+  labs(x = "Weight (1000 lbs)", y = "MPG", color = "Cylinders")
+
+p_economist <- base_plot +
+  theme_economist() +
+  scale_color_economist() +
+  labs(title = "The Economist Style")
+
+p_wsj <- base_plot +
+  theme_wsj() +
+  scale_color_wsj() +
+  labs(title = "Wall Street Journal Style") +
+  theme(axis.title = element_text())  # WSJ은 기본적으로 축 제목 없음
+
+p_fivethirtyeight <- base_plot +
+  theme_fivethirtyeight() +
+  scale_color_fivethirtyeight() +
+  labs(title = "FiveThirtyEight Style")
+
+p_colorblind <- base_plot +
+  theme_minimal() +
+  scale_color_colorblind() +
+  labs(title = "Color-blind Safe Palette")
+
+(p_economist | p_wsj) / (p_fivethirtyeight | p_colorblind) +
+  plot_annotation(
+    title = "ggthemes 스타일 예제",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+```
+
+### 6.3.3 ggpubr: 통계적 비교
+
+**ggpubr**는 p-value와 유의성 표시를 자동화합니다.
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-ggpubr-stats
+#| fig-cap: "ggpubr로 통계 정보 추가"
+#| fig-width: 8
+#| fig-height: 6
+#| warning: false
+
+library(ggpubr)
+
+# ToothGrowth 데이터: 비타민 C 투여량에 따른 치아 성장
+ggboxplot(
+  ToothGrowth,
+  x = "dose",
+  y = "len",
+  fill = "dose",
+  palette = "jco",  # Journal of Clinical Oncology 색상
+  add = "jitter",   # 개별 점 추가
+  add.params = list(size = 0.5, alpha = 0.5)
+) +
+  stat_compare_means(
+    comparisons = list(c("0.5", "1"), c("1", "2"), c("0.5", "2")),
+    label = "p.signif",  # *, **, *** 표시
+    method = "t.test"
+  ) +
+  stat_compare_means(label.y = 35, method = "anova") +  # 전체 ANOVA
+  labs(
+    title = "비타민 C 투여량에 따른 치아 성장",
+    subtitle = "Guinea Pigs (N=60)",
+    x = "Dose (mg/day)",
+    y = "Tooth Length",
+    caption = "데이터: ToothGrowth (R 내장)"
+  ) +
+  theme_pubr()
+```
+
+**ggpubr의 주요 함수:**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 그룹 간 비교
+stat_compare_means(
+  comparisons = list(c("group1", "group2"), c("group2", "group3")),
+  method = "t.test",        # 또는 "wilcox.test", "anova"
+  label = "p.signif"        # 또는 "p.format" (숫자)
+)
+
+# 상관관계 표시
+stat_cor(
+  aes(label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")),
+  method = "pearson"
+)
+```
+
+## 6.4 색상 접근성: 색맹 친화적 팔레트
+
+전 세계 남성의 약 **8%**, 여성의 **0.5%**가 색맹입니다. 학술 출판에서는 색맹 친화적 색상을 사용해야 합니다.
+
+### 6.4.1 Viridis 색상 팔레트
+
+**Viridis**는 색맹 친화적이며, 흑백 인쇄에서도 구별 가능합니다.
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-viridis
+#| fig-cap: "Viridis 색상 팔레트 (색맹 친화적)"
+#| fig-width: 10
+#| fig-height: 8
+#| warning: false
+
+library(viridis)
+
+# 기본 플롯
+base_plot <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Petal.Length)) +
+  geom_point(size = 3) +
+  labs(x = "Sepal Length", y = "Sepal Width", color = "Petal Length")
+
+# 5가지 Viridis 옵션
+p_viridis <- base_plot + scale_color_viridis_c(option = "viridis") + labs(title = "viridis (default)")
+p_magma <- base_plot + scale_color_viridis_c(option = "magma") + labs(title = "magma")
+p_plasma <- base_plot + scale_color_viridis_c(option = "plasma") + labs(title = "plasma")
+p_inferno <- base_plot + scale_color_viridis_c(option = "inferno") + labs(title = "inferno")
+p_cividis <- base_plot + scale_color_viridis_c(option = "cividis") + labs(title = "cividis (최대 접근성)")
+p_rocket <- base_plot + scale_color_viridis_c(option = "rocket") + labs(title = "rocket")
+
+(p_viridis | p_magma | p_plasma) / (p_inferno | p_cividis | p_rocket) +
+  plot_annotation(
+    title = "Viridis 색상 팔레트 옵션",
+    subtitle = "모든 옵션이 색맹 친화적이며 흑백 인쇄 가능",
+    theme = theme(plot.title = element_text(size = 14, face = "bold"))
+  )
+```
+
+### 6.4.2 범주형 데이터: ColorBrewer
+
+**ColorBrewer**는 지도학에서 개발된 색상 팔레트로, 색맹 친화성이 검증되었습니다.
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-colorbrewer
+#| fig-cap: "ColorBrewer 팔레트"
+#| fig-width: 10
+#| fig-height: 6
+#| warning: false
+
+library(RColorBrewer)
+
+base_plot <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point(size = 3) +
+  labs(x = "Sepal Length", y = "Sepal Width")
+
+p_set1 <- base_plot + scale_color_brewer(palette = "Set1") + labs(title = "Set1")
+p_set2 <- base_plot + scale_color_brewer(palette = "Set2") + labs(title = "Set2")
+p_dark2 <- base_plot + scale_color_brewer(palette = "Dark2") + labs(title = "Dark2")
+p_paired <- base_plot + scale_color_brewer(palette = "Paired") + labs(title = "Paired")
+
+(p_set1 | p_set2) / (p_dark2 | p_paired) +
+  plot_annotation(
+    title = "ColorBrewer 팔레트 (범주형 데이터용)",
+    theme = theme(plot.title = element_text(size = 14, face = "bold"))
+  )
+```
+
+::: {.callout-warning}
+## ⚠️ 피해야 할 색상 조합
+
+**빨강-초록 조합**: 가장 흔한 색맹 유형(적록색맹)에서 구별 불가
+
+```r
+# ❌ 피하세요
+scale_color_manual(values = c("red", "green"))
+
+# ✅ 대신 사용하세요
+scale_color_viridis_d()
+scale_color_brewer(palette = "Set2")
+scale_color_colorblind()  # ggthemes
+```
+
+**온라인 도구**:
+- [Color Oracle](https://colororacle.org/): 색맹 시뮬레이터
+- [ColorBrewer](https://colorbrewer2.org/): 팔레트 선택 도구
+:::
+
+## 6.5 고해상도 저장: ggsave
+
+### 6.5.1 기본 사용법
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 플롯 생성
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  theme_classic()
+
+# 저장
+ggsave(
+  filename = "figure1.png",
+  plot = p,
+  width = 8,           # 너비 (inch)
+  height = 6,          # 높이 (inch)
+  dpi = 300,           # 해상도 (dots per inch)
+  units = "in"         # 단위: "in", "cm", "mm"
+)
+```
+
+### 6.5.2 학술지별 권장 설정
+
+| 학술지 | 해상도 (DPI) | 파일 형식 | 최소 글꼴 크기 | 권장 너비 |
+|--------|--------------|-----------|----------------|-----------|
+| **Nature** | 300-600 | PDF, EPS, TIFF | 5-7 pt | Single column: 89 mm<br>Double column: 183 mm |
+| **Science** | 300+ | PDF, EPS, TIFF | 6-8 pt | Single: 5.5 cm<br>Double: 12 cm |
+| **NEJM** | 300-600 | EPS, TIFF | 7-9 pt | Single: 3.25 in<br>Double: 6.75 in |
+| **PLOS ONE** | 300+ | TIFF, EPS | 8-12 pt | Max width: 17.35 cm |
+| **BMJ** | 300+ | TIFF, EPS, PDF | 7-9 pt | Single: 8 cm<br>Double: 17 cm |
+
+**실전 예제:**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# Nature 스타일 (single column)
+ggsave(
+  filename = "nature_figure1.pdf",
+  plot = p,
+  width = 89,
+  height = 89,
+  units = "mm",
+  dpi = 600,
+  device = cairo_pdf  # 벡터 형식, 고품질
+)
+
+# NEJM 스타일 (double column)
+ggsave(
+  filename = "nejm_figure1.tiff",
+  plot = p,
+  width = 6.75,
+  height = 5,
+  units = "in",
+  dpi = 300,
+  compression = "lzw"  # TIFF 압축
+)
+
+# 프레젠테이션용 (고해상도 PNG)
+ggsave(
+  filename = "presentation_figure1.png",
+  plot = p,
+  width = 10,
+  height = 6,
+  units = "in",
+  dpi = 300,
+  bg = "white"  # 배경 흰색
+)
+```
+
+### 6.5.3 벡터 vs. 래스터 형식
+
+**벡터 형식 (확대해도 선명)**:
+- **PDF**: 범용, 편집 가능
+- **EPS**: PostScript, 전통적 출판
+- **SVG**: 웹용, 인터랙티브
+
+**래스터 형식 (픽셀 기반)**:
+- **PNG**: 웹, 프레젠테이션 (투명 배경 지원)
+- **TIFF**: 고품질 인쇄 (압축 옵션)
+- **JPEG**: 사진용 (손실 압축)
+
+::: {.callout-tip}
+## 💡 포맷 선택 가이드
+
+**학술 논문 제출용**:
+1. **1순위**: PDF (벡터) - 편집 가능, 확대 시 선명
+2. **2순위**: TIFF (300+ DPI) - 고품질 래스터
+3. **3순위**: EPS (벡터) - 레거시 시스템
+
+**프레젠테이션용**:
+- PNG (300 DPI) - 투명 배경 지원, 파워포인트 호환
+
+**웹 게시용**:
+- PNG (150 DPI) - 빠른 로딩
+- SVG - 인터랙티브 요소
+:::
+
+## 6.6 타이포그래피와 글꼴
+
+### 6.6.1 글꼴 크기 설정
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-typography
+#| fig-cap: "타이포그래피 예제"
+#| fig-width: 8
+#| fig-height: 6
+#| warning: false
+
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point(size = 3, color = "steelblue") +
+  labs(
+    title = "자동차 무게와 연비의 관계",
+    subtitle = "미국 자동차 32종 (1973-74 모델)",
+    x = "무게 (1000 lbs)",
+    y = "연비 (miles per gallon)",
+    caption = "데이터: mtcars | 분석: 연세대 산업보건 연구소"
+  ) +
+  theme_classic(base_size = 14) +  # 기본 글꼴 크기
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0),
+    plot.subtitle = element_text(size = 12, color = "gray40", hjust = 0),
+    axis.title = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 10),
+    plot.caption = element_text(size = 9, color = "gray50", hjust = 1)
+  )
+```
+
+**글꼴 크기 권장사항:**
+
+| 요소 | 권장 크기 | 비고 |
+|------|-----------|------|
+| **제목** | 14-18 pt | 굵게 (bold) |
+| **부제목** | 12-14 pt | 보통 (plain) |
+| **축 제목** | 11-13 pt | 굵게 또는 보통 |
+| **축 눈금** | 9-11 pt | 보통 |
+| **범례** | 10-12 pt | 보통 |
+| **캡션** | 8-10 pt | 회색 |
+
+### 6.6.2 한글 폰트 설정 (showtext)
+
+Windows에서 한글이 깨질 때 `showtext` 패키지 사용:
+
+```{r}
+#| eval: false
+#| echo: true
+
+library(showtext)
+
+# Google Fonts에서 Noto Sans KR 다운로드
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+
+# 한글 폰트 적용
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  labs(title = "자동차 무게와 연비", x = "무게", y = "연비") +
+  theme_minimal(base_family = "notosanskr", base_size = 14)
+```
+
+## 6.7 출판 품질 체크리스트
+
+::: {.callout-important icon="true"}
+## ✅ 학술지 제출 전 필수 체크리스트
+
+**1. 데이터 정확성**
+- [ ] 모든 수치가 올바른가?
+- [ ] 통계 검정이 정확하게 수행되었는가?
+- [ ] 에러바가 SE인지 CI인지 명시했는가?
+- [ ] N 수를 명시했는가?
+
+**2. 시각적 요소**
+- [ ] 모든 축에 **명확한 레이블과 단위** 표시
+- [ ] 글꼴 크기 적절 (최소 7pt 이상)
+- [ ] 색상이 색맹 친화적인가? (Viridis, ColorBrewer)
+- [ ] 범례가 명확하고 위치가 적절한가?
+- [ ] 그리드라인이 너무 많지 않은가?
+
+**3. 해상도 및 포맷**
+- [ ] 해상도 **≥ 300 DPI** (학술지 요구사항 확인)
+- [ ] 파일 형식: PDF (벡터) 또는 TIFF (래스터)
+- [ ] 파일 크기 < 10 MB (학술지 제한 확인)
+- [ ] 그림 크기가 학술지 규정 준수 (single/double column)
+
+**4. 텍스트 및 라벨**
+- [ ] 모든 텍스트가 읽기 쉬운가?
+- [ ] 라벨이 겹치지 않는가? (ggrepel 사용)
+- [ ] Figure 캡션이 완전하고 자세한가?
+- [ ] 통계 정보 명시 (p-value, CI, SE)
+
+**5. 일관성**
+- [ ] 같은 논문 내 모든 그래프가 동일한 테마 사용
+- [ ] 색상 팔레트가 일관적인가?
+- [ ] 글꼴과 크기가 일관적인가?
+
+**6. 접근성**
+- [ ] 색맹 친화적 색상 사용
+- [ ] 흑백 인쇄 시에도 구별 가능한가?
+- [ ] 점선, 모양 등으로 추가 구별 제공
+
+**7. 윤리 및 투명성**
+- [ ] 데이터 출처 명시
+- [ ] 통계 방법 명시
+- [ ] 데이터 조작 없음 (y축 범위 조작 등)
+:::
+
+## 6.8 실전 예제: 논문용 Figure 완성하기
+
+### 6.8.1 Before & After 비교
+
+**Before (기본 ggplot2):**
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-before
+#| fig-cap: "출판 전 기본 그래프"
+#| fig-width: 7
+#| fig-height: 5
+#| warning: false
+
+# 간단한 산점도 (개선 전)
+ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+**After (출판 품질):**
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-after
+#| fig-cap: "출판 품질 완성본"
+#| fig-width: 8
+#| fig-height: 6
+#| warning: false
+
+library(tidyverse)
+library(ggrepel)
+
+# 상위 5개 차량만 라벨링
+mtcars_top <- mtcars %>%
+  tibble::rownames_to_column("model") %>%
+  arrange(desc(mpg)) %>%
+  slice(1:5)
+
+ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl), shape = factor(cyl))) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8) +
+  geom_text_repel(
+    data = mtcars_top,
+    aes(label = model),
+    size = 3,
+    max.overlaps = 10,
+    box.padding = 0.5
+  ) +
+  scale_color_viridis_d(
+    option = "plasma",
+    name = "Cylinders",
+    labels = c("4 cyl", "6 cyl", "8 cyl")
+  ) +
+  scale_shape_manual(
+    values = c(16, 17, 15),
+    name = "Cylinders",
+    labels = c("4 cyl", "6 cyl", "8 cyl")
+  ) +
+  labs(
+    title = "Relationship Between Vehicle Weight and Fuel Efficiency",
+    subtitle = "US automobiles (1973-74 models, n=32)",
+    x = "Weight (1000 lbs)",
+    y = "Fuel Efficiency (miles per gallon)",
+    caption = "Data: Henderson and Velleman (1981) | Linear regression lines with 95% CI"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0),
+    plot.subtitle = element_text(size = 11, color = "gray40", hjust = 0),
+    axis.title = element_text(size = 11, face = "bold"),
+    axis.text = element_text(size = 10),
+    legend.position = c(0.85, 0.8),
+    legend.background = element_rect(fill = "white", color = "black", linewidth = 0.3),
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 9),
+    plot.caption = element_text(size = 8, color = "gray50", hjust = 0),
+    panel.grid.major = element_line(color = "gray90", linewidth = 0.3)
+  )
+```
+
+### 6.8.2 종합 예제: 다중 패널 Figure
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: fig-comprehensive
+#| fig-cap: "출판 품질 다중 패널 Figure (Nature 스타일)"
+#| fig-width: 12
+#| fig-height: 8
+#| warning: false
+
+library(tidyverse)
+library(patchwork)
+library(ggrepel)
+library(viridis)
+library(ggpubr)
+
+# 데이터 준비
+set.seed(42)
+clinical_data <- tibble(
+  patient_id = 1:100,
+  age = rnorm(100, mean = 55, sd = 15),
+  treatment = sample(c("Control", "Drug A", "Drug B"), 100, replace = TRUE),
+  response = rnorm(100, mean = 50, sd = 20) + ifelse(treatment == "Drug A", 15, ifelse(treatment == "Drug B", 10, 0)),
+  adverse_event = sample(c("None", "Mild", "Moderate"), 100, replace = TRUE, prob = c(0.6, 0.3, 0.1))
+)
+
+# Panel A: 치료군별 반응
+p_a <- ggplot(clinical_data, aes(x = treatment, y = response, fill = treatment)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.3, size = 1) +
+  stat_compare_means(
+    comparisons = list(c("Control", "Drug A"), c("Control", "Drug B"), c("Drug A", "Drug B")),
+    label = "p.signif",
+    method = "t.test"
+  ) +
+  scale_fill_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(
+    title = "Treatment Response by Group",
+    x = "Treatment Group",
+    y = "Response Score (0-100)"
+  ) +
+  theme_classic(base_size = 11) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 12)
+  )
+
+# Panel B: 나이와 반응의 관계
+p_b <- ggplot(clinical_data, aes(x = age, y = response, color = treatment, shape = treatment)) +
+  geom_point(size = 2.5, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8) +
+  scale_color_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  scale_shape_manual(values = c(16, 17, 15)) +
+  labs(
+    title = "Age vs. Response",
+    x = "Patient Age (years)",
+    y = "Response Score",
+    color = "Treatment",
+    shape = "Treatment"
+  ) +
+  theme_classic(base_size = 11) +
+  theme(
+    legend.position = c(0.15, 0.85),
+    legend.background = element_rect(fill = "white", color = "black", linewidth = 0.3),
+    legend.title = element_text(face = "bold", size = 10),
+    plot.title = element_text(face = "bold", size = 12)
+  )
+
+# Panel C: 부작용 발생률
+adverse_summary <- clinical_data %>%
+  count(treatment, adverse_event) %>%
+  group_by(treatment) %>%
+  mutate(prop = n / sum(n) * 100)
+
+p_c <- ggplot(adverse_summary, aes(x = treatment, y = prop, fill = adverse_event)) +
+  geom_col(position = "dodge", alpha = 0.8) +
+  geom_text(
+    aes(label = sprintf("%.0f%%", prop)),
+    position = position_dodge(width = 0.9),
+    vjust = -0.5,
+    size = 3
+  ) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Adverse Event Incidence",
+    x = "Treatment Group",
+    y = "Percentage of Patients (%)",
+    fill = "Severity"
+  ) +
+  theme_classic(base_size = 11) +
+  theme(
+    legend.position = "top",
+    legend.title = element_text(face = "bold", size = 10),
+    plot.title = element_text(face = "bold", size = 12)
+  )
+
+# Panel D: 나이 분포
+p_d <- ggplot(clinical_data, aes(x = age, fill = treatment)) +
+  geom_density(alpha = 0.6) +
+  scale_fill_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(
+    title = "Patient Age Distribution",
+    x = "Age (years)",
+    y = "Density",
+    fill = "Treatment"
+  ) +
+  theme_classic(base_size = 11) +
+  theme(
+    legend.position = c(0.85, 0.8),
+    legend.background = element_rect(fill = "white", color = "black", linewidth = 0.3),
+    legend.title = element_text(face = "bold", size = 10),
+    plot.title = element_text(face = "bold", size = 12)
+  )
+
+# 조합
+(p_a | p_b) / (p_c | p_d) +
+  plot_annotation(
+    title = "Phase II Clinical Trial Results: Novel Drug A vs. Drug B vs. Control",
+    subtitle = "Multicenter, randomized controlled trial (N=100 patients)",
+    caption = "Error bars: 95% CI | Statistical test: Two-sample t-test | *p<0.05, **p<0.01, ***p<0.001",
+    tag_levels = "A",
+    tag_suffix = ")",
+    theme = theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(size = 12, hjust = 0.5, color = "gray40"),
+      plot.caption = element_text(size = 9, hjust = 0, color = "gray50")
+    )
+  ) &
+  theme(
+    plot.tag = element_text(size = 14, face = "bold"),
+    plot.tag.position = c(0.02, 0.98)
+  )
+```
+
+## 6.9 요약 및 실전 워크플로우
+
+### 6.9.1 출판용 그래프 제작 워크플로우
+
+**1단계: 데이터 준비 및 탐색**
+```r
+library(tidyverse)
+data <- read_csv("data.csv")
+summary(data)
+```
+
+**2단계: 기본 플롯 생성**
+```r
+p <- ggplot(data, aes(x = var1, y = var2)) +
+  geom_point()
+```
+
+**3단계: 시각적 개선**
+```r
+p <- p +
+  geom_smooth(method = "lm", se = TRUE) +
+  scale_color_viridis_d() +  # 색맹 친화적
+  theme_classic(base_size = 12)
+```
+
+**4단계: 텍스트 및 라벨**
+```r
+p <- p +
+  geom_text_repel(aes(label = label)) +  # 겹침 방지
+  labs(
+    title = "명확한 제목",
+    x = "X축 레이블 (단위)",
+    y = "Y축 레이블 (단위)",
+    caption = "데이터 출처 및 통계 정보"
+  )
+```
+
+**5단계: 다중 플롯 조합 (필요 시)**
+```r
+library(patchwork)
+(p1 | p2) / p3 +
+  plot_annotation(tag_levels = "A")
+```
+
+**6단계: 고해상도 저장**
+```r
+ggsave(
+  "figure1.pdf",
+  width = 8, height = 6,
+  dpi = 300, device = cairo_pdf
+)
+```
+
+**7단계: 체크리스트 확인**
+- [ ] 모든 항목 검토
+- [ ] 동료 피드백 받기
+- [ ] 학술지 규정 재확인
+
+### 6.9.2 핵심 패키지 요약
+
+| 패키지 | 기능 | 필수도 |
+|--------|------|--------|
+| **ggplot2** | 기본 시각화 | ⭐⭐⭐⭐⭐ |
+| **ggrepel** | 라벨 겹침 방지 | ⭐⭐⭐⭐⭐ |
+| **patchwork** | 다중 플롯 조합 | ⭐⭐⭐⭐⭐ |
+| **ggpubr** | 통계 비교 자동화 | ⭐⭐⭐⭐ |
+| **viridis** | 색맹 친화적 색상 | ⭐⭐⭐⭐ |
+| **ggthemes** | 학술지 스타일 | ⭐⭐⭐ |
+| **showtext** | 한글 폰트 지원 | ⭐⭐⭐ |
+| **scales** | 축 포맷팅 | ⭐⭐⭐ |
+
+### 6.9.3 다음 단계
+
+::: {.callout-important}
+## 📖 Chapter 7 예고
+
+**[Chapter 7: 인터랙티브 시각화](07-interactive.qmd)**
+
+출판된 논문을 넘어서, 웹 기반 대시보드와 인터랙티브 시각화를 배웁니다:
+
+- **plotly**: ggplot2를 인터랙티브하게 (`ggplotly()`)
+- **shiny**: 실시간 데이터 대시보드 구축
+- **DT**: 인터랙티브 데이터 테이블
+- **실전 프로젝트**: COVID-19 대시보드 만들기
+
+웹에서 클릭하고 확대하고 필터링할 수 있는 차세대 시각화를 경험해보세요!
+:::
+
+::: {.callout-note}
+## 🔗 유용한 리소스
+
+### 출판 가이드라인
+- **Nature**: [Figure Preparation Guide](https://www.nature.com/nature/for-authors/final-submission)
+- **Science**: [Figure Guidelines](https://www.science.org/content/page/instructions-preparing-initial-manuscript)
+- **NEJM**: [Author Center](https://www.nejm.org/author-center/new-manuscripts)
+
+### 색상 도구
+- **ColorBrewer**: [https://colorbrewer2.org/](https://colorbrewer2.org/)
+- **Color Oracle**: [https://colororacle.org/](https://colororacle.org/) (색맹 시뮬레이터)
+- **Viz Palette**: [https://projects.susielu.com/viz-palette](https://projects.susielu.com/viz-palette)
+
+### R 패키지 문서
+- **ggrepel**: [https://ggrepel.slowkow.com/](https://ggrepel.slowkow.com/)
+- **patchwork**: [https://patchwork.data-imaginist.com/](https://patchwork.data-imaginist.com/)
+- **ggpubr**: [https://rpkgs.datanovia.com/ggpubr/](https://rpkgs.datanovia.com/ggpubr/)
+
+### 학습 자료
+- **R Graphics Cookbook**: [https://r-graphics.org/](https://r-graphics.org/)
+- **Data Visualization**: Kieran Healy의 책 [https://socviz.co/](https://socviz.co/)
+:::
+
+---
+
+**축하합니다!** Chapter 6를 완료했습니다. 이제 출판 수준의 전문적인 시각화를 만들 수 있습니다! 🎉

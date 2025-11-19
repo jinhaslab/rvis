@@ -1,0 +1,364 @@
+---
+title: "R 기반 보건학 시각화"
+subtitle: "역학 및 임상통계를 위한 실습 가이드"
+author: "보건학 R 시각화 팀"
+date: today
+---
+
+# 환영합니다! {.unnumbered}
+
+::: {.callout-note appearance="simple"}
+## 이 책에 대하여
+
+이 책은 **보건학, 역학, 임상 통계** 분야의 대학원생과 전문가를 위한 R 시각화 실습 가이드입니다.
+ggplot2의 "그래픽 문법(Grammar of Graphics)"을 기반으로,
+데이터 탐색부터 학술지 출판, 대화형 대시보드 구축까지 전 과정을 다룹니다.
+:::
+
+::: {.callout-important}
+## 🚀 시작하기 전에 (필독!)
+
+**GitHub 저장소**: [https://github.com/jinhaslab/rvis](https://github.com/jinhaslab/rvis)
+
+**온라인 책**: [https://jinhaslab.github.io/rvis/](https://jinhaslab.github.io/rvis/)
+
+### 📂 1단계: RStudio 프로젝트 생성
+
+**먼저 프로젝트를 만드세요!**
+
+1. RStudio 열기
+2. **File** → **New Project** → **New Directory** → **New Project**
+3. 프로젝트 이름: `rvis-practice`
+4. **Create Project** 클릭
+
+### 📥 2단계: 실습 스크립트 다운로드
+
+프로젝트 안에서 스크립트를 다운로드하세요.
+
+**방법 1: GitHub에서 직접 다운로드**
+
+1. [GitHub 저장소](https://github.com/jinhaslab/rvis) 접속
+2. **code** 폴더 클릭
+3. `setup.R` 클릭 → **Raw** 버튼 → 우클릭 "다른 이름으로 저장"
+4. 프로젝트의 **code/** 폴더에 저장 (폴더가 없으면 생성)
+5. `data-simulation.R`도 동일하게 저장
+
+**직접 링크:**
+- [setup.R 다운로드](https://raw.githubusercontent.com/jinhaslab/rvis/main/code/setup.R)
+- [data-simulation.R 다운로드](https://raw.githubusercontent.com/jinhaslab/rvis/main/code/data-simulation.R)
+
+**방법 2: R Console에서 자동 다운로드 (더 쉬움!)**
+
+```{r}
+#| eval: false
+#| echo: true
+
+# RStudio Console에서 실행 (프로젝트 내에서)
+# 폴더 자동 생성 + 스크립트 다운로드
+dir.create("code", showWarnings = FALSE)
+dir.create("data", showWarnings = FALSE)
+dir.create("data/processed", showWarnings = FALSE)
+
+download.file(
+  "https://raw.githubusercontent.com/jinhaslab/rvis/main/code/setup.R",
+  "code/setup.R"
+)
+
+download.file(
+  "https://raw.githubusercontent.com/jinhaslab/rvis/main/code/data-simulation.R",
+  "code/data-simulation.R"
+)
+
+# 확인
+list.files("code")  # "setup.R" "data-simulation.R" 보여야 함
+```
+
+### 📦 3단계: 패키지 설치 (10-20분)
+
+```{r}
+#| eval: false
+#| echo: true
+
+# RStudio Console에서 실행
+source("code/setup.R")
+```
+
+**설치되는 패키지:** tidyverse, ggplot2, incidence2, survival, plotly, shiny 등 40개 이상
+
+### 📊 4단계: 실습 데이터 생성 (1-2분)
+
+```{r}
+#| eval: false
+#| echo: true
+
+# RStudio Console에서 실행
+source("code/data-simulation.R")
+```
+
+**생성되는 데이터:** health_survey.csv, disease_incidence.csv 등 6개 파일
+
+---
+
+✅ **준비 완료!** 이제 [Chapter 1](chapters/01-introduction.html)로 이동하세요.
+
+**상세 가이드**: [Chapter 1 섹션 1.2](chapters/01-introduction.html#개발-환경-설정)에서 스크린샷과 함께 더 자세한 설명을 확인할 수 있습니다.
+:::
+
+## 📚 학습 목표
+
+이 책을 완료하면 다음을 할 수 있습니다:
+
+✅ ggplot2의 7가지 핵심 구성 요소를 이해하고 활용
+✅ 역학 데이터(유행 곡선, 연령 표준화 비율)를 올바르게 시각화
+✅ 공간 역학 데이터를 지도로 표현 (코로플레스 맵)
+✅ 생존 분석과 메타 분석 결과를 전문적으로 시각화
+✅ 학술지 출판 품질의 Figure를 제작
+✅ Shiny를 활용한 공중 보건 대시보드 구축
+
+## 🎯 대상 독자
+
+- 보건학, 역학, 임상통계 전공 **대학원생**
+- R을 처음 배우거나 시각화를 체계적으로 배우고 싶은 **연구자**
+- 논문 작성을 위해 고품질 그래프가 필요한 **보건의료 전문가**
+- 공중 보건 데이터를 대시보드로 만들고 싶은 **실무자**
+
+::: {.callout-warning}
+## 사전 요구사항
+
+- R 기본 문법 이해 (변수, 함수, 데이터프레임)
+- RStudio 사용 경험 권장
+- 통계학 기초 (평균, 표준편차, 신뢰구간)
+
+R을 처음 접하신다면 [R for Data Science](https://r4ds.hadley.nz/) 1-5장을 먼저 읽어보시기를 권장합니다.
+:::
+
+## 📖 책의 구성
+
+이 책은 **4개 파트 8개 챕터**로 구성되어 있습니다:
+
+### Part I: 기초편
+
+- **Chapter 1**: R과 ggplot2 시작하기
+- **Chapter 2**: ggplot2 완벽 마스터 - 그래픽 문법의 7가지 구성 요소
+
+### Part II: 역학편
+
+- **Chapter 3**: 역학 데이터 시각화 - 발병률, 유행곡선, 표준화
+- **Chapter 4**: 공간 역학 - GIS와 지도 제작
+
+### Part III: 임상통계편
+
+- **Chapter 5**: 생존 분석과 메타 분석 시각화
+- **Chapter 6**: 출판 품질 그래프 제작 전략
+
+### Part IV: 고급편
+
+- **Chapter 7**: 대화형 시각화와 Shiny 대시보드
+- **Chapter 8**: 효과적인 데이터 커뮤니케이션을 위한 제언
+
+## 💻 실습 환경 준비
+
+### 1. R과 RStudio 설치
+
+```bash
+# R 다운로드: https://cran.r-project.org/
+# RStudio 다운로드: https://posit.co/download/rstudio-desktop/
+```
+
+**권장 버전:**
+
+- R ≥ 4.3.0
+- RStudio ≥ 2023.06.0
+
+### 2. 필수 패키지 설치
+
+모든 필요한 패키지는 `code/setup.R`에서 자동으로 설치됩니다:
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 프로젝트 루트에서 실행
+source("code/setup.R")
+```
+
+주요 패키지:
+
+- **Core**: `tidyverse`, `here`, `ggplot2`
+- **Epidemiology**: `incidence2`, `surveil`
+- **Spatial**: `sf`, `tmap`
+- **Clinical**: `survival`, `ggsurvfit`, `metafor`
+- **Interactive**: `plotly`, `shiny`
+- **Publication**: `patchwork`, `ggrepel`, `ggpubr`
+
+::: {.callout-tip}
+## 패키지 설치 시간
+
+처음 실행 시 모든 패키지를 설치하는 데 **10-20분** 정도 소요됩니다.
+인터넷 연결을 확인하고 충분한 시간을 두고 실행하세요.
+:::
+
+### 3. 실습 데이터 준비
+
+#### 방법 1: 시뮬레이션 데이터 생성 (권장)
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 실습용 데이터 자동 생성
+source("code/data-simulation.R")
+```
+
+다음 파일이 `data/processed/`에 생성됩니다:
+
+- `health_survey.csv` - 건강검진 데이터 (N=1,000)
+- `disease_incidence.csv` - 월별 질병 발생률
+- `regional_disease.csv` - 시도별 질병 데이터
+- `clinical_trial.csv` - 임상시험 데이터
+- `meta_analysis.csv` - 메타분석 데이터
+- `covid_timeseries.csv` - COVID-19 유사 시계열
+
+#### 방법 2: 패키지 내장 데이터 사용
+
+별도 파일 없이 R 패키지에 내장된 데이터를 직접 사용합니다:
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 예시
+data(mtcars)      # 기본 R
+data(iris)        # 기본 R
+library(survival)
+data(lung)        # 생존 분석
+
+library(outbreaks)
+data(ebola_sim)   # 에볼라 유행 데이터
+```
+
+::: {.callout-note}
+## 데이터 전략
+
+이 책의 모든 실습은 **재현 가능성**을 최우선으로 합니다:
+
+1. ✅ **패키지 내장 데이터** 우선 사용
+2. ✅ **시뮬레이션 데이터** (재현 가능한 `set.seed()`)
+3. ❌ 외부 다운로드 최소화 (Shapefile만 예외)
+
+따라서 인터넷이 없는 환경에서도 대부분의 실습이 가능합니다.
+:::
+
+## 🗺️ 학습 로드맵
+
+### 초보자 (R 처음 시작)
+
+```
+Ch 1 → Ch 2 (꼼꼼히) → Ch 3 (일부) → Ch 6 (기본)
+```
+
+### 중급자 (R 사용 경험 있음)
+
+```
+Ch 2 (복습) → Ch 3-4 (본인 분야) → Ch 5-6 → Ch 7
+```
+
+### 고급자 (논문/프로젝트 목적)
+
+```
+Ch 3-5 (필요 챕터) → Ch 6 (출판 전략) → Ch 7 (대시보드)
+```
+
+## 📊 실습 코드 사용법
+
+### 코드 블록 종류
+
+#### ✍️ 직접 실행할 코드
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 여러분이 직접 RStudio에서 실행하세요
+library(ggplot2)
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+```
+
+#### 📺 결과가 함께 표시되는 코드
+
+```{r}
+#| eval: true
+#| echo: true
+
+# 이 책에서 실행 결과까지 보여줍니다
+summary(mtcars$mpg)
+```
+
+#### 💡 연습문제
+
+::: {.callout-tip icon="false"}
+## ✏️ Exercise 1
+
+`iris` 데이터로 꽃잎 길이(Petal.Length)와 너비(Petal.Width)의 산점도를 그려보세요.
+
+```{r}
+#| eval: false
+#| code-fold: true
+#| code-summary: "정답 보기"
+
+library(ggplot2)
+ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species)) +
+  geom_point() +
+  theme_minimal()
+```
+:::
+
+## 🆘 도움이 필요할 때
+
+### R 관련 질문
+
+- [Stack Overflow (R tag)](https://stackoverflow.com/questions/tagged/r)
+- [RStudio Community](https://community.rstudio.com/)
+- [R for Data Science Community](https://www.rfordatasci.com/)
+
+### ggplot2 관련
+
+- [공식 문서](https://ggplot2.tidyverse.org/)
+- [R Graph Gallery](https://r-graph-gallery.com/)
+- [ggplot2 Book](https://ggplot2-book.org/)
+
+### 역학/보건학 특화
+
+- [Epi R Handbook](https://epirhandbook.com/)
+- [Applied Epi Community](https://www.appliedepi.org/)
+
+## 📝 이 책을 인용하는 방법
+
+```bibtex
+@book{rvis2024,
+  title = {R 기반 보건학 시각화: 역학 및 임상통계를 위한 실습 가이드},
+  author = {보건학 R 시각화 팀},
+  year = {2025},
+  url = {https://dspubs.org},
+  note = {Accessed: 2025-11-18}
+}
+```
+
+## 🤝 기여하기
+
+이 책은 오픈 소스 프로젝트입니다. 오탈자, 코드 오류, 개선 제안은 언제든 환영합니다!
+
+
+## 📜 라이선스
+
+- **텍스트 및 코드**: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+- **데이터**: CC0 (Public Domain)
+
+---
+
+::: {.callout-important}
+## 준비되셨나요?
+
+모든 준비가 끝났다면, [Chapter 1: R과 ggplot2 시작하기](chapters/01-introduction.qmd)로 이동하세요! 🚀
+:::

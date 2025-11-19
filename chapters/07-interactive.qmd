@@ -1,0 +1,1241 @@
+---
+title: "인터랙티브 시각화"
+author: "연세대 산업보건 연구소"
+date: today
+---
+
+```{r setup, include=FALSE}
+# 한글 폰트 설정
+library(showtext)
+library(sysfonts)
+font_add_google("Noto Sans KR", "noto")
+showtext_auto()
+
+library(ggplot2)
+theme_set(theme_grey(base_family = "noto"))
+showtext_opts(dpi = 96)
+
+knitr::opts_chunk$set(
+  fig.showtext = TRUE,
+  dev = "png",
+  dpi = 96
+)
+```
+
+# 인터랙티브 시각화 및 공중보건 대시보드
+
+::: {.callout-note}
+## 🎯 학습 목표
+
+이 챕터를 마치면 다음을 할 수 있습니다:
+
+- **plotly**로 ggplot2를 인터랙티브하게 변환 (`ggplotly()`)
+- **Shiny** 앱의 UI와 Server 구조 이해
+- **반응성(Reactivity)** 개념 완벽 습득
+- **DT** 패키지로 인터랙티브 데이터 테이블 생성
+- 공중보건 대시보드 구축 및 배포
+- **flexdashboard**로 빠른 대시보드 제작
+:::
+
+::: {.callout-tip}
+## 📚 왜 인터랙티브 시각화인가?
+
+정적 그래프(Static plots)는 논문 출판에 적합하지만, **데이터 탐색**과 **실시간 모니터링**에는 한계가 있습니다.
+
+**인터랙티브 시각화의 장점:**
+- 🔍 **데이터 탐색**: 마우스 오버로 세부 정보 확인
+- 🔎 **확대/축소**: 관심 영역 집중 분석
+- 🎛️ **필터링**: 실시간으로 데이터 서브셋 선택
+- 📊 **대시보드**: 여러 지표를 한 화면에 통합
+- 🌐 **웹 공유**: URL로 간편하게 공유 가능
+
+**실제 활용 사례:**
+- Johns Hopkins COVID-19 대시보드
+- WHO 질병 감시 시스템
+- CDC FluView 인터랙티브 리포트
+- 지역 보건소 실시간 모니터링
+:::
+
+## 7.1 정적 → 동적: plotly와 ggplotly()
+
+### 7.1.1 plotly의 강력함
+
+**plotly**는 JavaScript 기반 라이브러리로, R에서 인터랙티브 그래프를 쉽게 만들 수 있습니다. 가장 강력한 기능은 **ggplot2 객체를 한 줄로 변환**하는 `ggplotly()`입니다.
+
+**기본 예제:**
+
+```{r}
+#| eval: false
+#| echo: true
+#| warning: false
+
+library(plotly)
+library(ggplot2)
+
+# 1. 일반 ggplot2 객체 생성
+p_static <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
+  geom_point(size = 3) +
+  labs(
+    title = "자동차 무게와 연비의 관계",
+    x = "무게 (1000 lbs)",
+    y = "연비 (mpg)",
+    color = "실린더"
+  ) +
+  theme_minimal()
+
+# 2. ggplotly()로 변환 (단 한 줄!)
+p_interactive <- ggplotly(p_static)
+
+# 3. 결과 출력 (HTML 위젯)
+p_interactive
+```
+
+**인터랙티브 기능:**
+- ✅ **마우스 오버**: 각 점의 정확한 값 표시
+- ✅ **확대/축소**: 박스 선택 또는 더블클릭
+- ✅ **패닝**: 클릭-드래그로 이동
+- ✅ **범례 클릭**: 그룹 표시/숨김
+- ✅ **다운로드**: PNG로 저장 가능
+
+::: {.callout-tip}
+## 💡 투자 대비 수익(ROI) 최고!
+
+ggplot2 문법을 마스터했다면, `ggplotly(p)`라는 **단 한 줄**로 강력한 인터랙티브 그래프로 변환됩니다!
+
+**코드 비교:**
+```r
+# 정적 (Static)
+p
+
+# 인터랙티브 (Interactive)
+ggplotly(p)
+```
+
+ggplot2의 모든 기능(facet, theme, scale)이 대부분 자동 변환됩니다!
+:::
+
+### 7.1.2 plotly 고급 활용
+
+**예제 1: 시계열 데이터 (COVID-19 추세)**
+
+```{r}
+#| eval: false
+#| echo: true
+#| warning: false
+
+# 모의 COVID-19 데이터
+library(tidyverse)
+library(plotly)
+
+set.seed(42)
+covid_sim <- tibble(
+  date = seq.Date(as.Date("2020-01-01"), by = "day", length.out = 365),
+  cases = cumsum(c(0, rpois(364, lambda = 50)))
+)
+
+# ggplot2 생성
+p <- ggplot(covid_sim, aes(x = date, y = cases)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_point(size = 0.5, alpha = 0.3) +
+  labs(
+    title = "COVID-19 누적 확진자 추세",
+    x = "날짜",
+    y = "누적 확진자 (명)"
+  ) +
+  theme_minimal(base_size = 12)
+
+# plotly 변환
+ggplotly(p) %>%
+  layout(
+    hovermode = "x unified",  # x축 기준 통합 툴팁
+    xaxis = list(rangeslider = list(visible = TRUE))  # 날짜 범위 슬라이더 추가
+  )
+```
+
+**예제 2: 3D 산점도**
+
+plotly는 ggplot2를 넘어 3D 시각화도 지원합니다:
+
+```{r}
+#| eval: false
+#| echo: true
+#| warning: false
+
+library(plotly)
+
+# iris 데이터로 3D 산점도
+plot_ly(
+  iris,
+  x = ~Sepal.Length,
+  y = ~Sepal.Width,
+  z = ~Petal.Length,
+  color = ~Species,
+  colors = c("#E41A1C", "#377EB8", "#4DAF4A"),
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 5)
+) %>%
+  layout(
+    title = "붓꽃 3D 산점도",
+    scene = list(
+      xaxis = list(title = "Sepal Length"),
+      yaxis = list(title = "Sepal Width"),
+      zaxis = list(title = "Petal Length")
+    )
+  )
+```
+
+**예제 3: 애니메이션 (시간 경과에 따른 변화)**
+
+```{r}
+#| eval: false
+#| echo: true
+#| warning: false
+
+# 연도별 데이터 시뮬레이션
+library(plotly)
+
+anim_data <- data.frame(
+  year = rep(2010:2020, each = 100),
+  age = rep(20:119, 11),
+  prevalence = rnorm(1100, mean = 50, sd = 10)
+)
+
+# 애니메이션 플롯
+plot_ly(
+  anim_data,
+  x = ~age,
+  y = ~prevalence,
+  frame = ~year,  # 애니메이션 프레임
+  type = "scatter",
+  mode = "markers",
+  marker = list(size = 8, color = "steelblue")
+) %>%
+  layout(
+    title = "연도별 연령대 유병률 변화",
+    xaxis = list(title = "나이"),
+    yaxis = list(title = "유병률 (%)")
+  ) %>%
+  animation_opts(
+    frame = 500,  # 프레임당 500ms
+    transition = 300,  # 전환 300ms
+    redraw = FALSE
+  )
+```
+
+### 7.1.3 커스터마이징: tooltip과 hover 정보
+
+기본 툴팁을 커스터마이즈할 수 있습니다:
+
+```{r}
+#| eval: false
+#| echo: true
+#| warning: false
+
+# 데이터 준비
+library(tidyverse)
+library(plotly)
+
+health_data <- tibble(
+  patient_id = paste0("P", 1:50),
+  age = rnorm(50, mean = 55, sd = 15),
+  bmi = rnorm(50, mean = 25, sd = 4),
+  sbp = rnorm(50, mean = 130, sd = 20)
+)
+
+# 커스텀 툴팁
+p <- ggplot(health_data, aes(
+  x = age,
+  y = sbp,
+  text = paste(
+    "환자 ID:", patient_id,
+    "\n나이:", round(age, 1), "세",
+    "\nBMI:", round(bmi, 1),
+    "\n수축기 혈압:", round(sbp, 0), "mmHg"
+  )
+)) +
+  geom_point(aes(size = bmi), color = "steelblue", alpha = 0.7) +
+  labs(
+    title = "환자별 나이와 혈압",
+    x = "나이 (세)",
+    y = "수축기 혈압 (mmHg)"
+  ) +
+  theme_minimal()
+
+# tooltip 옵션 지정
+ggplotly(p, tooltip = "text")
+```
+
+## 7.2 Shiny 대시보드 구축
+
+### 7.2.1 Shiny의 핵심: UI와 Server
+
+**Shiny**는 R 코드만으로 웹 애플리케이션을 만드는 프레임워크입니다. HTML/CSS/JavaScript 지식이 없어도 강력한 대시보드를 구축할 수 있습니다.
+
+**Shiny의 구조:**
+
+```
+┌─────────────────────────────────────┐
+│            Shiny App                │
+├─────────────────┬───────────────────┤
+│       UI        │      Server       │
+│  (사용자 인터페이스) │   (백엔드 로직)    │
+├─────────────────┼───────────────────┤
+│ - 레이아웃       │ - 데이터 처리      │
+│ - 입력 위젯      │ - 플롯 생성       │
+│ - 출력 영역      │ - 테이블 생성      │
+│                 │ - 반응성 로직      │
+└─────────────────┴───────────────────┘
+```
+
+**최소 Shiny 앱 예제:**
+
+```{r}
+#| eval: false
+#| echo: true
+
+library(shiny)
+
+# UI: 사용자가 보는 화면
+ui <- fluidPage(
+  titlePanel("첫 번째 Shiny 앱"),
+
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput(
+        "num_points",
+        "점의 개수:",
+        min = 10,
+        max = 200,
+        value = 50
+      )
+    ),
+
+    mainPanel(
+      plotOutput("scatter_plot")
+    )
+  )
+)
+
+# Server: 실제 연산이 일어나는 곳
+server <- function(input, output) {
+
+  output$scatter_plot <- renderPlot({
+    # input$num_points 값에 따라 자동으로 재실행됨!
+    n <- input$num_points
+
+    data <- data.frame(
+      x = rnorm(n),
+      y = rnorm(n)
+    )
+
+    ggplot(data, aes(x, y)) +
+      geom_point(color = "steelblue", size = 3) +
+      labs(title = paste("N =", n, "개 점")) +
+      theme_minimal()
+  })
+}
+
+# 앱 실행
+shinyApp(ui = ui, server = server)
+```
+
+**파일 저장:**
+- `app.R` (단일 파일) 또는
+- `ui.R` + `server.R` (분리 파일)
+
+**실행 방법:**
+1. RStudio: "Run App" 버튼 클릭
+2. 콘솔: `shiny::runApp("app_directory")`
+
+### 7.2.2 반응성(Reactivity) 이해
+
+::: {.callout-important}
+## 🔄 Shiny의 핵심: 반응성
+
+**반응성(Reactivity)**은 Shiny의 마법입니다:
+
+1. 사용자가 UI 위젯 변경 (예: `input$num_points`)
+2. Shiny가 자동 감지
+3. 해당 `input`에 의존하는 모든 `output` **자동 재실행**
+4. UI 업데이트
+
+**선언적 프로그래밍:**
+"언제 업데이트할지"가 아니라 "무엇을 보여줄지"만 선언하면, Shiny가 자동으로 관리합니다!
+
+**반응성 그래프:**
+```
+input$num_points
+       ↓
+  (의존성)
+       ↓
+output$scatter_plot
+       ↓
+  (자동 재실행)
+       ↓
+   UI 업데이트
+```
+:::
+
+**반응성 예제: 필터링**
+
+```{r}
+#| eval: false
+#| echo: true
+
+library(shiny)
+library(tidyverse)
+
+ui <- fluidPage(
+  titlePanel("mtcars 데이터 필터링"),
+
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(
+        "cyl_select",
+        "실린더 개수:",
+        choices = c("All", "4", "6", "8"),
+        selected = "All"
+      ),
+
+      sliderInput(
+        "mpg_range",
+        "연비 범위:",
+        min = 10,
+        max = 35,
+        value = c(10, 35)
+      )
+    ),
+
+    mainPanel(
+      plotOutput("filtered_plot"),
+      tableOutput("filtered_table")
+    )
+  )
+)
+
+server <- function(input, output) {
+
+  # 반응형 데이터 (reactive expression)
+  filtered_data <- reactive({
+    data <- mtcars
+
+    # 실린더 필터
+    if (input$cyl_select != "All") {
+      data <- data %>%
+        filter(cyl == as.numeric(input$cyl_select))
+    }
+
+    # 연비 범위 필터
+    data <- data %>%
+      filter(mpg >= input$mpg_range[1],
+             mpg <= input$mpg_range[2])
+
+    data
+  })
+
+  # 플롯 출력
+  output$filtered_plot <- renderPlot({
+    ggplot(filtered_data(), aes(x = wt, y = mpg)) +
+      geom_point(size = 3, color = "steelblue") +
+      labs(
+        title = paste("필터링된 데이터:", nrow(filtered_data()), "대"),
+        x = "무게",
+        y = "연비"
+      ) +
+      theme_minimal()
+  })
+
+  # 테이블 출력
+  output$filtered_table <- renderTable({
+    head(filtered_data(), 10)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+### 7.2.3 주요 입력 위젯
+
+Shiny는 다양한 입력 위젯을 제공합니다:
+
+| 위젯 함수 | 설명 | 사용 예시 |
+|----------|------|----------|
+| `textInput()` | 텍스트 입력 | 환자 ID 입력 |
+| `numericInput()` | 숫자 입력 | 연령 입력 |
+| `sliderInput()` | 슬라이더 | 날짜/범위 선택 |
+| `selectInput()` | 드롭다운 | 지역 선택 |
+| `checkboxInput()` | 체크박스 | 옵션 활성화 |
+| `radioButtons()` | 라디오 버튼 | 성별 선택 |
+| `dateInput()` | 날짜 선택 | 시작일 입력 |
+| `dateRangeInput()` | 날짜 범위 | 기간 선택 |
+| `fileInput()` | 파일 업로드 | CSV 업로드 |
+| `actionButton()` | 액션 버튼 | "분석 실행" 버튼 |
+
+**예제: 다양한 입력 위젯**
+
+```{r}
+#| eval: false
+#| echo: true
+
+ui <- fluidPage(
+  titlePanel("입력 위젯 데모"),
+
+  sidebarLayout(
+    sidebarPanel(
+      textInput("patient_id", "환자 ID:", "P12345"),
+
+      numericInput("age", "나이:", value = 50, min = 0, max = 120),
+
+      selectInput("gender", "성별:",
+                  choices = c("남성" = "M", "여성" = "F")),
+
+      checkboxInput("smoker", "흡연자", value = FALSE),
+
+      radioButtons("diagnosis", "진단:",
+                   choices = c("정상", "당뇨", "고혈압")),
+
+      dateRangeInput("visit_dates", "방문 기간:",
+                     start = Sys.Date() - 30,
+                     end = Sys.Date()),
+
+      actionButton("submit", "제출", class = "btn-primary")
+    ),
+
+    mainPanel(
+      verbatimTextOutput("input_summary")
+    )
+  )
+)
+
+server <- function(input, output) {
+
+  observeEvent(input$submit, {
+    output$input_summary <- renderPrint({
+      cat("=== 입력 요약 ===\n")
+      cat("환자 ID:", input$patient_id, "\n")
+      cat("나이:", input$age, "\n")
+      cat("성별:", input$gender, "\n")
+      cat("흡연:", ifelse(input$smoker, "예", "아니오"), "\n")
+      cat("진단:", input$diagnosis, "\n")
+      cat("방문 기간:", as.character(input$visit_dates), "\n")
+    })
+  })
+}
+
+shinyApp(ui, server)
+```
+
+### 7.2.4 실전 예제: 공중보건 감시 대시보드
+
+**완전한 예제: 감염병 감시 대시보드**
+
+```{r}
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| code-summary: "전체 코드 보기 (클릭)"
+
+# app.R - 감염병 감시 대시보드
+library(shiny)
+library(tidyverse)
+library(plotly)
+library(DT)
+
+# 모의 데이터 생성
+set.seed(42)
+disease_data <- tibble(
+  date = rep(seq.Date(as.Date("2024-01-01"), by = "day", length.out = 365), 3),
+  region = rep(c("서울", "부산", "대구"), each = 365),
+  cases = rpois(365 * 3, lambda = 50) + rnorm(365 * 3, mean = 0, sd = 10),
+  deaths = rpois(365 * 3, lambda = 2)
+) %>%
+  mutate(
+    cases = pmax(0, cases),  # 음수 제거
+    deaths = pmax(0, deaths),
+    cfr = deaths / cases * 100  # Case Fatality Rate
+  )
+
+# UI
+ui <- fluidPage(
+  # 스타일링
+  tags$head(
+    tags$style(HTML("
+      .navbar { background-color: #2C3E50; }
+      .navbar-brand { color: white !important; }
+      h2 { color: #2C3E50; }
+    "))
+  ),
+
+  # 제목
+  titlePanel(
+    div(
+      style = "background-color: #2C3E50; color: white; padding: 20px; margin: -15px -15px 20px -15px;",
+      h1("감염병 실시간 감시 대시보드", style = "margin: 0;"),
+      p("Infectious Disease Surveillance System", style = "margin: 5px 0 0 0; font-size: 14px;")
+    )
+  ),
+
+  # 레이아웃
+  sidebarLayout(
+    sidebarPanel(
+      width = 3,
+
+      h4("📊 필터 옵션"),
+
+      selectInput(
+        "region_select",
+        "지역 선택:",
+        choices = c("전체" = "All", "서울", "부산", "대구"),
+        selected = "All"
+      ),
+
+      dateRangeInput(
+        "date_range",
+        "기간 선택:",
+        start = as.Date("2024-01-01"),
+        end = as.Date("2024-12-31"),
+        min = as.Date("2024-01-01"),
+        max = as.Date("2024-12-31")
+      ),
+
+      hr(),
+
+      h4("📈 표시 옵션"),
+
+      checkboxInput("show_deaths", "사망자 표시", value = TRUE),
+      checkboxInput("show_cfr", "치명률(CFR) 표시", value = FALSE),
+
+      hr(),
+
+      actionButton("update", "업데이트", class = "btn-primary btn-block"),
+
+      br(),
+
+      wellPanel(
+        h5("ℹ️ 정보"),
+        p("데이터 출처: 모의 데이터", style = "font-size: 12px;"),
+        p("업데이트: 실시간", style = "font-size: 12px;")
+      )
+    ),
+
+    mainPanel(
+      width = 9,
+
+      # 요약 통계 카드
+      fluidRow(
+        column(
+          3,
+          div(
+            style = "background-color: #3498DB; color: white; padding: 15px; border-radius: 5px;",
+            h4("총 확진자", style = "margin: 0;"),
+            h2(textOutput("total_cases", inline = TRUE), style = "margin: 10px 0 0 0;")
+          )
+        ),
+        column(
+          3,
+          div(
+            style = "background-color: #E74C3C; color: white; padding: 15px; border-radius: 5px;",
+            h4("총 사망자", style = "margin: 0;"),
+            h2(textOutput("total_deaths", inline = TRUE), style = "margin: 10px 0 0 0;")
+          )
+        ),
+        column(
+          3,
+          div(
+            style = "background-color: #F39C12; color: white; padding: 15px; border-radius: 5px;",
+            h4("평균 CFR", style = "margin: 0;"),
+            h2(textOutput("avg_cfr", inline = TRUE), style = "margin: 10px 0 0 0;")
+          )
+        ),
+        column(
+          3,
+          div(
+            style = "background-color: #27AE60; color: white; padding: 15px; border-radius: 5px;",
+            h4("관찰 기간", style = "margin: 0;"),
+            h2(textOutput("obs_days", inline = TRUE), style = "margin: 10px 0 0 0;")
+          )
+        )
+      ),
+
+      br(),
+
+      # 탭 패널
+      tabsetPanel(
+        type = "tabs",
+
+        # 탭 1: 시계열 그래프
+        tabPanel(
+          "시계열 추세",
+          br(),
+          plotlyOutput("time_series_plot", height = "500px")
+        ),
+
+        # 탭 2: 지역별 비교
+        tabPanel(
+          "지역별 비교",
+          br(),
+          plotlyOutput("region_comparison", height = "500px")
+        ),
+
+        # 탭 3: 데이터 테이블
+        tabPanel(
+          "데이터 테이블",
+          br(),
+          DTOutput("data_table")
+        ),
+
+        # 탭 4: 통계 요약
+        tabPanel(
+          "통계 요약",
+          br(),
+          verbatimTextOutput("summary_stats")
+        )
+      )
+    )
+  )
+)
+
+# Server
+server <- function(input, output, session) {
+
+  # 반응형 데이터
+  filtered_data <- reactive({
+    data <- disease_data
+
+    # 지역 필터
+    if (input$region_select != "All") {
+      data <- data %>% filter(region == input$region_select)
+    }
+
+    # 날짜 필터
+    data <- data %>%
+      filter(date >= input$date_range[1],
+             date <= input$date_range[2])
+
+    data
+  }) %>% bindEvent(input$update)
+
+  # 요약 통계
+  output$total_cases <- renderText({
+    format(sum(filtered_data()$cases), big.mark = ",")
+  })
+
+  output$total_deaths <- renderText({
+    format(sum(filtered_data()$deaths), big.mark = ",")
+  })
+
+  output$avg_cfr <- renderText({
+    cfr <- mean(filtered_data()$cfr, na.rm = TRUE)
+    paste0(round(cfr, 2), "%")
+  })
+
+  output$obs_days <- renderText({
+    paste(nrow(filtered_data()), "일")
+  })
+
+  # 시계열 플롯
+  output$time_series_plot <- renderPlotly({
+    data <- filtered_data()
+
+    p <- ggplot(data, aes(x = date)) +
+      geom_line(aes(y = cases, color = region), size = 1) +
+      labs(
+        title = "일일 확진자 추세",
+        x = "날짜",
+        y = "확진자 수",
+        color = "지역"
+      ) +
+      theme_minimal(base_size = 12)
+
+    # 사망자 추가
+    if (input$show_deaths) {
+      p <- p + geom_line(aes(y = deaths * 10, linetype = "사망자 (×10)"),
+                         color = "red", size = 0.8, alpha = 0.7)
+    }
+
+    ggplotly(p) %>%
+      layout(hovermode = "x unified")
+  })
+
+  # 지역별 비교
+  output$region_comparison <- renderPlotly({
+    data <- filtered_data() %>%
+      group_by(region) %>%
+      summarize(
+        total_cases = sum(cases),
+        total_deaths = sum(deaths),
+        avg_cfr = mean(cfr, na.rm = TRUE)
+      )
+
+    plot_ly(data) %>%
+      add_bars(
+        x = ~region,
+        y = ~total_cases,
+        name = "총 확진자",
+        marker = list(color = "#3498DB")
+      ) %>%
+      layout(
+        title = "지역별 총 확진자",
+        xaxis = list(title = "지역"),
+        yaxis = list(title = "확진자 수")
+      )
+  })
+
+  # 데이터 테이블
+  output$data_table <- renderDT({
+    datatable(
+      filtered_data() %>%
+        select(날짜 = date, 지역 = region, 확진자 = cases,
+               사망자 = deaths, CFR = cfr) %>%
+        mutate(CFR = round(CFR, 2)),
+      options = list(
+        pageLength = 20,
+        lengthMenu = c(10, 20, 50, 100),
+        searching = TRUE,
+        ordering = TRUE
+      ),
+      filter = "top",
+      rownames = FALSE
+    )
+  })
+
+  # 통계 요약
+  output$summary_stats <- renderPrint({
+    data <- filtered_data()
+
+    cat("=== 기술 통계 요약 ===\n\n")
+    cat("확진자 수:\n")
+    print(summary(data$cases))
+    cat("\n사망자 수:\n")
+    print(summary(data$deaths))
+    cat("\n치명률 (%):\n")
+    print(summary(data$cfr))
+    cat("\n지역별 총계:\n")
+    print(data %>%
+            group_by(region) %>%
+            summarize(
+              확진자 = sum(cases),
+              사망자 = sum(deaths),
+              평균CFR = round(mean(cfr, na.rm = TRUE), 2)
+            ))
+  })
+}
+
+# 앱 실행
+shinyApp(ui, server)
+```
+
+## 7.3 인터랙티브 테이블: DT 패키지
+
+### 7.3.1 DT 기본 사용법
+
+**DT** 패키지는 JavaScript DataTables 라이브러리를 R에 통합하여 강력한 인터랙티브 테이블을 제공합니다.
+
+**기본 예제:**
+
+```{r}
+#| eval: false
+#| echo: true
+
+library(DT)
+
+# 기본 테이블
+datatable(mtcars)
+```
+
+**주요 기능:**
+- 🔍 **검색**: 실시간 필터링
+- ↕️ **정렬**: 열 클릭으로 정렬
+- 📄 **페이지네이션**: 대용량 데이터 처리
+- 📥 **내보내기**: CSV, Excel, PDF
+- 🎨 **스타일링**: 조건부 포맷팅
+
+**고급 예제:**
+
+```{r}
+#| eval: false
+#| echo: true
+
+library(DT)
+library(tidyverse)
+
+# 보건 데이터
+health_table <- tibble(
+  patient_id = paste0("P", 1:100),
+  age = sample(20:80, 100, replace = TRUE),
+  gender = sample(c("M", "F"), 100, replace = TRUE),
+  bmi = rnorm(100, mean = 25, sd = 4),
+  sbp = rnorm(100, mean = 130, sd = 20),
+  glucose = rnorm(100, mean = 100, sd = 20),
+  diagnosis = sample(c("정상", "전당뇨", "당뇨"), 100, replace = TRUE, prob = c(0.6, 0.25, 0.15))
+)
+
+# 인터랙티브 테이블
+datatable(
+  health_table,
+
+  # 옵션
+  options = list(
+    pageLength = 20,  # 페이지당 행 수
+    lengthMenu = c(10, 20, 50, 100),  # 페이지 크기 옵션
+    searching = TRUE,  # 검색 활성화
+    ordering = TRUE,   # 정렬 활성화
+    dom = 'Bfrtip',    # 레이아웃 (B=버튼, f=필터, r=processing, t=테이블, i=정보, p=페이지네이션)
+    buttons = c('copy', 'csv', 'excel', 'pdf', 'print')  # 내보내기 버튼
+  ),
+
+  # 열 필터
+  filter = "top",  # 상단에 열별 필터 추가
+
+  # 행 이름 제거
+  rownames = FALSE,
+
+  # 열 이름 변경
+  colnames = c("환자 ID", "나이", "성별", "BMI", "수축기 혈압", "혈당", "진단")
+) %>%
+
+  # 조건부 포맷팅: BMI가 25 이상이면 빨간색
+  formatStyle(
+    'bmi',
+    backgroundColor = styleInterval(c(25), c('white', '#ffcccc'))
+  ) %>%
+
+  # 조건부 포맷팅: 혈당이 126 이상이면 주황색
+  formatStyle(
+    'glucose',
+    backgroundColor = styleInterval(c(126), c('white', '#ffe6cc'))
+  ) %>%
+
+  # 숫자 반올림
+  formatRound(c('bmi', 'sbp', 'glucose'), 1)
+```
+
+## 7.4 flexdashboard: 빠른 대시보드 제작
+
+**flexdashboard**는 R Markdown 기반으로 대시보드를 빠르게 만드는 패키지입니다. Shiny보다 간단하지만 강력합니다.
+
+**기본 구조:**
+
+```{r}
+#| eval: false
+#| echo: true
+
+---
+title: "보건 지표 대시보드"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r flex-setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+```
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### 일일 확진자 추세
+
+```{r}
+# 플롯 코드
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### 지역별 누적 확진자
+
+```{r}
+# 플롯 코드
+```
+
+### 최근 7일 요약
+
+```{r}
+# 테이블 코드
+```
+```
+
+## 7.5 Shiny 앱 배포
+
+### 7.5.1 shinyapps.io (무료/유료)
+
+가장 간단한 배포 방법입니다:
+
+**단계:**
+1. [shinyapps.io](https://www.shinyapps.io/) 계정 생성
+2. RStudio에서 `rsconnect` 패키지 설치
+3. 계정 연결
+4. 앱 배포
+
+```{r}
+#| eval: false
+#| echo: true
+
+# 1. rsconnect 설치
+install.packages("rsconnect")
+
+# 2. 계정 인증 (웹에서 토큰 복사)
+rsconnect::setAccountInfo(
+  name = "your-account",
+  token = "your-token",
+  secret = "your-secret"
+)
+
+# 3. 앱 배포
+rsconnect::deployApp(appDir = "path/to/app")
+```
+
+**무료 플랜 제한:**
+- 5개 앱
+- 25 활성 시간/월
+- 1GB RAM
+
+**유료 플랜:** $9/월부터 시작
+
+### 7.5.2 Shiny Server (오픈소스)
+
+자체 서버에 설치하는 무료 옵션:
+
+```bash
+# Ubuntu에 Shiny Server 설치
+sudo apt-get install gdebi-core
+wget https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-1.5.20.1002-amd64.deb
+sudo gdebi shiny-server-1.5.20.1002-amd64.deb
+
+# 서비스 시작
+sudo systemctl start shiny-server
+```
+
+앱은 `/srv/shiny-server/` 디렉토리에 배치합니다.
+
+### 7.5.3 Docker를 이용한 배포
+
+재현 가능하고 이식 가능한 배포:
+
+**Dockerfile:**
+
+```dockerfile
+FROM rocker/shiny:latest
+
+# 패키지 설치
+RUN R -e "install.packages(c('tidyverse', 'plotly', 'DT', 'shiny'))"
+
+# 앱 복사
+COPY ./app /srv/shiny-server/myapp
+
+# 포트 노출
+EXPOSE 3838
+
+# 실행
+CMD ["/usr/bin/shiny-server"]
+```
+
+**빌드 및 실행:**
+
+```bash
+# 이미지 빌드
+docker build -t my-shiny-app .
+
+# 컨테이너 실행
+docker run -p 3838:3838 my-shiny-app
+```
+
+## 7.6 종합 실습: COVID-19 모니터링 대시보드
+
+**최종 프로젝트: 완전한 COVID-19 대시보드**
+
+이 예제는 지금까지 배운 모든 내용을 통합합니다:
+
+```{r}
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| code-summary: "COVID-19 대시보드 전체 코드"
+
+# app.R - COVID-19 모니터링 대시보드
+library(shiny)
+library(tidyverse)
+library(plotly)
+library(DT)
+library(lubridate)
+
+# 데이터 로딩 (실제 프로젝트에서는 API나 데이터베이스 사용)
+covid_data <- read_csv("covid_data.csv")  # 또는 API 호출
+
+ui <- navbarPage(
+  title = "COVID-19 모니터링 시스템",
+  theme = bslib::bs_theme(version = 4, bootswatch = "flatly"),
+
+  # 탭 1: 개요
+  tabPanel(
+    "개요",
+    fluidRow(
+      column(3, valueBoxOutput("total_cases")),
+      column(3, valueBoxOutput("total_deaths")),
+      column(3, valueBoxOutput("total_recovered")),
+      column(3, valueBoxOutput("active_cases"))
+    ),
+    fluidRow(
+      column(6, plotlyOutput("daily_cases_plot")),
+      column(6, plotlyOutput("cumulative_plot"))
+    )
+  ),
+
+  # 탭 2: 지역별 분석
+  tabPanel(
+    "지역별 분석",
+    sidebarLayout(
+      sidebarPanel(
+        selectInput("region", "지역:", choices = unique(covid_data$region)),
+        dateRangeInput("dates", "기간:", start = min(covid_data$date))
+      ),
+      mainPanel(
+        plotlyOutput("region_plot"),
+        DTOutput("region_table")
+      )
+    )
+  ),
+
+  # 탭 3: 백신 접종
+  tabPanel(
+    "백신 접종",
+    plotlyOutput("vaccine_progress"),
+    DTOutput("vaccine_table")
+  )
+)
+
+server <- function(input, output, session) {
+  # 서버 로직 구현
+  # ... (위 예제 참고)
+}
+
+shinyApp(ui, server)
+```
+
+## 7.7 요약 및 다음 단계
+
+### 7.7.1 핵심 정리
+
+**이 챕터에서 배운 내용:**
+
+✅ **plotly/ggplotly**: ggplot2를 한 줄로 인터랙티브하게 변환
+✅ **Shiny 구조**: UI + Server, 반응성 개념
+✅ **입력/출력 위젯**: 10+ 종류의 위젯 활용
+✅ **DT 테이블**: 검색, 정렬, 필터링, 내보내기
+✅ **배포 전략**: shinyapps.io, Shiny Server, Docker
+
+**주요 함수 요약:**
+
+| 패키지 | 주요 함수 | 용도 |
+|--------|----------|------|
+| **plotly** | `ggplotly()` | ggplot2 → 인터랙티브 |
+| **plotly** | `plot_ly()` | 직접 plotly 생성 |
+| **shiny** | `fluidPage()` | UI 레이아웃 |
+| **shiny** | `renderPlot()` | 플롯 출력 |
+| **shiny** | `reactive()` | 반응형 데이터 |
+| **DT** | `datatable()` | 인터랙티브 테이블 |
+| **flexdashboard** | R Markdown 기반 | 빠른 대시보드 |
+
+### 7.7.2 실전 워크플로우
+
+**대시보드 개발 5단계:**
+
+```
+1. 프로토타입 → 2. UI 설계 → 3. Server 로직 → 4. 테스트 → 5. 배포
+   (ggplot2)     (레이아웃)    (반응성)       (버그 수정)   (공유)
+```
+
+**1단계: 프로토타입 (R 스크립트)**
+```r
+# 정적 플롯으로 먼저 개발
+p <- ggplot(data, aes(x, y)) + geom_line()
+p
+```
+
+**2단계: 인터랙티브로 변환**
+```r
+ggplotly(p)
+```
+
+**3단계: Shiny UI 추가**
+```r
+ui <- fluidPage(
+  selectInput(...),
+  plotlyOutput(...)
+)
+```
+
+**4단계: Server 로직**
+```r
+server <- function(input, output) {
+  output$plot <- renderPlotly({
+    filtered_data <- data %>% filter(...)
+    ggplotly(ggplot(filtered_data, ...))
+  })
+}
+```
+
+**5단계: 배포**
+```r
+rsconnect::deployApp()
+```
+
+### 7.7.3 추가 학습 자료
+
+::: {.callout-note}
+## 🔗 유용한 리소스
+
+### 공식 문서
+- **Shiny**: [https://shiny.posit.co/](https://shiny.posit.co/)
+- **plotly**: [https://plotly.com/r/](https://plotly.com/r/)
+- **DT**: [https://rstudio.github.io/DT/](https://rstudio.github.io/DT/)
+- **flexdashboard**: [https://pkgs.rstudio.com/flexdashboard/](https://pkgs.rstudio.com/flexdashboard/)
+
+### 튜토리얼
+- **Mastering Shiny**: [https://mastering-shiny.org/](https://mastering-shiny.org/) (무료 전자책)
+- **Shiny Gallery**: [https://shiny.posit.co/r/gallery/](https://shiny.posit.co/r/gallery/) (예제 모음)
+
+### 커뮤니티
+- **RStudio Community**: [https://community.rstudio.com/](https://community.rstudio.com/)
+- **Stack Overflow**: [shiny] 태그
+:::
+
+### 7.7.4 실전 프로젝트 아이디어
+
+**보건학 분야 Shiny 앱 아이디어:**
+
+1. **병원 병상 관리 대시보드**
+   - 실시간 병상 가용률
+   - 지역별/진료과별 현황
+   - 예측 모델링
+
+2. **백신 접종률 추적기**
+   - 지역별 접종률
+   - 인구 집단별 분석
+   - 목표 대비 진행률
+
+3. **질병 발생 조기 경보 시스템**
+   - 실시간 모니터링
+   - 이상치 탐지
+   - 알림 기능
+
+4. **임상시험 모니터링 도구**
+   - 환자 모집 현황
+   - 부작용 추적
+   - 통계 분석 자동화
+
+5. **건강검진 결과 시각화**
+   - 개인별 대시보드
+   - 추세 분석
+   - 건강 권고사항
+
+---
+
+**축하합니다!** Chapter 7을 완료했습니다. 이제 인터랙티브 대시보드를 만들고 배포할 수 있습니다! 🎉
+
+다음 챕터에서는 전체 내용을 정리하고, 실전 프로젝트를 진행합니다.

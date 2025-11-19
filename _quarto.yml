@@ -1,0 +1,83 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "R 기반 보건학 시각화"
+  subtitle: "역학 및 임상통계를 위한 실습 가이드"
+  author: "연세대 산업보건 연구소"
+  date: today
+
+  chapters:
+    - index.qmd
+    - part: "기초편"
+      chapters:
+        - chapters/01-introduction.qmd
+        - chapters/02-ggplot2-basics.qmd
+    - part: "역학편"
+      chapters:
+        - chapters/03-epidemiology.qmd
+        - chapters/04-spatial-epi.qmd
+    - part: "임상통계편"
+      chapters:
+        - chapters/05-clinical-stats.qmd
+        - chapters/06-publication.qmd
+    - part: "고급편"
+      chapters:
+        - chapters/07-interactive.qmd
+        - chapters/08-conclusion.qmd
+    - references.qmd
+
+  sidebar:
+    style: "floating"
+    search: true
+    collapse-level: 1
+
+  page-footer:
+    left: |
+      R 기반 보건학 시각화 by 보건학 R 시각화 팀
+    right: |
+      Built with [Quarto](https://quarto.org/)
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      light: [cosmo, custom.scss]
+      dark: darkly
+    code-fold: false
+    code-tools: true
+    code-copy: true
+    code-link: true
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    number-depth: 3
+    link-external-newwindow: true
+    fig-width: 8
+    fig-height: 6
+
+  # pdf:
+  #   documentclass: scrbook
+  #   keep-tex: true
+  #   pdf-engine: xelatex
+  #   mainfont: "Noto Sans KR"
+  #   sansfont: "Noto Sans KR"
+  #   monofont: "D2Coding"
+  #   include-in-header:
+  #     text: |
+  #       \usepackage{kotex}
+  # PDF 빌드는 TeX 설치 필요: quarto install tinytex
+
+execute:
+  warning: false
+  message: false
+  cache: false
+  freeze: auto
+
+knitr:
+  opts_chunk:
+    comment: "#>"
+    fig.align: "center"
+    out.width: "90%"

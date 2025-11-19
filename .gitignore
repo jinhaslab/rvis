@@ -1,25 +1,37 @@
 # ============================================
-# docs 폴더 + 학생 실습용 코드 Git에 커밋
+# Open Source R Visualization Book
+# 모든 소스 코드 공개 (오픈소스 원칙)
 # ============================================
 
-# 모든 파일 무시
-*
-
-# docs 폴더는 허용 (GitHub Pages 배포)
-!docs/
-!docs/**
-
-# code 폴더는 허용 (학생들이 다운로드하여 실습)
-!code/
-!code/**
-
-# 필수 파일만 허용
-!.gitignore
-!.nojekyll
-!README.md
-
-# 배포 가이드 (로컬 작업자용 - 선택적)
-!DEPLOY_GUIDE.md
-
+# Quarto 빌드 결과물 및 임시 파일만 제외
 /.quarto/
+/_freeze/
+
+# R 관련 임시 파일
 .Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Python 가상환경
+envrvis/
+venv/
+env/
+*.pyc
+
+# OS 관련
+.DS_Store
+Thumbs.db
+
+# IDE 관련
+.vscode/
+.idea/
+
+# 빌드 출력물 (임시)
+outputs/
+
+# 나머지는 모두 공개
+# - 소스 코드 (.qmd, .R, .yml)
+# - 데이터 (data/)
+# - 챕터 (chapters/)
+# - 빌드 결과물 (docs/) - GitHub Pages용

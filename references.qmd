@@ -1,0 +1,95 @@
+---
+title: "참고문헌"
+---
+
+# 참고문헌 {.unnumbered}
+
+이 책은 다음 자료들을 참고하여 작성되었습니다.
+
+## 주요 참고 도서
+
+1. Wickham, H., & Grolemund, G. (2017). *R for Data Science*. O'Reilly Media. <https://r4ds.hadley.nz/>
+
+2. Wickham, H. (2016). *ggplot2: Elegant Graphics for Data Analysis* (3rd ed.). Springer. <https://ggplot2-book.org/>
+
+3. Healy, K. (2018). *Data Visualization: A Practical Introduction*. Princeton University Press.
+
+4. Moraga, P. (2019). *Geospatial Health Data: Modeling and Visualization with R-INLA and Shiny*. Chapman and Hall/CRC.
+
+5. Batra, N., et al. (2021). *The Epidemiologist R Handbook*. <https://epirhandbook.com/>
+
+## R 패키지
+
+### 시각화
+
+- Wickham, H. (2016). ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics. <https://CRAN.R-project.org/package=ggplot2>
+
+- Pedersen, T. L. (2024). patchwork: The Composer of Plots. <https://CRAN.R-project.org/package=patchwork>
+
+- Slowikowski, K. (2024). ggrepel: Automatically Position Non-Overlapping Text Labels. <https://CRAN.R-project.org/package=ggrepel>
+
+- Kassambara, A. (2023). ggpubr: 'ggplot2' Based Publication Ready Plots. <https://CRAN.R-project.org/package=ggpubr>
+
+### 역학 분석
+
+- Jombart, T., et al. (2022). incidence2: Compute, Handle and Plot Incidence. <https://CRAN.R-project.org/package=incidence2>
+
+- Donegan, C. (2022). surveil: Public Health Surveillance. <https://CRAN.R-project.org/package=surveil>
+
+### 공간 분석
+
+- Pebesma, E. (2018). Simple Features for R: Standardized Support for Spatial Vector Data. *The R Journal*, 10(1), 439-446. <https://doi.org/10.32614/RJ-2018-009>
+
+- Tennekes, M. (2018). tmap: Thematic Maps in R. *Journal of Statistical Software*, 84(6), 1-39. <https://doi.org/10.18637/jss.v084.i06>
+
+### 임상 통계
+
+- Therneau, T. (2024). survival: Survival Analysis. <https://CRAN.R-project.org/package=survival>
+
+- Sjoberg, D. D., et al. (2023). ggsurvfit: Flexible Time-to-Event Figures. <https://CRAN.R-project.org/package=ggsurvfit>
+
+- Viechtbauer, W. (2010). Conducting Meta-Analyses in R with the metafor Package. *Journal of Statistical Software*, 36(3), 1-48. <https://doi.org/10.18637/jss.v036.i03>
+
+### 대화형 시각화
+
+- Sievert, C. (2020). *Interactive Web-Based Data Visualization with R, plotly, and shiny*. Chapman and Hall/CRC. <https://plotly-r.com/>
+
+- Chang, W., et al. (2024). shiny: Web Application Framework for R. <https://CRAN.R-project.org/package=shiny>
+
+## 웹 리소스
+
+### 튜토리얼
+
+- R Graph Gallery. <https://r-graph-gallery.com/>
+- From Data to Viz. <https://www.data-to-viz.com/>
+- Cedric Scherer's ggplot2 Tutorial. <https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/>
+
+### 커뮤니티
+
+- RStudio Community. <https://community.rstudio.com/>
+- Stack Overflow (R tag). <https://stackoverflow.com/questions/tagged/r>
+- R-Bloggers. <https://www.r-bloggers.com/>
+
+### 데이터 소스
+
+- 통계지리정보서비스(SGIS). <https://sgis.kostat.go.kr/>
+- 질병관리청 감염병포털. <https://npt.kdca.go.kr/>
+- Our World in Data. <https://ourworldindata.org/>
+
+## 학술 논문
+
+1. Wilkinson, L. (2005). *The Grammar of Graphics* (2nd ed.). Springer.
+
+2. Tufte, E. R. (2001). *The Visual Display of Quantitative Information* (2nd ed.). Graphics Press.
+
+3. Cleveland, W. S., & McGill, R. (1984). Graphical Perception: Theory, Experimentation, and Application to the Development of Graphical Methods. *Journal of the American Statistical Association*, 79(387), 531-554.
+
+4. Friendly, M. (2008). A Brief History of Data Visualization. In C. Chen, W. Härdle, & A. Unwin (Eds.), *Handbook of Data Visualization* (pp. 15-56). Springer.
+
+---
+
+::: {.callout-note}
+## BibTeX 파일
+
+전체 참고문헌 목록은 `references.bib` 파일에서 확인할 수 있습니다.
+:::
