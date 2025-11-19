@@ -529,19 +529,22 @@ data(mtcars)        # 자동차 연비 데이터
 head(iris, 3)
 ```
 
-**예제 2: survival 패키지의 lung 데이터**
+**예제 2: survival 패키지의 lung 데이터 (두 가지 방법)**
 
 ```{r}
 #| echo: true
 #| eval: true
 
-# ⚠️ 중요: 패키지를 먼저 불러와야 data() 작동!
+# ⚠️ 중요: 패키지를 먼저 불러와야 함!
 library(survival)   # 1단계: 패키지 로드
-data(lung)          # 2단계: lung 데이터 불러오기
 
-# 데이터 구조 확인
-str(lung)
+# 방법 1: data() 명시적 호출 (권장)
+data(lung)
 head(lung, 3)
+
+# 방법 2: 패키지 로드 후 바로 사용 (lazy loading)
+# library(survival) 후 바로 lung 사용 가능
+str(lung)
 ```
 
 ::: {.callout-note}
@@ -558,10 +561,13 @@ data(lung)          # ❌ Error: 'lung' not found
 ```r
 library(survival)   # ✅ 패키지 먼저 로드
 data(lung)          # ✅ 정상 작동
+# 또는 그냥 lung 직접 사용 (더 간단!)
+head(lung)          # ✅ library() 후에는 data() 없이도 가능
 ```
 
-**팁:**
-- `data(lung, package = "survival")` 처럼 `package` 인자를 사용하면 library() 없이도 불러올 수 있지만, 실전에서는 `library()` 사용을 권장합니다.
+**중요:**
+- `data(lung, package = "survival")` 문법은 작동하지 않습니다!
+- 반드시 `library(survival)`을 먼저 실행하세요.
 :::
 
 **보건학에서 자주 사용하는 내장 데이터셋:**

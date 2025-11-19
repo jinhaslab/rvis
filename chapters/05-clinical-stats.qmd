@@ -143,7 +143,6 @@ library(ggsurvfit)
 
 # 2단계: lung 데이터 불러오기
 data(lung)           # survival 패키지의 내장 데이터
-# 또는: data(lung, package = "survival")
 
 # 데이터 구조 확인
 head(lung, 3)
@@ -162,6 +161,12 @@ head(lung, 3)
 **예시:**
 - 환자 1: time=306일, status=2 → 306일 후 사망
 - 환자 2: time=455일, status=1 → 455일까지 추적 후 중도절단 (생존)
+
+**TIP:** `library(survival)` 후에는 `data(lung)` 없이 바로 `lung`을 사용해도 됩니다!
+```r
+library(survival)
+head(lung)  # ✅ data(lung) 없이도 작동!
+```
 :::
 
 ```{r}
