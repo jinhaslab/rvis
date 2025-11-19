@@ -40,22 +40,50 @@ knitr::opts_chunk$set(
 ::: {.callout-tip}
 ## 📚 이 챕터의 실습 데이터
 
+이 챕터에서는 **R 내장 데이터셋**과 **시뮬레이션 데이터**를 사용합니다.
+
+### R 내장 데이터셋 불러오기
+
+R 패키지의 데이터를 사용하려면 **반드시 패키지를 먼저 불러와야** 합니다:
+
 ```r
 library(tidyverse)
-library(survival)
+library(survival)    # ⚠️ 먼저 패키지 로드!
 library(ggsurvfit)
 library(metafor)
 
 # 생존 분석: survival 패키지 내장 데이터
-data(lung)      # 폐암 환자 생존 데이터
-data(colon)     # 대장암 생존 데이터
+data(lung)           # 폐암 환자 생존 데이터 (N=228)
+data(colon)          # 대장암 생존 데이터
 
 # 메타분석: metafor 패키지 내장 데이터
-data(dat.bcg)   # BCG 백신 효과 메타분석
+data(dat.bcg)        # BCG 백신 효과 메타분석 (13개 연구)
 
 # 임상시험 데이터 (시뮬레이션)
 clinical <- read_csv(here("data", "processed", "clinical_trial.csv"))
 ```
+
+### lung 데이터셋 상세 정보
+
+**출처:** North Central Cancer Treatment Group
+**환자 수:** 228명 (진행성 폐암 환자)
+**주요 변수:**
+
+| 변수명    | 설명                          | 타입      |
+|-----------|-------------------------------|-----------|
+| `time`    | 생존 시간 (일)                | numeric   |
+| `status`  | 생존 상태 (1=사망, 2=생존)    | numeric   |
+| `age`     | 나이 (세)                     | numeric   |
+| `sex`     | 성별 (1=남성, 2=여성)         | numeric   |
+| `ph.ecog` | ECOG 수행 점수 (0-3)          | numeric   |
+| `ph.karno`| Karnofsky 점수 (의사 평가)    | numeric   |
+| `pat.karno`| Karnofsky 점수 (환자 평가)   | numeric   |
+| `meal.cal`| 식사 칼로리                   | numeric   |
+| `wt.loss` | 최근 6개월 체중 감소 (파운드) | numeric   |
+
+**사용 예시:** Kaplan-Meier 생존 곡선, Cox 비례위험 모델
+
+**참고:** `?lung` 명령어로 자세한 설명을 볼 수 있습니다.
 :::
 
 ## 5.1 생존 분석 (Survival Analysis)
@@ -109,15 +137,32 @@ S(t) = Π [1 - (사건 발생 수 / 위험 인구)]
 #| label: fig-km-basic
 #| fig-cap: "Kaplan-Meier 생존 곡선 (폐암 데이터)"
 
-library(survival)
+# ⚠️ 중요: survival 패키지를 먼저 로드해야 lung 데이터 사용 가능!
+library(survival)    # 1단계: 패키지 로드
 library(ggsurvfit)
 
-# lung 데이터 로드
-data(lung)
+# 2단계: lung 데이터 불러오기
+data(lung)           # survival 패키지의 내장 데이터
+# 또는: data(lung, package = "survival")
 
 # 데이터 구조 확인
 head(lung, 3)
 ```
+
+::: {.callout-note}
+## 💡 lung 데이터 주요 변수
+
+- **time**: 생존 시간 (일 단위)
+- **status**: 1 = 중도절단(censored), 2 = 사망(event)
+  - ⚠️ 주의: 일반적인 코딩(0/1)과 반대!
+- **sex**: 1 = 남성, 2 = 여성
+- **age**: 나이 (세)
+- **ph.ecog**: ECOG 수행 상태 점수 (0 = 정상, 5 = 사망)
+
+**예시:**
+- 환자 1: time=306일, status=2 → 306일 후 사망
+- 환자 2: time=455일, status=1 → 455일까지 추적 후 중도절단 (생존)
+:::
 
 ```{r}
 #| eval: true
