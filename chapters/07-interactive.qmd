@@ -65,7 +65,7 @@ knitr::opts_chunk$set(
 **기본 예제:**
 
 ```{r}
-#| eval: false
+#| eval: true
 #| echo: true
 #| warning: false
 
@@ -119,7 +119,7 @@ ggplot2의 모든 기능(facet, theme, scale)이 대부분 자동 변환됩니�
 **예제 1: 시계열 데이터 (COVID-19 추세)**
 
 ```{r}
-#| eval: false
+#| eval: true
 #| echo: true
 #| warning: false
 
@@ -157,7 +157,7 @@ ggplotly(p) %>%
 plotly는 ggplot2를 넘어 3D 시각화도 지원합니다:
 
 ```{r}
-#| eval: false
+#| eval: true
 #| echo: true
 #| warning: false
 
@@ -188,7 +188,7 @@ plot_ly(
 **예제 3: 애니메이션 (시간 경과에 따른 변화)**
 
 ```{r}
-#| eval: false
+#| eval: true
 #| echo: true
 #| warning: false
 
@@ -228,7 +228,7 @@ plot_ly(
 기본 툴팁을 커스터마이즈할 수 있습니다:
 
 ```{r}
-#| eval: false
+#| eval: true
 #| echo: true
 #| warning: false
 
@@ -267,6 +267,37 @@ ggplotly(p, tooltip = "text")
 ```
 
 ## 7.2 Shiny 대시보드 구축
+
+::: {.callout-important}
+## 💻 Shiny 앱 실행 방법
+
+**정적 HTML 책에서는 Shiny 앱이 작동하지 않습니다!** (서버 필요)
+
+아래 코드 예제들을 **직접 실행**하려면:
+
+**방법 1: 예제 파일 다운로드**
+```r
+# GitHub에서 전체 프로젝트 클론
+git clone https://github.com/jinhaslab/rvis.git
+
+# 또는 ZIP 다운로드: https://github.com/jinhaslab/rvis/archive/main.zip
+
+# Shiny 앱 실행
+shiny::runApp("code/shiny_apps/01_basic_app")
+shiny::runApp("code/shiny_apps/02_disease_dashboard")
+```
+
+**방법 2: 코드 복사**
+- 아래 코드를 `app.R` 파일로 저장
+- RStudio에서 "Run App" 버튼 클릭
+
+**필수 패키지**:
+```r
+install.packages(c("shiny", "tidyverse", "plotly", "DT"))
+```
+
+자세한 설명: `code/shiny_apps/README.md` 참조
+:::
 
 ### 7.2.1 Shiny의 핵심: UI와 Server
 
@@ -835,7 +866,7 @@ shinyApp(ui, server)
 **기본 예제:**
 
 ```{r}
-#| eval: false
+#| eval: true
 #| echo: true
 
 library(DT)
@@ -854,7 +885,7 @@ datatable(mtcars)
 **고급 예제:**
 
 ```{r}
-#| eval: false
+#| eval: true
 #| echo: true
 
 library(DT)
