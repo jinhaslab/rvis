@@ -1,0 +1,50 @@
+<script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+<script src="kakao-login.js"></script>
+<script>
+// 홈 버튼 강제 추가 (페이지 로드 완료 후)
+window.addEventListener('load', function() {
+  console.log('Page loaded, adding home button...');
+
+  // 기존 버튼 제거
+  var existing = document.querySelector('.custom-home-button');
+  if (existing) existing.remove();
+
+  // 새 버튼 생성
+  var btn = document.createElement('a');
+  btn.href = '/shiny/';
+  btn.className = 'custom-home-button';
+  btn.innerHTML = '🏠 홈으로';
+  btn.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;background:white;color:#667eea;padding:12px 25px;border-radius:30px;text-decoration:none;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+
+  // 호버 효과
+  btn.onmouseenter = function() {
+    this.style.background = '#667eea';
+    this.style.color = 'white';
+    this.style.transform = 'translateY(-2px)';
+  };
+  btn.onmouseleave = function() {
+    this.style.background = 'white';
+    this.style.color = '#667eea';
+    this.style.transform = 'translateY(0)';
+  };
+
+  document.body.appendChild(btn);
+  console.log('Home button added to body');
+});
+
+// 백업: Shiny 연결 후에도 시도
+if (typeof Shiny !== 'undefined') {
+  Shiny.addCustomMessageHandler('dummy', function() {});
+  setTimeout(function() {
+    if (!document.querySelector('.custom-home-button')) {
+      console.log('Retry adding home button...');
+      var btn = document.createElement('a');
+      btn.href = '/shiny/';
+      btn.className = 'custom-home-button';
+      btn.innerHTML = '🏠 홈으로';
+      btn.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;background:white;color:#667eea;padding:12px 25px;border-radius:30px;text-decoration:none;font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+      document.body.appendChild(btn);
+    }
+  }, 1000);
+}
+</script>

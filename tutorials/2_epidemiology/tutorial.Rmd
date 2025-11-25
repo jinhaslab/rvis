@@ -1,0 +1,812 @@
+---
+title: "Part II: 역학 데이터 시각화"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    css: www/custom.css
+    includes:
+      in_header: www/header.html
+runtime: shiny_prerendered
+---
+
+```{r packages, include=FALSE}
+# 필요 패키지 자동 설치
+if(!require("learnr")) install.packages("learnr")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("lubridate")) install.packages("lubridate")
+if(!require("scales")) install.packages("scales")
+```
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(scales)
+
+# 역학 데이터 생성
+set.seed(456)
+
+# 1. 발병률 데이터 (Incidence Rate)
+disease_incidence <- data.frame(
+  year = rep(2018:2023, each = 12),
+  month = rep(1:12, 6),
+  cases = c(
+    45, 52, 48, 55, 62, 58, 65, 70, 68, 60, 55, 50,  # 2018
+    48, 55, 52, 60, 68, 65, 72, 78, 75, 68, 62, 55,  # 2019
+    52, 58, 55, 65, 75, 72, 80, 88, 85, 75, 68, 60,  # 2020
+    55, 62, 58, 68, 78, 75, 85, 95, 92, 82, 75, 65,  # 2021
+    58, 65, 62, 72, 82, 78, 88, 98, 95, 85, 78, 68,  # 2022
+    60, 68, 65, 75, 85, 82, 92, 102, 98, 88, 82, 72  # 2023
+  ),
+  population = rep(100000, 72)
+) %>%
+  mutate(
+    date = as.Date(paste(year, month, "01", sep = "-")),
+    incidence_rate = (cases / population) * 100000
+  )
+
+# 2. 연령별 발병률 (Age-specific rates)
+age_specific_data <- data.frame(
+  age_group = rep(c("0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70+"), 2),
+  region = rep(c("도시", "농촌"), each = 8),
+  cases = c(15, 25, 45, 65, 85, 120, 150, 180,  # 도시
+            12, 20, 35, 55, 75, 110, 140, 170),  # 농촌
+  population = c(5000, 6000, 8000, 7500, 7000, 6500, 5500, 4000,  # 도시
+                 4500, 5500, 7000, 6500, 6000, 5500, 4500, 3500)   # 농촌
+) %>%
+  mutate(
+    rate_per_100k = (cases / population) * 100000
+  )
+
+# 3. 유행곡선 데이터 (Outbreak)
+outbreak_data <- data.frame(
+  date = seq.Date(as.Date("2023-06-01"), by = "day", length.out = 60),
+  cases = c(
+    2, 3, 5, 8, 12, 18, 25, 35, 48, 62, 78, 95, 110, 125, 138,  # 상승기
+    148, 155, 158, 160, 158, 152, 145, 135, 122, 108, 95, 82,   # 정점 및 하강
+    70, 58, 48, 38, 30, 24, 18, 15, 12, 10, 8, 7, 6,            # 하강 지속
+    5, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0    # 종료
+  )
+) %>%
+  mutate(
+    week = floor(as.numeric(date - min(date)) / 7) + 1,
+    cumulative = cumsum(cases)
+  )
+
+# 4. 지역별 데이터
+regional_data <- data.frame(
+  region = c("서울", "경기", "인천", "부산", "대구", "광주", "대전", "울산"),
+  cases = c(450, 380, 120, 250, 180, 140, 130, 95),
+  population = c(9500000, 13500000, 2950000, 3350000, 2400000, 1450000, 1450000, 1150000)
+) %>%
+  mutate(
+    incidence_rate = (cases / population) * 100000
+  )
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<div style="text-align: right; padding: 10px;">
+  <a href="/shiny/" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold;">🏠 홈으로</a>
+</div>
+
+## 📈 역학 데이터 시각화에 오신 것을 환영합니다!
+
+### 학습 목표:
+- **발병률(Incidence Rate)** 계산 및 시각화
+- **유행곡선(Epidemic Curve)** 제작
+- **연령 표준화 비율** 표현
+- **시계열 역학 데이터** 분석 및 시각화
+- 지역별 질병 분포 비교
+
+### 이 과정을 마치면:
+✅ 역학 연구에 필수적인 그래프를 그릴 수 있습니다
+✅ 발병률과 유병률을 시각화할 수 있습니다
+✅ 질병 유행의 패턴을 분석할 수 있습니다
+✅ 논문 출판 수준의 역학 그래프를 제작할 수 있습니다
+
+---
+
+## 1장: 발병률 시각화 (Incidence Rate)
+
+### 발병률이란?
+
+**발병률(Incidence Rate)** = (특정 기간 동안 새로 발생한 환자 수 / 위험인구) × 100,000
+
+역학에서 가장 중요한 지표 중 하나로, 질병의 새로운 발생을 측정합니다.
+
+### 시계열 발병률 그래프
+
+```{r incidence-demo, echo=TRUE}
+ggplot(disease_incidence, aes(x = date, y = incidence_rate)) +
+  geom_line(color = "#E74C3C", size = 1.2) +
+  geom_point(color = "#E74C3C", size = 2) +
+  geom_smooth(method = "loess", se = TRUE, alpha = 0.2, color = "#3498DB") +
+  labs(
+    title = "연도별 질병 발병률 추이",
+    subtitle = "2018-2023년 월별 발병률 (인구 10만 명당)",
+    x = "날짜",
+    y = "발병률 (per 100,000)",
+    caption = "출처: 가상 역학 감시 데이터"
+  ) +
+  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", size = 14)
+  )
+```
+
+**해석:** 2018년부터 2023년까지 발병률이 점진적으로 증가하는 추세를 보입니다!
+
+### 연습: 발병 건수 시각화
+
+```{r incidence-exercise, exercise=TRUE, exercise.lines=8}
+# disease_incidence 데이터로 연도별 평균 발병 건수 막대 그래프
+disease_incidence %>%
+  group_by(year) %>%
+  summarise(avg_cases = mean(___)) %>%
+  ggplot(aes(x = factor(year), y = avg_cases)) +
+  geom_col(fill = "#3498DB")
+```
+
+```{r incidence-exercise-solution}
+disease_incidence %>%
+  group_by(year) %>%
+  summarise(avg_cases = mean(cases)) %>%
+  ggplot(aes(x = factor(year), y = avg_cases)) +
+  geom_col(fill = "#3498DB", alpha = 0.8) +
+  geom_text(aes(label = round(avg_cases, 1)), vjust = -0.5, size = 4) +
+  labs(
+    title = "연도별 평균 월간 발병 건수",
+    x = "연도",
+    y = "평균 발병 건수",
+    caption = "데이터: 월별 평균 집계"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+---
+
+## 2장: 유행곡선 (Epidemic Curve)
+
+### 유행곡선이란?
+
+**유행곡선(Epidemic Curve)** 은 질병 발생의 시간적 분포를 보여주는 히스토그램입니다. 발병 시점의 패턴을 통해 전파 방식을 추론할 수 있습니다.
+
+### 일별 유행곡선
+
+```{r epi-curve-demo, echo=TRUE}
+ggplot(outbreak_data, aes(x = date, y = cases)) +
+  geom_col(fill = "#E74C3C", alpha = 0.7, color = "white") +
+  geom_line(aes(y = cases), color = "#2C3E50", size = 1, group = 1) +
+  labs(
+    title = "감염병 발생 유행곡선",
+    subtitle = "2023년 6-7월 발생 사례 (일별)",
+    x = "날짜",
+    y = "일일 발생 건수",
+    caption = "전형적인 점원 노출 패턴 (Point Source)"
+  ) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%m/%d") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  )
+```
+
+**해석:** 약 3주차에 정점을 보이고 급격히 감소하는 전형적인 단일 노출 유행 패턴입니다!
+
+### 누적 발생 곡선
+
+```{r cumulative-curve, echo=TRUE}
+ggplot(outbreak_data, aes(x = date)) +
+  geom_area(aes(y = cumulative), fill = "#3498DB", alpha = 0.5) +
+  geom_line(aes(y = cumulative), color = "#2C3E50", size = 1.2) +
+  geom_hline(yintercept = max(outbreak_data$cumulative),
+             linetype = "dashed", color = "red") +
+  annotate("text", x = min(outbreak_data$date) + 10,
+           y = max(outbreak_data$cumulative) + 50,
+           label = paste0("총 ", max(outbreak_data$cumulative), "명"),
+           color = "red", fontface = "bold") +
+  labs(
+    title = "누적 발생 사례",
+    subtitle = "시간에 따른 누적 환자 수",
+    x = "날짜",
+    y = "누적 발생 건수"
+  ) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%m/%d") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### 연습: 주간 집계 유행곡선
+
+```{r weekly-epi-exercise, exercise=TRUE, exercise.lines=10}
+# outbreak_data를 주별로 집계하여 유행곡선 그리기
+outbreak_weekly <- outbreak_data %>%
+  group_by(___) %>%
+  summarise(weekly_cases = sum(___))
+
+ggplot(outbreak_weekly, aes(x = week, y = weekly_cases)) +
+  geom_col()
+```
+
+```{r weekly-epi-exercise-solution}
+outbreak_weekly <- outbreak_data %>%
+  group_by(week) %>%
+  summarise(weekly_cases = sum(cases))
+
+ggplot(outbreak_weekly, aes(x = week, y = weekly_cases)) +
+  geom_col(fill = "#E74C3C", alpha = 0.7) +
+  geom_text(aes(label = weekly_cases), vjust = -0.5, size = 3) +
+  labs(
+    title = "주간 발생 사례",
+    subtitle = "주별 집계 유행곡선",
+    x = "주차",
+    y = "주간 발생 건수"
+  ) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank())
+```
+
+---
+
+## 3장: 연령별 발병률 비교
+
+### 연령군별 발병률
+
+역학에서 연령은 가장 중요한 위험 요인입니다. 연령별 발병률을 시각화하여 고위험군을 파악할 수 있습니다.
+
+```{r age-specific-demo, echo=TRUE}
+ggplot(age_specific_data, aes(x = age_group, y = rate_per_100k, fill = region)) +
+  geom_col(position = "dodge", alpha = 0.8) +
+  geom_text(aes(label = round(rate_per_100k, 0)),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_manual(values = c("도시" = "#3498DB", "농촌" = "#E74C3C")) +
+  labs(
+    title = "지역별 연령군 특이 발병률",
+    subtitle = "도시 vs 농촌 비교 (인구 10만 명당)",
+    x = "연령군",
+    y = "발병률 (per 100,000)",
+    fill = "지역"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0),
+    legend.position = "top",
+    plot.title = element_text(face = "bold")
+  )
+```
+
+**해석:** 연령이 증가할수록 발병률이 높아지며, 도시가 농촌보다 전반적으로 높습니다!
+
+### 연습: 선 그래프로 비교
+
+```{r age-line-exercise, exercise=TRUE, exercise.lines=8}
+# 연령별 발병률을 선 그래프로 표현
+ggplot(age_specific_data, aes(x = age_group, y = rate_per_100k,
+                               color = region, group = region)) +
+  geom_line() +
+  geom_point()
+```
+
+```{r age-line-exercise-solution}
+ggplot(age_specific_data, aes(x = age_group, y = rate_per_100k,
+                               color = region, group = region)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("도시" = "#3498DB", "농촌" = "#E74C3C")) +
+  labs(
+    title = "연령군별 발병률 추이",
+    subtitle = "지역 간 비교",
+    x = "연령군",
+    y = "발병률 (per 100,000)",
+    color = "지역"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+
+---
+
+## 4장: 지역별 질병 분포
+
+### 지역별 발병률 비교
+
+```{r regional-demo, echo=TRUE}
+ggplot(regional_data, aes(x = reorder(region, -incidence_rate),
+                          y = incidence_rate)) +
+  geom_col(aes(fill = incidence_rate), alpha = 0.8) +
+  geom_text(aes(label = round(incidence_rate, 1)), vjust = -0.5, size = 4) +
+  scale_fill_gradient(low = "#2ECC71", high = "#E74C3C") +
+  labs(
+    title = "지역별 질병 발병률",
+    subtitle = "인구 10만 명당 발병률",
+    x = "지역",
+    y = "발병률 (per 100,000)",
+    fill = "발병률"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0),
+    legend.position = "right",
+    plot.title = element_text(face = "bold", size = 14)
+  )
+```
+
+### 발생 건수 vs 발병률 비교
+
+```{r cases-vs-rate, echo=TRUE}
+library(tidyr)
+
+regional_long <- regional_data %>%
+  select(region, cases, incidence_rate) %>%
+  pivot_longer(cols = c(cases, incidence_rate),
+               names_to = "measure",
+               values_to = "value")
+
+ggplot(regional_long, aes(x = reorder(region, value), y = value, fill = measure)) +
+  geom_col() +
+  facet_wrap(~ measure, scales = "free_y",
+             labeller = labeller(measure = c(cases = "발생 건수",
+                                             incidence_rate = "발병률"))) +
+  coord_flip() +
+  scale_fill_manual(values = c("cases" = "#3498DB", "incidence_rate" = "#E74C3C"),
+                    labels = c("발생 건수", "발병률")) +
+  labs(
+    title = "지역별 발생 건수 vs 발병률 비교",
+    subtitle = "인구 규모를 보정한 발병률이 더 정확한 비교 지표",
+    x = "지역",
+    y = "값",
+    fill = "지표"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+
+**중요:** 인구가 많은 지역이 발생 건수는 많지만, 발병률로 보정하면 다른 패턴을 보입니다!
+
+---
+
+## 5장: 종합 퀴즈 📝
+
+### 역학 개념 퀴즈
+
+```{r quiz-epi-concepts}
+quiz(
+  question("발병률(Incidence Rate)의 정의는?",
+    answer("특정 시점에 질병을 가진 사람의 비율"),
+    answer("특정 기간 동안 새로 발생한 환자의 비율", correct = TRUE),
+    answer("질병으로 인한 사망자의 비율"),
+    answer("회복된 환자의 비율"),
+    correct = "정답! 발병률은 새로운 발생(New cases)을 측정합니다.",
+    incorrect = "발병률은 '새로운' 환자 발생을 측정하는 지표입니다."
+  ),
+
+  question("유행곡선(Epidemic Curve)의 주요 목적은?",
+    answer("질병의 치료 방법 결정"),
+    answer("발병 시점의 시간적 분포 파악", correct = TRUE),
+    answer("환자의 임상 증상 기록"),
+    answer("병원의 수용 능력 계산"),
+    correct = "정답! 유행곡선은 발병 시점의 패턴을 보여줍니다."
+  ),
+
+  question("인구 10만 명당 발병률을 계산하는 이유는?",
+    answer("계산이 쉬워서"),
+    answer("WHO 기준이라서"),
+    answer("서로 다른 인구 규모의 지역을 공정하게 비교하기 위해", correct = TRUE),
+    answer("통계적 유의성을 높이기 위해"),
+    correct = "정답! 인구 규모를 표준화하여 공정한 비교가 가능합니다."
+  ),
+
+  question("점원 노출(Point Source) 유행의 특징은?",
+    answer("지속적으로 일정한 발생"),
+    answer("단일 시점 노출 후 급격한 증가와 감소", correct = TRUE),
+    answer("여러 번의 정점"),
+    answer("선형적 증가"),
+    correct = "정답! 단일 노출 후 잠복기를 거쳐 집단 발병하는 패턴입니다."
+  )
+)
+```
+
+### 시각화 기법 퀴즈
+
+```{r quiz-visualization}
+quiz(
+  question("유행곡선을 그릴 때 가장 적합한 geom은?",
+    answer("geom_point()"),
+    answer("geom_line()"),
+    answer("geom_col()", correct = TRUE),
+    answer("geom_boxplot()"),
+    correct = "정답! 유행곡선은 막대 그래프(geom_col)가 표준입니다."
+  ),
+
+  question("시계열 발병률 데이터에 적합한 시각화는? (복수 선택)",
+    answer("geom_line()", correct = TRUE),
+    answer("geom_smooth()", correct = TRUE),
+    answer("geom_col()"),
+    answer("geom_point()", correct = TRUE),
+    type = "multiple",
+    correct = "맞습니다! 선 그래프, 추세선, 점 모두 사용 가능합니다."
+  ),
+
+  question("연령별 발병률을 비교할 때 사용할 수 있는 그래프는?",
+    answer("막대 그래프", correct = TRUE),
+    answer("선 그래프", correct = TRUE),
+    answer("산점도"),
+    answer("파이 차트"),
+    type = "multiple",
+    correct = "정답! 막대와 선 그래프 모두 적합합니다."
+  ),
+
+  question("누적 발생 곡선을 그릴 때 적합한 geom은?",
+    answer("geom_area()", correct = TRUE),
+    answer("geom_line()", correct = TRUE),
+    answer("geom_histogram()"),
+    answer("geom_boxplot()"),
+    type = "multiple",
+    correct = "맞습니다! 누적 곡선은 영역(area)이나 선(line)으로 표현합니다."
+  ),
+
+  question("지역별 발병률을 색상 그라데이션으로 표현할 때 사용하는 함수는?",
+    answer("scale_color_manual()"),
+    answer("scale_fill_gradient()", correct = TRUE),
+    answer("scale_fill_brewer()"),
+    answer("theme()"),
+    correct = "정답! scale_fill_gradient()로 연속형 색상 그라데이션을 만듭니다."
+  )
+)
+```
+
+### 데이터 해석 퀴즈
+
+```{r quiz-interpretation}
+quiz(
+  question("발생 건수가 많지만 발병률이 낮은 이유는?",
+    answer("데이터 오류"),
+    answer("인구가 많아서", correct = TRUE),
+    answer("질병이 약해서"),
+    answer("측정 방법의 차이"),
+    correct = "정답! 인구가 많으면 절대 건수는 많지만 비율(발병률)은 낮을 수 있습니다."
+  ),
+
+  question("유행곡선의 정점이 3주차에 나타났다면 의미하는 것은?",
+    answer("치료가 가장 많이 이루어진 시점"),
+    answer("가장 많은 환자가 발병한 시점", correct = TRUE),
+    answer("유행이 끝난 시점"),
+    answer("백신 접종 시작 시점"),
+    correct = "정답! 정점은 최대 발병 시점을 의미합니다."
+  ),
+
+  question("연령이 증가할수록 발병률이 높아지는 패턴의 의미는?",
+    answer("진단 기술의 차이"),
+    answer("연령이 질병의 위험 요인", correct = TRUE),
+    answer("우연한 결과"),
+    answer("표본 추출 오류"),
+    correct = "정답! 연령 증가와 발병률의 양의 상관관계를 보입니다."
+  ),
+
+  question("발병률 시계열 그래프에서 계절성 패턴이 보인다면?",
+    answer("계절이 질병 발생에 영향", correct = TRUE),
+    answer("데이터 수집 오류"),
+    answer("우연한 변동"),
+    answer("치료 효과"),
+    correct = "정답! 반복되는 계절적 패턴은 환경 요인의 영향을 시사합니다."
+  )
+)
+```
+
+---
+
+## 6장: 심화 퀴즈 🧠
+
+### 코드 결과 예측 퀴즈
+
+```{r quiz-code-predict-epi}
+quiz(
+  question("다음 코드의 결과는?\n\n`outbreak_data %>% filter(cases > 100) %>% nrow()`",
+    answer("100건 이상 발생한 날의 수", correct = TRUE),
+    answer("100건 이상의 총 발생 건수"),
+    answer("100개의 행"),
+    answer("에러 발생"),
+    correct = "정답! filter로 조건에 맞는 행만 남기고 nrow()로 행 수를 셉니다."
+  ),
+
+  question("`scale_x_date(date_breaks = '1 week', date_labels = '%m/%d')`의 결과는?",
+    answer("x축에 1주 간격으로 월/일 형식 표시", correct = TRUE),
+    answer("x축에 1개월 간격 표시"),
+    answer("데이터를 주별로 집계"),
+    answer("에러 발생"),
+    correct = "정답! date_breaks는 눈금 간격, date_labels는 표시 형식을 지정합니다."
+  ),
+
+  question("`cumsum(cases)`의 결과는?",
+    answer("cases의 합계"),
+    answer("cases의 누적 합계", correct = TRUE),
+    answer("cases의 평균"),
+    answer("cases의 표준편차"),
+    correct = "정답! cumsum()은 누적 합계(cumulative sum)를 계산합니다."
+  )
+)
+```
+
+### 오류 찾기 퀴즈
+
+```{r quiz-error-epi}
+quiz(
+  question("다음 코드의 오류는?\n\n`ggplot(data, aes(x = date, y = cases)) + geom_col() + scale_x_date()`\n\n(단, date가 문자열인 경우)",
+    answer("date가 Date 형식이 아니라서 scale_x_date 오류", correct = TRUE),
+    answer("geom_col() 오류"),
+    answer("aes() 오류"),
+    answer("오류 없음"),
+    correct = "정답! scale_x_date()는 Date 형식 변수에만 작동합니다. as.Date()로 변환 필요!"
+  ),
+
+  question("다음 코드의 문제점은?\n\n`data %>% group_by(year) %>% summarise(total = sum(cases)) %>% mutate(rate = total / population)`",
+    answer("group_by 후 population 변수가 없음", correct = TRUE),
+    answer("summarise 문법 오류"),
+    answer("mutate 위치 오류"),
+    answer("문제 없음"),
+    correct = "정답! summarise 후에는 그룹 변수와 요약 변수만 남습니다. population도 summarise에 포함해야 합니다."
+  ),
+
+  question("발병률 계산 공식 `(cases / population) * 1000`의 문제점은?",
+    answer("1000 대신 100000을 사용해야 인구 10만명당 비율", correct = TRUE),
+    answer("나눗셈 순서 오류"),
+    answer("괄호 위치 오류"),
+    answer("문제 없음"),
+    correct = "정답! 역학에서 발병률은 보통 인구 10만명당(100,000)으로 표현합니다."
+  )
+)
+```
+
+### 빈칸 채우기 퀴즈
+
+```{r quiz-fill-epi}
+quiz(
+  question("주별 집계: `data %>% group_by(____) %>% summarise(weekly = sum(cases))`",
+    answer("week", correct = TRUE),
+    answer("date"),
+    answer("cases"),
+    answer("sum"),
+    correct = "정답! week 변수로 그룹화하여 주별 합계를 구합니다."
+  ),
+
+  question("날짜 형식 변환: `mutate(date = ______(date_string))`",
+    answer("as.Date", correct = TRUE),
+    answer("as.numeric"),
+    answer("as.character"),
+    answer("date"),
+    correct = "정답! as.Date()로 문자열을 날짜 형식으로 변환합니다."
+  ),
+
+  question("x축 45도 회전: `theme(axis.text.x = element_text(angle = ____))`",
+    answer("45", correct = TRUE),
+    answer("90"),
+    answer("0"),
+    answer("180"),
+    correct = "정답! angle = 45로 45도 회전합니다."
+  )
+)
+```
+
+### 역학 개념 심화 퀴즈
+
+```{r quiz-epi-advanced}
+quiz(
+  question("유행곡선에서 'trailing tail'이 길게 나타나는 경우 의미하는 것은?",
+    answer("2차 감염(person-to-person transmission)이 발생", correct = TRUE),
+    answer("측정 오류"),
+    answer("단일 노출원"),
+    answer("유행 종료"),
+    correct = "정답! 긴 꼬리는 사람 간 전파로 인한 2차, 3차 감염을 시사합니다."
+  ),
+
+  question("연령 표준화(Age Standardization)가 필요한 이유는?",
+    answer("연령 구조가 다른 인구 집단을 공정하게 비교하기 위해", correct = TRUE),
+    answer("계산이 쉬워서"),
+    answer("그래프가 예뻐서"),
+    answer("WHO 규정"),
+    correct = "정답! 연령 구조 차이를 보정하여 순수한 발병률 차이를 비교합니다."
+  ),
+
+  question("발병률(Incidence)과 유병률(Prevalence)의 차이는?",
+    answer("발병률은 새로운 발생, 유병률은 특정 시점의 보유 상태", correct = TRUE),
+    answer("같은 의미"),
+    answer("발병률이 항상 더 높음"),
+    answer("유병률은 사망률 포함"),
+    correct = "정답! Incidence는 새로운 케이스, Prevalence는 현재 가지고 있는 케이스입니다."
+  ),
+
+  question("R0 (기초감염재생산수)가 2라는 것은?",
+    answer("감염자 1명이 평균 2명을 감염시킴", correct = TRUE),
+    answer("2일 안에 발병"),
+    answer("치명률 2%"),
+    answer("발병률 200%"),
+    correct = "정답! R0는 한 감염자가 평균적으로 감염시키는 2차 감염자 수입니다."
+  )
+)
+```
+
+---
+
+## 7장: 종합 실습 🚀
+
+### 최종 과제: 역학 보고서 그래프 제작
+
+**시나리오:** 여러분은 질병관리본부의 역학조사관입니다. 새로운 감염병 발생 데이터를 분석하여 보고서를 작성해야 합니다.
+
+#### 과제 1: 시계열 분석
+
+disease_incidence 데이터로 2022-2023년 발병률 추이를 분석하세요.
+
+```{r final-exercise-1, exercise=TRUE, exercise.lines=12}
+# 2022-2023년 데이터 필터링 후 시각화
+recent_data <- disease_incidence %>%
+  filter(year >= ___)
+
+ggplot(recent_data, aes(x = ___, y = ___)) +
+  geom_line() +
+  geom_point()
+```
+
+```{r final-exercise-1-solution}
+recent_data <- disease_incidence %>%
+  filter(year >= 2022)
+
+ggplot(recent_data, aes(x = date, y = incidence_rate)) +
+  geom_line(color = "#E74C3C", size = 1.2) +
+  geom_point(color = "#E74C3C", size = 2.5) +
+  geom_smooth(method = "loess", se = TRUE, alpha = 0.2) +
+  labs(
+    title = "최근 2년간 질병 발병률 추이",
+    subtitle = "2022-2023년 월별 발병률 (인구 10만 명당)",
+    x = "날짜",
+    y = "발병률 (per 100,000)",
+    caption = "데이터: 질병관리본부"
+  ) +
+  scale_x_date(date_breaks = "2 months", date_labels = "%Y-%m") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  )
+```
+
+#### 과제 2: 발생 vs 발병률 비교 패널
+
+regional_data로 발생 건수와 발병률을 facet으로 나누어 비교하세요.
+
+```{r final-exercise-2, exercise=TRUE, exercise.lines=15}
+# 데이터 변환 및 facet 그래프
+regional_long <- regional_data %>%
+  select(region, cases, incidence_rate) %>%
+  pivot_longer(cols = c(___, ___),
+               names_to = "measure",
+               values_to = "value")
+
+ggplot(regional_long, aes(x = reorder(region, value), y = value)) +
+  geom_col()
+```
+
+```{r final-exercise-2-solution}
+regional_long <- regional_data %>%
+  select(region, cases, incidence_rate) %>%
+  pivot_longer(cols = c(cases, incidence_rate),
+               names_to = "measure",
+               values_to = "value")
+
+ggplot(regional_long, aes(x = reorder(region, value), y = value, fill = measure)) +
+  geom_col(alpha = 0.8) +
+  geom_text(aes(label = round(value, 1)), hjust = -0.2, size = 3) +
+  facet_wrap(~ measure, scales = "free_x",
+             labeller = labeller(measure = c(
+               cases = "발생 건수",
+               incidence_rate = "발병률 (per 100,000)"
+             ))) +
+  coord_flip() +
+  scale_fill_manual(values = c("cases" = "#3498DB", "incidence_rate" = "#E74C3C"),
+                    labels = c("발생 건수", "발병률")) +
+  labs(
+    title = "지역별 질병 부담 비교",
+    subtitle = "절대 건수 vs 인구 보정 발병률",
+    x = "지역",
+    y = "값",
+    fill = "지표",
+    caption = "인구 보정 발병률로 공정한 비교 가능"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold", size = 14),
+    strip.text = element_text(face = "bold", size = 11)
+  )
+```
+
+#### 과제 3: 연령-지역 이중 비교
+
+age_specific_data로 연령과 지역을 모두 고려한 발병률 히트맵을 만드세요.
+
+```{r final-exercise-3, exercise=TRUE, exercise.lines=10}
+# 히트맵 스타일 그래프
+ggplot(age_specific_data, aes(x = age_group, y = region, fill = rate_per_100k)) +
+  geom_tile()
+```
+
+```{r final-exercise-3-solution}
+ggplot(age_specific_data, aes(x = age_group, y = region, fill = rate_per_100k)) +
+  geom_tile(color = "white", size = 1) +
+  geom_text(aes(label = round(rate_per_100k, 0)),
+            color = "white", fontface = "bold", size = 5) +
+  scale_fill_gradient(low = "#3498DB", high = "#E74C3C") +
+  labs(
+    title = "연령-지역별 발병률 히트맵",
+    subtitle = "인구 10만 명당 발병률",
+    x = "연령군",
+    y = "지역",
+    fill = "발병률"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank()
+  )
+```
+
+---
+
+## 수고하셨습니다! 🎉
+
+### 배운 내용 요약:
+
+#### 📊 역학 지표
+- **발병률 (Incidence Rate)**: 새로운 환자 발생률
+- **인구 10만 명당 표준화**: 지역 간 공정한 비교
+- **연령군 특이 발병률**: 연령별 위험도 평가
+- **누적 발생**: 유행의 전체 규모 파악
+
+#### 📈 역학 그래프
+- **유행곡선**: 발병 시점의 시간적 분포
+- **시계열 그래프**: 장기 추세 분석
+- **지역별 비교**: 공간적 분포 파악
+- **연령 피라미드**: 연령별 위험도 시각화
+
+#### 🎨 시각화 기법
+- geom_col() - 유행곡선
+- geom_line() + geom_smooth() - 시계열 분석
+- facet_wrap() - 다중 지역/시기 비교
+- scale_fill_gradient() - 발병률 그라데이션
+- geom_tile() - 히트맵
+
+#### 🔍 역학적 해석
+- 점원 노출 vs 지속 노출 패턴 구분
+- 계절성 패턴 인식
+- 인구 보정의 중요성
+- 고위험군 식별
+
+### 다음 학습 단계:
+
+✅ **Part III: 임상통계편** - 생존 분석, 메타 분석, 임상시험 그래프
+
+✅ **Part IV: 고급편** - 공간 데이터 (지도), Shiny 대시보드
+
+### 추천 학습 자료:
+
+📖 **Epi R Handbook**: https://epirhandbook.com/
+📖 **CDC Field Epidemiology Manual**: https://www.cdc.gov/
+📖 **WHO Outbreak Toolkit**: https://www.who.int/
+
+---
+
+**축하합니다! Part II 역학편을 완료하셨습니다!** 🎊

@@ -1,0 +1,930 @@
+---
+title: "Part II-2: 공간 역학 시각화"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    css: www/custom.css
+    includes:
+      in_header: www/header.html
+runtime: shiny_prerendered
+---
+
+```{r packages, include=FALSE}
+# 필요 패키지 자동 설치
+if(!require("learnr")) install.packages("learnr")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("sf")) install.packages("sf")
+if(!require("viridis")) install.packages("viridis")
+if(!require("scales")) install.packages("scales")
+```
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(sf)
+library(viridis)
+
+# 한국 17개 시도 데이터 생성
+set.seed(123)
+regional_disease <- data.frame(
+  region = c("서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+             "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"),
+  population = c(9700000, 3400000, 2400000, 3000000, 1500000, 1500000, 1100000, 360000,
+                 13500000, 1500000, 1600000, 2100000, 1800000, 1800000, 2600000, 3300000, 670000),
+  cases = c(980, 340, 245, 305, 155, 152, 112, 37,
+            1360, 153, 163, 214, 183, 185, 265, 335, 68),
+  deaths = c(98, 34, 25, 31, 16, 15, 11, 4,
+             136, 15, 16, 21, 18, 19, 27, 34, 7),
+  stringsAsFactors = FALSE
+)
+
+regional_disease <- regional_disease %>%
+  mutate(
+    incidence_rate = (cases / population) * 100000,
+    case_fatality = (deaths / cases) * 100
+  )
+
+# 시도별 좌표 (중심점)
+region_coords <- data.frame(
+  region = c("서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+             "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"),
+  lon = c(126.98, 129.08, 128.60, 126.71, 126.85, 127.38, 129.31, 127.29,
+          127.18, 128.21, 127.70, 126.80, 127.15, 126.99, 128.89, 128.25, 126.53),
+  lat = c(37.57, 35.18, 35.87, 37.46, 35.16, 36.35, 35.54, 36.48,
+          37.41, 37.82, 36.64, 36.52, 35.72, 34.86, 36.25, 35.46, 33.49),
+  stringsAsFactors = FALSE
+)
+
+# 데이터 결합
+map_data <- regional_disease %>%
+  left_join(region_coords, by = "region")
+
+# 국가별 전염병 데이터
+set.seed(456)
+world_disease <- data.frame(
+  country = c("Korea", "Japan", "China", "USA", "Germany", "France", "UK", "Italy",
+              "Brazil", "India", "Australia", "Canada"),
+  population_mil = c(52, 126, 1400, 330, 83, 67, 67, 60, 210, 1400, 26, 38),
+  cases = c(5200, 12600, 28000, 33000, 8300, 6700, 6700, 6000, 21000, 42000, 2600, 3800),
+  stringsAsFactors = FALSE
+) %>%
+  mutate(incidence_rate = cases / population_mil)
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<div style="text-align: right; padding: 10px;">
+  <a href="/shiny/" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold;">홈으로</a>
+</div>
+
+## 공간 역학 시각화에 오신 것을 환영합니다!
+
+### 학습 목표:
+- **공간 데이터**의 기본 개념 이해
+- **sf 패키지**로 공간 데이터 다루기
+- **코로플레스 맵 (Choropleth Map)** 제작
+- **발생률 (Incidence Rate)** 계산 및 시각화
+- **표준화 발생비 (SIR)** 이해 및 적용
+
+### 이 과정을 마치면:
+- 지역별 질병 데이터를 지도에 표현할 수 있습니다
+- 인구 표준화의 중요성을 이해합니다
+- 공간 패턴을 탐색하고 해석할 수 있습니다
+
+---
+
+## 1장: 공간 역학의 기초
+
+### 공간 역학 (Spatial Epidemiology)이란?
+
+**공간 역학**은 질병의 **지리적 분포**와 **공간적 패턴**을 연구하는 학문입니다.
+
+**주요 질문:**
+- 특정 질병이 어느 지역에 집중되어 있는가?
+- 환경적 요인과 질병 발생의 관계는?
+- 질병 클러스터(집단 발생)가 있는가?
+
+### 역사적 사례: 존 스노우의 콜레라 지도 (1854)
+
+존 스노우(John Snow)는 런던 콜레라 발생을 지도에 표시하여 **Broad Street 펌프**가 원인임을 밝혀냈습니다. 이것이 현대 공간 역학의 시작입니다.
+
+```{r snow-example, echo=TRUE}
+# 가상의 존 스노우 데이터
+snow_data <- data.frame(
+  x = c(5.1, 5.3, 5.2, 5.0, 5.4, 5.5, 6.0, 6.2, 4.8, 5.1,
+        5.2, 5.3, 5.1, 5.4, 5.0, 6.5, 7.0, 4.0, 8.0, 3.5),
+  y = c(3.2, 3.1, 3.4, 3.0, 3.3, 3.5, 4.0, 3.8, 3.1, 3.0,
+        3.3, 3.2, 3.1, 3.4, 2.9, 5.0, 5.5, 4.0, 5.0, 2.0),
+  deaths = c(3, 2, 4, 1, 2, 3, 1, 1, 2, 3,
+             2, 1, 2, 3, 1, 0, 0, 0, 0, 0)
+)
+
+# 펌프 위치
+pump <- data.frame(x = 5.2, y = 3.2, label = "Broad St. Pump")
+
+ggplot() +
+  geom_point(data = snow_data, aes(x = x, y = y, size = deaths),
+             alpha = 0.6, color = "#E74C3C") +
+  geom_point(data = pump, aes(x = x, y = y),
+             shape = 24, size = 5, fill = "#3498DB", color = "black") +
+  geom_text(data = pump, aes(x = x, y = y + 0.4, label = label),
+            fontface = "bold", size = 4) +
+  scale_size_continuous(name = "사망자 수", range = c(2, 10)) +
+  labs(
+    title = "존 스노우의 콜레라 지도 (시뮬레이션)",
+    subtitle = "삼각형: Broad Street 펌프, 원: 사망 발생 지점",
+    x = "경도 (가상)", y = "위도 (가상)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "right"
+  )
+```
+
+**해석:** 사망자들이 Broad Street 펌프 주변에 집중되어 있음을 알 수 있습니다!
+
+### Quiz: 공간 역학 기초
+
+```{r quiz-spatial-basics}
+quiz(
+  question("공간 역학(Spatial Epidemiology)의 주요 목적은?",
+    answer("질병의 지리적 분포 패턴 파악", correct = TRUE),
+    answer("개인의 유전적 요인 분석"),
+    answer("약물의 효능 평가"),
+    answer("세포 수준의 병리 분석"),
+    allow_retry = TRUE
+  ),
+  question("존 스노우의 콜레라 연구에서 발견한 것은?",
+    answer("오염된 물 펌프가 콜레라의 원인", correct = TRUE),
+    answer("공기 중 세균이 원인"),
+    answer("음식 오염이 원인"),
+    answer("접촉 전파가 원인"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## 2장: sf 패키지와 공간 데이터
+
+### Simple Features (sf) 소개
+
+**sf (Simple Features for R)**는 R에서 공간 데이터를 다루는 현대적인 패키지입니다.
+
+**주요 특징:**
+- tidyverse와 완벽하게 호환
+- GDAL/GEOS 기반으로 안정적
+- 데이터프레임처럼 쉽게 다룰 수 있음
+
+### 좌표계 (CRS)
+
+**좌표계 (Coordinate Reference System)**는 지구 표면을 평면에 표현하는 방법입니다.
+
+| 좌표계 | EPSG 코드 | 용도 |
+|--------|-----------|------|
+| **WGS84** | 4326 | GPS, 전세계 표준 |
+| **UTM-K** | 5179 | 한국 평면직각좌표 |
+| **Web Mercator** | 3857 | 웹 지도 (Google, Kakao) |
+
+```{r sf-demo, echo=TRUE}
+# sf 패키지로 점 데이터 생성
+seoul <- st_point(c(126.98, 37.57))  # 서울 좌표
+busan <- st_point(c(129.08, 35.18))  # 부산 좌표
+
+# sfc (geometry column) 생성
+cities_geom <- st_sfc(seoul, busan, crs = 4326)
+
+# sf 객체로 변환
+cities_sf <- st_sf(
+  name = c("서울", "부산"),
+  population = c(9700000, 3400000),
+  geometry = cities_geom
+)
+
+# 구조 확인
+print(cities_sf)
+```
+
+### 연습문제: sf 객체 생성
+
+대전(위도 36.35, 경도 127.38)과 광주(위도 35.16, 경도 126.85)를 추가하는 코드를 완성하세요.
+
+```{r sf-exercise, exercise=TRUE, exercise.lines=15}
+# 점 생성 (경도, 위도 순서)
+daejeon <- st_point(c(___, ___))  # 대전
+gwangju <- st_point(c(___, ___))  # 광주
+
+# geometry 생성
+more_cities <- st_sfc(daejeon, gwangju, crs = 4326)
+
+# sf 객체 생성
+more_cities_sf <- st_sf(
+  name = c("대전", "광주"),
+  population = c(1500000, 1500000),
+  geometry = more_cities
+)
+
+print(more_cities_sf)
+```
+
+```{r sf-exercise-hint}
+# 경도가 먼저, 위도가 나중입니다!
+# 대전: 경도 127.38, 위도 36.35
+# 광주: 경도 126.85, 위도 35.16
+```
+
+```{r sf-exercise-solution}
+# 점 생성 (경도, 위도 순서)
+daejeon <- st_point(c(127.38, 36.35))  # 대전
+gwangju <- st_point(c(126.85, 35.16))  # 광주
+
+# geometry 생성
+more_cities <- st_sfc(daejeon, gwangju, crs = 4326)
+
+# sf 객체 생성
+more_cities_sf <- st_sf(
+  name = c("대전", "광주"),
+  population = c(1500000, 1500000),
+  geometry = more_cities
+)
+
+print(more_cities_sf)
+```
+
+---
+
+## 3장: 점 지도 (Point Map)
+
+### 점 지도란?
+
+**점 지도**는 위치 데이터를 점으로 표현하는 가장 기본적인 공간 시각화입니다.
+
+**활용 예:**
+- 질병 발생 위치
+- 병원/보건소 분포
+- 환경 오염원 위치
+
+### 한국 시도별 발생률 점 지도
+
+```{r point-map-demo, echo=TRUE}
+# 데이터 확인
+head(map_data)
+```
+
+```{r point-map-viz, echo=TRUE}
+# 점 지도 생성
+ggplot(map_data, aes(x = lon, y = lat)) +
+  geom_point(aes(size = incidence_rate, color = incidence_rate), alpha = 0.7) +
+  geom_text(aes(label = region), vjust = -1.5, size = 3) +
+  scale_size_continuous(name = "발생률\n(10만명당)", range = c(3, 15)) +
+  scale_color_viridis_c(name = "발생률\n(10만명당)", option = "plasma") +
+  coord_fixed(ratio = 1.3) +  # 위도/경도 비율 조정
+  labs(
+    title = "한국 시도별 질병 발생률",
+    subtitle = "원의 크기와 색상 = 인구 10만명당 발생률",
+    x = "경도", y = "위도"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "right"
+  )
+```
+
+### 연습문제: 점 지도 커스터마이징
+
+치명률(case_fatality)을 색상으로 표현하는 점 지도를 만드세요.
+
+```{r point-exercise, exercise=TRUE, exercise.lines=18}
+# map_data에는 incidence_rate와 case_fatality가 있습니다!
+
+ggplot(map_data, aes(x = lon, y = lat)) +
+  geom_point(aes(size = cases, color = ___), alpha = 0.7) +
+  geom_text(aes(label = region), vjust = -1.5, size = 3) +
+  scale_size_continuous(name = "발생 건수", range = c(3, 15)) +
+  scale_color_gradient(
+    name = "치명률 (%)",
+    low = "___",
+    high = "___"
+  ) +
+  coord_fixed(ratio = 1.3) +
+  labs(
+    title = "시도별 질병 발생 건수와 치명률",
+    x = "경도", y = "위도"
+  ) +
+  theme_minimal()
+```
+
+```{r point-exercise-hint}
+# color = case_fatality 를 사용하세요
+# low = "yellow", high = "red" 같은 색상을 지정하세요
+```
+
+```{r point-exercise-solution}
+ggplot(map_data, aes(x = lon, y = lat)) +
+  geom_point(aes(size = cases, color = case_fatality), alpha = 0.7) +
+  geom_text(aes(label = region), vjust = -1.5, size = 3) +
+  scale_size_continuous(name = "발생 건수", range = c(3, 15)) +
+  scale_color_gradient(
+    name = "치명률 (%)",
+    low = "yellow",
+    high = "red"
+  ) +
+  coord_fixed(ratio = 1.3) +
+  labs(
+    title = "시도별 질병 발생 건수와 치명률",
+    x = "경도", y = "위도"
+  ) +
+  theme_minimal()
+```
+
+### Quiz: 점 지도
+
+```{r quiz-point-map}
+quiz(
+  question("점 지도에서 coord_fixed(ratio = 1.3)의 역할은?",
+    answer("위도/경도 비율을 조정하여 지도 왜곡 방지", correct = TRUE),
+    answer("점의 크기를 1.3배로 확대"),
+    answer("x축과 y축 범위를 1.3배로 설정"),
+    answer("레이어를 1.3개만 표시"),
+    allow_retry = TRUE
+  ),
+  question("viridis 색상 팔레트의 장점은?",
+    answer("색맹 친화적이고 흑백 인쇄 가능", correct = TRUE),
+    answer("RGB 색상만 사용"),
+    answer("단색만 지원"),
+    answer("인터랙티브 지도 전용"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## 4장: 발생률 계산과 시각화
+
+### 발생률 (Incidence Rate)
+
+**발생률**은 특정 기간 동안 새로 발생한 질병 사례를 인구로 나눈 값입니다.
+
+$$\text{발생률} = \frac{\text{신규 발생 건수}}{\text{인구}} \times 100,000$$
+
+**인구 10만명당**으로 표준화하는 이유:
+- 인구가 다른 지역 간 공정한 비교
+- 작은 숫자를 피해 해석 용이
+
+### 발생률 계산 예제
+
+```{r incidence-demo, echo=TRUE}
+# 발생률 계산 (이미 데이터에 포함됨)
+regional_disease %>%
+  select(region, population, cases, incidence_rate) %>%
+  arrange(desc(incidence_rate)) %>%
+  head(5)
+```
+
+### 연습문제: 발생률 계산
+
+다음 데이터로 발생률을 직접 계산해보세요.
+
+```{r incidence-exercise, exercise=TRUE, exercise.lines=12}
+# 새로운 데이터
+new_data <- data.frame(
+  city = c("A시", "B시", "C시"),
+  population = c(500000, 1000000, 250000),
+  cases = c(50, 80, 40)
+)
+
+# 발생률 계산 (인구 10만명당)
+new_data <- new_data %>%
+  mutate(incidence_rate = ___)
+
+print(new_data)
+```
+
+```{r incidence-exercise-hint}
+# 발생률 = (cases / population) * 100000
+```
+
+```{r incidence-exercise-solution}
+new_data <- data.frame(
+  city = c("A시", "B시", "C시"),
+  population = c(500000, 1000000, 250000),
+  cases = c(50, 80, 40)
+)
+
+new_data <- new_data %>%
+  mutate(incidence_rate = (cases / population) * 100000)
+
+print(new_data)
+```
+
+### 막대 그래프로 발생률 비교
+
+```{r bar-incidence, echo=TRUE}
+regional_disease %>%
+  arrange(desc(incidence_rate)) %>%
+  mutate(region = factor(region, levels = region)) %>%
+  ggplot(aes(x = region, y = incidence_rate, fill = incidence_rate)) +
+  geom_col(alpha = 0.8) +
+  geom_text(aes(label = round(incidence_rate, 1)),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(
+    title = "시도별 질병 발생률 순위",
+    subtitle = "인구 10만명당",
+    x = NULL, y = "발생률",
+    fill = "발생률"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14)
+  )
+```
+
+---
+
+## 5장: 표준화 발생비 (SIR)
+
+### SIR (Standardized Incidence Ratio)란?
+
+**표준화 발생비**는 관찰된 발생 건수를 기대 발생 건수로 나눈 값입니다.
+
+$$\text{SIR} = \frac{\text{관찰된 건수 (Observed)}}{\text{기대 건수 (Expected)}} \times 100$$
+
+**해석:**
+- **SIR = 100**: 전국 평균과 동일
+- **SIR > 100**: 전국 평균보다 높음 (주의 필요)
+- **SIR < 100**: 전국 평균보다 낮음
+
+### SIR 계산 과정
+
+```{r sir-demo, echo=TRUE}
+# 1. 전국 평균 발생률 계산
+national_rate <- sum(regional_disease$cases) / sum(regional_disease$population) * 100000
+cat("전국 평균 발생률:", round(national_rate, 2), "(인구 10만명당)\n")
+
+# 2. 기대 발생 건수 계산
+regional_sir <- regional_disease %>%
+  mutate(
+    expected_cases = (population / 100000) * national_rate,
+    SIR = (cases / expected_cases) * 100
+  )
+
+# 3. 결과 확인
+regional_sir %>%
+  select(region, cases, expected_cases, SIR) %>%
+  arrange(desc(SIR)) %>%
+  head(5)
+```
+
+### SIR 시각화
+
+```{r sir-viz, echo=TRUE}
+# SIR 카테고리 추가
+regional_sir <- regional_sir %>%
+  mutate(
+    SIR_category = case_when(
+      SIR < 90 ~ "매우 낮음",
+      SIR < 98 ~ "낮음",
+      SIR < 102 ~ "평균",
+      SIR < 110 ~ "높음",
+      TRUE ~ "매우 높음"
+    ),
+    SIR_category = factor(SIR_category,
+                          levels = c("매우 낮음", "낮음", "평균", "높음", "매우 높음"))
+  )
+
+# 막대 그래프
+ggplot(regional_sir, aes(x = reorder(region, SIR), y = SIR, fill = SIR_category)) +
+  geom_col(alpha = 0.8) +
+  geom_hline(yintercept = 100, linetype = "dashed", color = "red", size = 1) +
+  geom_text(aes(label = round(SIR, 1)), hjust = -0.1, size = 3) +
+  coord_flip() +
+  scale_fill_manual(
+    values = c("매우 낮음" = "#2ECC71", "낮음" = "#82E0AA",
+               "평균" = "#F4D03F", "높음" = "#E67E22", "매우 높음" = "#E74C3C"),
+    name = "SIR 카테고리"
+  ) +
+  labs(
+    title = "시도별 표준화 발생비 (SIR)",
+    subtitle = "빨간 점선 = 전국 평균 (100)",
+    x = NULL, y = "SIR"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top"
+  )
+```
+
+### 연습문제: SIR 계산
+
+아래 코드를 완성하여 SIR을 계산하세요.
+
+```{r sir-exercise, exercise=TRUE, exercise.lines=18}
+# 데이터
+practice_data <- data.frame(
+  region = c("X구", "Y구", "Z구"),
+  population = c(300000, 500000, 200000),
+  cases = c(35, 45, 30)
+)
+
+# 1. 전체 평균 발생률 계산
+total_cases <- sum(practice_data$cases)
+total_pop <- sum(practice_data$population)
+avg_rate <- ___ / ___ * 100000
+
+# 2. SIR 계산
+practice_data <- practice_data %>%
+  mutate(
+    expected_cases = ___,
+    SIR = ___
+  )
+
+print(practice_data)
+```
+
+```{r sir-exercise-hint}
+# avg_rate = total_cases / total_pop * 100000
+# expected_cases = (population / 100000) * avg_rate
+# SIR = (cases / expected_cases) * 100
+```
+
+```{r sir-exercise-solution}
+practice_data <- data.frame(
+  region = c("X구", "Y구", "Z구"),
+  population = c(300000, 500000, 200000),
+  cases = c(35, 45, 30)
+)
+
+total_cases <- sum(practice_data$cases)
+total_pop <- sum(practice_data$population)
+avg_rate <- total_cases / total_pop * 100000
+
+practice_data <- practice_data %>%
+  mutate(
+    expected_cases = (population / 100000) * avg_rate,
+    SIR = (cases / expected_cases) * 100
+  )
+
+print(practice_data)
+```
+
+### Quiz: SIR
+
+```{r quiz-sir}
+quiz(
+  question("SIR = 120은 무엇을 의미하나요?",
+    answer("관찰된 발생이 기대보다 20% 높음", correct = TRUE),
+    answer("관찰된 발생이 기대보다 20% 낮음"),
+    answer("인구가 120만명임"),
+    answer("사망률이 120%임"),
+    allow_retry = TRUE
+  ),
+  question("SIR 계산 시 '기대 발생 건수'란?",
+    answer("해당 지역 인구에 전국 평균 발생률을 적용한 값", correct = TRUE),
+    answer("작년 같은 기간의 발생 건수"),
+    answer("전문가가 예측한 값"),
+    answer("인접 지역의 평균 발생 건수"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## 6장: 발생률 vs 치명률 분석
+
+### 발생률과 치명률의 관계
+
+**발생률 (Incidence Rate)**: 인구 대비 새로운 감염 비율
+**치명률 (Case Fatality Rate, CFR)**: 감염자 중 사망자 비율
+
+두 지표를 함께 분석하면 질병의 **전파력**과 **치명성**을 동시에 파악할 수 있습니다.
+
+```{r cfr-scatter, echo=TRUE}
+ggplot(regional_disease, aes(x = incidence_rate, y = case_fatality)) +
+  geom_point(aes(size = population, color = region), alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, color = "red", linetype = "dashed") +
+  geom_text(aes(label = region), vjust = -1, size = 3, check_overlap = TRUE) +
+  scale_size_continuous(name = "인구", labels = scales::comma, range = c(3, 12)) +
+  labs(
+    title = "발생률 vs 치명률",
+    subtitle = "원 크기 = 인구",
+    x = "발생률 (인구 10만명당)",
+    y = "치명률 (%)",
+    color = "시도"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "right"
+  ) +
+  guides(color = "none")
+```
+
+### 연습문제: 산점도 해석
+
+아래 코드를 수정하여 발생 건수와 사망 건수의 관계를 시각화하세요.
+
+```{r scatter-exercise, exercise=TRUE, exercise.lines=16}
+# 힌트: x = cases, y = deaths
+
+ggplot(regional_disease, aes(x = ___, y = ___)) +
+  geom_point(aes(size = population), color = "#3498DB", alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  geom_text(aes(label = region), vjust = -1, size = 3, check_overlap = TRUE) +
+  scale_size_continuous(name = "인구", labels = scales::comma) +
+  labs(
+    title = "발생 건수 vs 사망 건수",
+    x = "발생 건수",
+    y = "사망 건수"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+```{r scatter-exercise-solution}
+ggplot(regional_disease, aes(x = cases, y = deaths)) +
+  geom_point(aes(size = population), color = "#3498DB", alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  geom_text(aes(label = region), vjust = -1, size = 3, check_overlap = TRUE) +
+  scale_size_continuous(name = "인구", labels = scales::comma) +
+  labs(
+    title = "발생 건수 vs 사망 건수",
+    x = "발생 건수",
+    y = "사망 건수"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+---
+
+## 7장: 국가 간 비교
+
+### 국가별 발생률 비교
+
+공간 역학은 국내뿐 아니라 **국가 간 비교**에도 활용됩니다.
+
+```{r world-bar, echo=TRUE}
+# 국가별 발생률 (인구 백만명당)
+world_disease %>%
+  arrange(desc(incidence_rate)) %>%
+  mutate(country = factor(country, levels = country)) %>%
+  ggplot(aes(x = country, y = incidence_rate, fill = incidence_rate)) +
+  geom_col(alpha = 0.8) +
+  geom_text(aes(label = round(incidence_rate, 0)), vjust = -0.5, size = 3) +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  labs(
+    title = "국가별 질병 발생률 비교",
+    subtitle = "인구 백만명당 발생 건수",
+    x = NULL, y = "발생률 (per million)",
+    fill = "발생률"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14)
+  )
+```
+
+### 연습문제: 국가 순위
+
+발생률 상위 5개국을 필터링하여 시각화하세요.
+
+```{r world-exercise, exercise=TRUE, exercise.lines=15}
+# 상위 5개국 필터링
+top5 <- world_disease %>%
+  arrange(desc(incidence_rate)) %>%
+  head(___)
+
+# 시각화
+ggplot(top5, aes(x = reorder(country, incidence_rate), y = incidence_rate)) +
+  geom_col(fill = "#E74C3C", alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "발생률 상위 5개국",
+    x = NULL, y = "발생률 (per million)"
+  ) +
+  theme_minimal()
+```
+
+```{r world-exercise-solution}
+top5 <- world_disease %>%
+  arrange(desc(incidence_rate)) %>%
+  head(5)
+
+ggplot(top5, aes(x = reorder(country, incidence_rate), y = incidence_rate)) +
+  geom_col(fill = "#E74C3C", alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "발생률 상위 5개국",
+    x = NULL, y = "발생률 (per million)"
+  ) +
+  theme_minimal()
+```
+
+---
+
+## 8장: 심화 퀴즈 🧠
+
+### 코드 결과 예측 퀴즈
+
+```{r quiz-code-spatial}
+quiz(
+  question("다음 코드의 결과는?\n\n`st_point(c(127.0, 37.5))`",
+    answer("경도 127, 위도 37.5인 점 객체 생성", correct = TRUE),
+    answer("127개의 점 생성"),
+    answer("37.5km 반경의 원 생성"),
+    answer("에러 발생"),
+    correct = "정답! st_point()는 경도, 위도 순으로 좌표를 받아 점 객체를 생성합니다."
+  ),
+
+  question("`coord_fixed(ratio = 1.3)`의 효과는?",
+    answer("위도/경도 비율을 조정하여 지도 왜곡 방지", correct = TRUE),
+    answer("그래프 크기를 1.3배로"),
+    answer("점 크기를 1.3배로"),
+    answer("투명도를 30%로"),
+    correct = "정답! 한국 지도의 경우 약 1.3 비율이 적절합니다."
+  ),
+
+  question("`scale_color_gradient2(midpoint = 100)`의 의미는?",
+    answer("100을 기준으로 양방향 색상 그라데이션", correct = TRUE),
+    answer("100개의 색상 사용"),
+    answer("색상을 100% 채도로"),
+    answer("에러 발생"),
+    correct = "정답! gradient2는 중간값(midpoint)을 기준으로 양방향 색상을 적용합니다."
+  )
+)
+```
+
+### 오류 찾기 퀴즈
+
+```{r quiz-error-spatial}
+quiz(
+  question("다음 코드의 오류는?\n\n`st_sfc(point1, point2, crs = '4326')`",
+    answer("crs는 숫자여야 함 (따옴표 제거)", correct = TRUE),
+    answer("point1, point2 순서 오류"),
+    answer("st_sfc 함수 없음"),
+    answer("오류 없음"),
+    correct = "정답! crs = 4326 (숫자)로 지정해야 합니다."
+  ),
+
+  question("SIR 계산에서 `expected = population * national_rate`의 문제점은?",
+    answer("population을 10만명 단위로 변환해야 함", correct = TRUE),
+    answer("곱셈 대신 나눗셈"),
+    answer("national_rate가 잘못됨"),
+    answer("문제 없음"),
+    correct = "정답! expected = (population / 100000) * national_rate가 올바릅니다."
+  ),
+
+  question("점 지도에서 `aes(x = lat, y = lon)`의 문제점은?",
+    answer("위도/경도 순서가 반대 (x = lon, y = lat)", correct = TRUE),
+    answer("aes 대신 mapping 사용"),
+    answer("문제 없음"),
+    answer("geom_point 필요"),
+    correct = "정답! x축은 경도(lon), y축은 위도(lat)입니다."
+  )
+)
+```
+
+### 빈칸 채우기 퀴즈
+
+```{r quiz-fill-spatial}
+quiz(
+  question("SIR 계산: `SIR = (observed / ______) * 100`",
+    answer("expected", correct = TRUE),
+    answer("population"),
+    answer("cases"),
+    answer("rate"),
+    correct = "정답! SIR = (관찰값 / 기대값) * 100 입니다."
+  ),
+
+  question("sf 객체 생성: `st_sf(data, geometry = ______)`",
+    answer("st_sfc(...)", correct = TRUE),
+    answer("c(lon, lat)"),
+    answer("points"),
+    answer("coordinates"),
+    correct = "정답! geometry 열에는 st_sfc() 객체를 넣습니다."
+  ),
+
+  question("좌표계 변환: `st_transform(data, crs = ______)`  (한국 좌표계)",
+    answer("5179", correct = TRUE),
+    answer("4326"),
+    answer("3857"),
+    answer("2097"),
+    correct = "정답! EPSG:5179는 한국 평면직각좌표계입니다."
+  )
+)
+```
+
+### 공간 역학 심화 퀴즈
+
+```{r quiz-spatial-advanced}
+quiz(
+  question("공간 자기상관(Spatial Autocorrelation)이란?",
+    answer("가까운 지역일수록 값이 비슷한 경향", correct = TRUE),
+    answer("모든 지역의 값이 동일"),
+    answer("시간에 따른 상관관계"),
+    answer("무작위 분포"),
+    correct = "정답! '가까운 것이 먼 것보다 더 관련있다'는 Tobler의 제1법칙입니다."
+  ),
+
+  question("Moran's I 값이 양수(+)이면 의미하는 것은?",
+    answer("비슷한 값끼리 군집(clustering)", correct = TRUE),
+    answer("값이 무작위 분포"),
+    answer("높은 값과 낮은 값이 번갈아 분포"),
+    answer("상관관계 없음"),
+    correct = "정답! 양의 공간 자기상관은 유사한 값의 군집을 의미합니다."
+  ),
+
+  question("핫스팟(Hotspot) 분석의 목적은?",
+    answer("통계적으로 유의한 고발생 지역 식별", correct = TRUE),
+    answer("가장 인구가 많은 지역 찾기"),
+    answer("지도 색상 결정"),
+    answer("좌표계 변환"),
+    correct = "정답! 핫스팟 분석은 우연이 아닌 실제 고발생 클러스터를 찾습니다."
+  ),
+
+  question("WGS84 좌표계(EPSG:4326)의 특징은?",
+    answer("GPS 표준, 경도/위도 사용", correct = TRUE),
+    answer("미터 단위 사용"),
+    answer("한국 전용"),
+    answer("3D 좌표"),
+    correct = "정답! WGS84는 전 세계 GPS 표준 좌표계입니다."
+  )
+)
+```
+
+---
+
+## 종합 퀴즈
+
+```{r final-quiz}
+quiz(
+  question("sf 패키지에서 점을 생성하는 함수는?",
+    answer("st_point()", correct = TRUE),
+    answer("point()"),
+    answer("create_point()"),
+    answer("sf_point()"),
+    allow_retry = TRUE
+  ),
+  question("인구 10만명당 발생률 계산 공식은?",
+    answer("(cases / population) * 100000", correct = TRUE),
+    answer("(cases / population) * 100"),
+    answer("cases * population / 100000"),
+    answer("(population / cases) * 100000"),
+    allow_retry = TRUE
+  ),
+  question("SIR이 80이면 어떻게 해석하나요?",
+    answer("전국 평균보다 20% 낮은 발생", correct = TRUE),
+    answer("전국 평균보다 80% 높은 발생"),
+    answer("80명이 사망함"),
+    answer("인구의 80%가 감염됨"),
+    allow_retry = TRUE
+  ),
+  question("코로플레스 맵(Choropleth Map)이란?",
+    answer("지역을 색상으로 채워 값을 표현하는 지도", correct = TRUE),
+    answer("점으로 위치를 표시하는 지도"),
+    answer("3D로 높이를 표현하는 지도"),
+    answer("실시간 이동 경로를 보여주는 지도"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## 학습 완료!
+
+### 이번 과정에서 배운 내용:
+
+1. **공간 역학의 기초**: 질병의 지리적 분포 연구
+2. **sf 패키지**: R에서 공간 데이터 다루기
+3. **점 지도**: 위치 데이터 시각화
+4. **발생률 계산**: 인구 표준화의 중요성
+5. **SIR (표준화 발생비)**: 공정한 지역 비교
+6. **발생률 vs 치명률**: 다차원 분석
+
+### 다음 단계:
+
+- **Chapter 5**: 임상통계 시각화 (생존 분석, Forest Plot)
+- **실습 프로젝트**: 실제 한국 지도 데이터로 코로플레스 맵 제작
+
+### 추가 학습 자료:
+
+- [sf 패키지 공식 문서](https://r-spatial.github.io/sf/)
+- [Geocomputation with R](https://geocompr.robinlovelace.net/)
+- [국가공간정보포털](http://data.nsdi.go.kr) - 한국 행정구역 데이터

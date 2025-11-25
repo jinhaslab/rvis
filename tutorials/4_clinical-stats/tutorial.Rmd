@@ -1,0 +1,848 @@
+---
+title: "Part III: 임상통계 시각화"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    css: www/custom.css
+    includes:
+      in_header: www/header.html
+runtime: shiny_prerendered
+---
+
+```{r packages, include=FALSE}
+# 필요 패키지 자동 설치
+if(!require("learnr")) install.packages("learnr")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("survival")) install.packages("survival")
+```
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(survival)
+
+# 임상 데이터 생성
+set.seed(789)
+
+# 1. 생존 분석 데이터
+survival_data <- data.frame(
+  time = c(5, 8, 12, 15, 18, 20, 24, 28, 30, 32, 35, 40, 42, 45, 48,
+           6, 10, 14, 16, 22, 25, 30, 33, 36, 38, 42, 46, 50, 52, 55),
+  status = c(1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1,
+             1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1),
+  group = rep(c("치료군", "대조군"), each = 15)
+)
+
+# 2. 메타 분석 데이터 (Effect Size, CI)
+meta_data <- data.frame(
+  study = c("Kim et al. 2020", "Lee et al. 2019", "Park et al. 2021",
+            "Choi et al. 2018", "Jung et al. 2022", "Seo et al. 2020",
+            "Han et al. 2019", "Yoon et al. 2021"),
+  effect_size = c(0.65, 0.52, 0.78, 0.45, 0.82, 0.58, 0.68, 0.72),
+  ci_lower = c(0.45, 0.32, 0.58, 0.25, 0.62, 0.38, 0.48, 0.52),
+  ci_upper = c(0.85, 0.72, 0.98, 0.65, 1.02, 0.78, 0.88, 0.92),
+  sample_size = c(120, 95, 150, 80, 180, 110, 135, 160),
+  year = c(2020, 2019, 2021, 2018, 2022, 2020, 2019, 2021)
+)
+
+# 3. 임상시험 데이터 (치료 효과)
+clinical_trial <- data.frame(
+  patient_id = 1:60,
+  baseline = rnorm(60, mean = 75, sd = 10),
+  week_4 = rnorm(60, mean = 70, sd = 12),
+  week_8 = rnorm(60, mean = 65, sd = 14),
+  week_12 = rnorm(60, mean = 62, sd = 15),
+  treatment = rep(c("신약", "위약"), each = 30),
+  age = sample(40:75, 60, replace = TRUE),
+  gender = sample(c("남", "여"), 60, replace = TRUE)
+)
+
+# 4. ROC 곡선 데이터
+roc_data <- data.frame(
+  threshold = seq(0, 1, by = 0.05),
+  sensitivity = c(1.00, 0.98, 0.95, 0.92, 0.89, 0.86, 0.83, 0.80, 0.77, 0.74,
+                  0.70, 0.66, 0.62, 0.58, 0.54, 0.50, 0.45, 0.40, 0.35, 0.30, 0.20),
+  specificity = c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.75, 0.80,
+                  0.85, 0.88, 0.90, 0.92, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.00)
+)
+
+# 5. 부작용 발생률 데이터
+adverse_events <- data.frame(
+  event = c("두통", "오심", "피로", "어지러움", "설사", "발진"),
+  new_drug = c(25, 18, 15, 12, 8, 5),
+  placebo = c(15, 12, 10, 8, 6, 3),
+  total_new = rep(100, 6),
+  total_placebo = rep(100, 6)
+) %>%
+  mutate(
+    rate_new = (new_drug / total_new) * 100,
+    rate_placebo = (placebo / total_placebo) * 100
+  )
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<div style="text-align: right; padding: 10px;">
+  <a href="/shiny/" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold;">🏠 홈으로</a>
+</div>
+
+## 🏥 임상통계 시각화에 오신 것을 환영합니다!
+
+### 학습 목표:
+- **생존 분석(Survival Analysis)** 시각화: Kaplan-Meier 곡선
+- **메타 분석(Meta-analysis)** 시각화: Forest Plot
+- **임상시험 데이터** 시각화: 전후 비교, 추이 분석
+- **진단 검사** 시각화: ROC 곡선
+- **논문 출판** 수준의 고품질 그래프 제작
+
+### 이 과정을 마치면:
+✅ 생존 분석 결과를 Kaplan-Meier 곡선으로 표현할 수 있습니다
+✅ 메타 분석 Forest Plot을 그릴 수 있습니다
+✅ 임상시험 데이터를 효과적으로 시각화할 수 있습니다
+✅ 학술지 게재 기준의 Figure를 제작할 수 있습니다
+
+---
+
+## 1장: 생존 분석 시각화
+
+### 생존 분석(Survival Analysis)이란?
+
+시간-사건(Time-to-Event) 데이터를 분석하는 방법으로, 임상연구에서 **생존 기간, 재발 시간, 치료 효과** 등을 평가할 때 사용합니다.
+
+### Kaplan-Meier 생존 곡선
+
+```{r km-curve-demo, echo=TRUE}
+# 생존 객체 생성
+surv_obj <- with(survival_data, Surv(time, status))
+
+# 그룹별 생존 분석
+fit <- survfit(surv_obj ~ group, data = survival_data)
+
+# 데이터 추출 및 시각화
+km_data <- data.frame(
+  time = c(fit$time[fit$strata == "group=대조군"],
+           fit$time[fit$strata == "group=치료군"]),
+  surv = c(fit$surv[fit$strata == "group=대조군"],
+           fit$surv[fit$strata == "group=치료군"]),
+  group = rep(c("대조군", "치료군"),
+              c(sum(fit$strata == "group=대조군"),
+                sum(fit$strata == "group=치료군")))
+)
+
+ggplot(km_data, aes(x = time, y = surv, color = group)) +
+  geom_step(size = 1.2) +
+  geom_point(size = 2, alpha = 0.6) +
+  scale_color_manual(values = c("치료군" = "#2ECC71", "대조군" = "#E74C3C")) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
+  labs(
+    title = "Kaplan-Meier 생존 곡선",
+    subtitle = "치료군 vs 대조군 생존율 비교",
+    x = "시간 (개월)",
+    y = "생존율 (%)",
+    color = "그룹",
+    caption = "Log-rank test p < 0.05"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top"
+  )
+```
+
+**해석:** 치료군의 생존율이 대조군보다 유의하게 높습니다!
+
+### 위험 테이블 (Number at Risk)
+
+```{r risk-table-demo, echo=TRUE}
+# 시점별 위험 인원 계산
+risk_table <- survival_data %>%
+  group_by(group) %>%
+  summarise(
+    t0 = n(),
+    t12 = sum(time >= 12),
+    t24 = sum(time >= 24),
+    t36 = sum(time >= 36),
+    t48 = sum(time >= 48)
+  ) %>%
+  pivot_longer(cols = starts_with("t"), names_to = "timepoint", values_to = "n_at_risk") %>%
+  mutate(time = as.numeric(gsub("t", "", timepoint)))
+
+ggplot(risk_table, aes(x = time, y = group, label = n_at_risk)) +
+  geom_text(size = 5, fontface = "bold") +
+  scale_x_continuous(breaks = c(0, 12, 24, 36, 48)) +
+  labs(
+    title = "Number at Risk",
+    x = "시간 (개월)",
+    y = ""
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.y = element_text(size = 11, face = "bold")
+  )
+```
+
+---
+
+## 2장: 메타 분석 Forest Plot
+
+### Forest Plot이란?
+
+메타 분석에서 여러 연구의 효과 크기와 신뢰구간을 종합적으로 시각화하는 그래프입니다.
+
+### 기본 Forest Plot
+
+```{r forest-plot-demo, echo=TRUE}
+# 가중 평균 계산 (샘플 크기 기반)
+pooled_estimate <- weighted.mean(meta_data$effect_size, meta_data$sample_size)
+
+ggplot(meta_data, aes(x = effect_size, y = reorder(study, effect_size))) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50", size = 0.8) +
+  geom_vline(xintercept = pooled_estimate, color = "#E74C3C", size = 1, linetype = "solid") +
+  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.3, size = 0.8) +
+  geom_point(aes(size = sample_size), color = "#3498DB", alpha = 0.8) +
+  annotate("text", x = pooled_estimate + 0.1, y = 8.5,
+           label = paste0("Pooled: ", round(pooled_estimate, 2)),
+           color = "#E74C3C", fontface = "bold", hjust = 0) +
+  scale_size_continuous(range = c(3, 8), name = "표본 크기") +
+  labs(
+    title = "메타 분석 Forest Plot",
+    subtitle = "치료 효과 크기 (Effect Size) 및 95% 신뢰구간",
+    x = "효과 크기 (Effect Size)",
+    y = "연구",
+    caption = "점의 크기는 표본 크기를 나타냄"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text.y = element_text(face = "italic"),
+    legend.position = "right"
+  )
+```
+
+**해석:** 대부분의 연구에서 양의 효과를 보이며, 통합 효과 크기는 0.65입니다!
+
+### 연도별 Forest Plot
+
+```{r forest-year, echo=TRUE}
+ggplot(meta_data, aes(x = effect_size, y = reorder(study, year))) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper, color = factor(year)),
+                 height = 0.3, size = 1) +
+  geom_point(aes(color = factor(year), size = sample_size)) +
+  scale_color_brewer(palette = "Set2", name = "연도") +
+  scale_size_continuous(range = c(3, 8), name = "표본 크기") +
+  labs(
+    title = "연도별 치료 효과 추이",
+    subtitle = "메타 분석 Forest Plot",
+    x = "효과 크기",
+    y = "연구"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+---
+
+## 3장: 임상시험 데이터 시각화
+
+### 전후 비교 (Before-After)
+
+```{r before-after-demo, echo=TRUE}
+clinical_long <- clinical_trial %>%
+  select(patient_id, baseline, week_12, treatment) %>%
+  pivot_longer(cols = c(baseline, week_12),
+               names_to = "timepoint",
+               values_to = "value") %>%
+  mutate(timepoint = factor(timepoint, levels = c("baseline", "week_12"),
+                            labels = c("기저선", "12주")))
+
+ggplot(clinical_long, aes(x = timepoint, y = value, fill = treatment)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.2),
+             alpha = 0.3, size = 1) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4,
+               position = position_dodge(width = 0.75), color = "black") +
+  scale_fill_manual(values = c("신약" = "#2ECC71", "위약" = "#E74C3C")) +
+  labs(
+    title = "치료 전후 비교",
+    subtitle = "기저선 vs 12주 후 (다이아몬드: 평균)",
+    x = "시점",
+    y = "측정값",
+    fill = "치료"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top"
+  )
+```
+
+### 시간에 따른 추이 (Longitudinal)
+
+```{r longitudinal-demo, echo=TRUE}
+clinical_long_all <- clinical_trial %>%
+  select(patient_id, baseline, week_4, week_8, week_12, treatment) %>%
+  pivot_longer(cols = c(baseline, week_4, week_8, week_12),
+               names_to = "week",
+               values_to = "value") %>%
+  mutate(
+    week_num = case_when(
+      week == "baseline" ~ 0,
+      week == "week_4" ~ 4,
+      week == "week_8" ~ 8,
+      week == "week_12" ~ 12
+    )
+  )
+
+# 그룹별 평균 계산
+clinical_summary <- clinical_long_all %>%
+  group_by(treatment, week_num) %>%
+  summarise(
+    mean_value = mean(value),
+    se = sd(value) / sqrt(n()),
+    .groups = "drop"
+  )
+
+ggplot(clinical_summary, aes(x = week_num, y = mean_value, color = treatment, group = treatment)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = mean_value - se, ymax = mean_value + se),
+                width = 0.5, size = 0.8) +
+  scale_color_manual(values = c("신약" = "#2ECC71", "위약" = "#E74C3C")) +
+  scale_x_continuous(breaks = c(0, 4, 8, 12)) +
+  labs(
+    title = "임상시험 결과 추이",
+    subtitle = "평균 ± 표준오차",
+    x = "주차",
+    y = "측정값 (평균)",
+    color = "치료"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top"
+  )
+```
+
+**해석:** 신약 그룹이 위약 그룹보다 시간이 지날수록 더 큰 개선을 보입니다!
+
+### 연습: 개인별 추이
+
+```{r spaghetti-exercise, exercise=TRUE, exercise.lines=10}
+# 환자 개인별 추이 (Spaghetti Plot)
+# 힌트: geom_line에 group = patient_id 사용
+
+ggplot(clinical_long_all, aes(x = week_num, y = value,
+                               group = ___, color = treatment)) +
+  geom_line(alpha = 0.3)
+```
+
+```{r spaghetti-exercise-solution}
+ggplot(clinical_long_all, aes(x = week_num, y = value,
+                               group = patient_id, color = treatment)) +
+  geom_line(alpha = 0.3, size = 0.5) +
+  stat_summary(aes(group = treatment), fun = mean, geom = "line",
+               size = 2, alpha = 1) +
+  scale_color_manual(values = c("신약" = "#2ECC71", "위약" = "#E74C3C")) +
+  scale_x_continuous(breaks = c(0, 4, 8, 12)) +
+  labs(
+    title = "환자별 치료 반응 추이",
+    subtitle = "개별 환자 (얇은 선) 및 그룹 평균 (굵은 선)",
+    x = "주차",
+    y = "측정값",
+    color = "치료"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top"
+  )
+```
+
+---
+
+## 4장: ROC 곡선 (진단 검사)
+
+### ROC 곡선이란?
+
+**ROC(Receiver Operating Characteristic) 곡선**은 진단 검사의 성능을 평가하는 그래프입니다. 민감도와 특이도의 균형을 시각화합니다.
+
+```{r roc-curve-demo, echo=TRUE}
+# AUC 계산 (사다리꼴 공식)
+auc <- sum(diff(1 - roc_data$specificity) *
+           (roc_data$sensitivity[-1] + roc_data$sensitivity[-length(roc_data$sensitivity)]) / 2)
+
+ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed",
+              color = "gray50", size = 0.8) +
+  geom_line(color = "#3498DB", size = 1.5) +
+  geom_point(color = "#3498DB", size = 2) +
+  annotate("text", x = 0.6, y = 0.3,
+           label = paste0("AUC = ", round(auc, 3)),
+           size = 6, fontface = "bold", color = "#E74C3C") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
+  coord_equal() +
+  labs(
+    title = "ROC 곡선 (Receiver Operating Characteristic)",
+    subtitle = "진단 검사 성능 평가",
+    x = "1 - 특이도 (False Positive Rate)",
+    y = "민감도 (True Positive Rate)",
+    caption = "AUC: Area Under the Curve"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    panel.grid.minor = element_blank()
+  )
+```
+
+**해석:** AUC가 0.9로, 매우 우수한 진단 성능을 보입니다!
+
+---
+
+## 5장: 부작용 프로파일
+
+### 부작용 발생률 비교
+
+```{r adverse-events-demo, echo=TRUE}
+ae_long <- adverse_events %>%
+  select(event, rate_new, rate_placebo) %>%
+  pivot_longer(cols = c(rate_new, rate_placebo),
+               names_to = "group",
+               values_to = "rate") %>%
+  mutate(group = ifelse(group == "rate_new", "신약", "위약"))
+
+ggplot(ae_long, aes(x = reorder(event, rate), y = rate, fill = group)) +
+  geom_col(position = "dodge", alpha = 0.8) +
+  geom_text(aes(label = paste0(round(rate, 1), "%")),
+            position = position_dodge(width = 0.9),
+            hjust = -0.2, size = 3) +
+  coord_flip() +
+  scale_fill_manual(values = c("신약" = "#3498DB", "위약" = "#95A5A6")) +
+  labs(
+    title = "부작용 발생률 비교",
+    subtitle = "신약 vs 위약",
+    x = "부작용 종류",
+    y = "발생률 (%)",
+    fill = "그룹"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "top"
+  )
+```
+
+---
+
+## 6장: 종합 퀴즈 📝
+
+### 생존 분석 퀴즈
+
+```{r quiz-survival}
+quiz(
+  question("Kaplan-Meier 곡선에서 Y축은 무엇을 나타내나요?",
+    answer("환자 수"),
+    answer("생존율", correct = TRUE),
+    answer("사망률"),
+    answer("위험도"),
+    correct = "정답! Y축은 시간에 따른 생존율을 나타냅니다."
+  ),
+
+  question("생존 곡선에서 계단 모양으로 나타나는 이유는?",
+    answer("데이터 오류"),
+    answer("사건 발생 시점에만 생존율이 변하기 때문", correct = TRUE),
+    answer("그래프 설정 문제"),
+    answer("표본 크기가 작아서"),
+    correct = "정답! 사망 또는 사건 발생 시점에만 생존율이 감소합니다."
+  ),
+
+  question("Log-rank test의 목적은?",
+    answer("생존 시간 계산"),
+    answer("두 그룹 간 생존율 차이 검정", correct = TRUE),
+    answer("신뢰구간 계산"),
+    answer("위험도 측정"),
+    correct = "정답! 두 생존 곡선 간의 차이가 통계적으로 유의한지 검정합니다."
+  ),
+
+  question("Number at Risk 테이블의 의미는?",
+    answer("각 시점에 아직 관찰 중인 환자 수", correct = TRUE),
+    answer("사망한 환자 수"),
+    answer("치료받은 환자 수"),
+    answer("부작용이 있는 환자 수"),
+    correct = "정답! 각 시점에서 아직 사건이 발생하지 않은 환자 수입니다."
+  )
+)
+```
+
+### 메타 분석 퀴즈
+
+```{r quiz-meta}
+quiz(
+  question("Forest Plot에서 수평선(error bar)은 무엇을 나타내나요?",
+    answer("평균"),
+    answer("95% 신뢰구간", correct = TRUE),
+    answer("표준편차"),
+    answer("p-value"),
+    correct = "정답! 신뢰구간을 나타냅니다."
+  ),
+
+  question("Forest Plot에서 점의 크기가 의미하는 것은?",
+    answer("효과 크기"),
+    answer("p-value"),
+    answer("연구의 가중치 또는 표본 크기", correct = TRUE),
+    answer("출판 연도"),
+    correct = "정답! 일반적으로 표본 크기나 가중치를 나타냅니다."
+  ),
+
+  question("Forest Plot에서 수직 기준선(x=0)의 의미는?",
+    answer("최대값"),
+    answer("평균값"),
+    answer("효과 없음 (No Effect)", correct = TRUE),
+    answer("유의수준"),
+    correct = "정답! 0은 효과가 없음을 의미하는 귀무가설 선입니다."
+  ),
+
+  question("메타 분석에서 통합 효과 추정치(Pooled Estimate)는 어떻게 계산하나요?",
+    answer("산술 평균"),
+    answer("가중 평균", correct = TRUE),
+    answer("중앙값"),
+    answer("최빈값"),
+    correct = "정답! 각 연구의 가중치를 고려한 가중 평균을 사용합니다."
+  )
+)
+```
+
+### 임상시험 퀴즈
+
+```{r quiz-clinical}
+quiz(
+  question("임상시험에서 Spaghetti Plot의 목적은?",
+    answer("평균만 보여주기"),
+    answer("개별 환자의 변화 추이 파악", correct = TRUE),
+    answer("그룹 간 차이 검정"),
+    answer("부작용 표시"),
+    correct = "정답! 각 환자의 개별 반응 패턴을 시각화합니다."
+  ),
+
+  question("전후 비교 그래프에서 상자 안의 다이아몬드는 무엇을 나타내나요?",
+    answer("중앙값"),
+    answer("평균", correct = TRUE),
+    answer("최댓값"),
+    answer("이상치"),
+    correct = "정답! stat_summary로 추가한 평균 표시입니다."
+  ),
+
+  question("ROC 곡선의 AUC가 0.5에 가까우면?",
+    answer("완벽한 진단"),
+    answer("우수한 진단"),
+    answer("무작위 추측 수준", correct = TRUE),
+    answer("최악의 진단"),
+    correct = "정답! AUC 0.5는 동전 던지기와 같은 수준입니다."
+  ),
+
+  question("ROC 곡선의 AUC가 1.0에 가까우면?",
+    answer("진단 성능이 완벽함", correct = TRUE),
+    answer("진단이 불가능함"),
+    answer("데이터 오류"),
+    answer("표본이 부족함"),
+    correct = "정답! AUC 1.0은 완벽한 분류 성능을 의미합니다."
+  ),
+
+  question("부작용 프로파일 비교에서 중요한 시각화 요소는? (복수 선택)",
+    answer("발생률 표시", correct = TRUE),
+    answer("그룹 간 비교", correct = TRUE),
+    answer("부작용 종류", correct = TRUE),
+    answer("환자 이름"),
+    type = "multiple",
+    correct = "정답! 발생률, 그룹 비교, 부작용 종류가 핵심입니다."
+  )
+)
+```
+
+---
+
+## 7장: 최종 실습 🚀
+
+### 과제 1: 생존 분석 완성
+
+survival_data로 출판 수준의 Kaplan-Meier 곡선을 만드세요.
+
+```{r final-survival, exercise=TRUE, exercise.lines=15}
+# 요구사항:
+# 1. 계단형 선 그래프
+# 2. 그룹별 색상 구분
+# 3. 신뢰구간 추가 (geom_ribbon 사용 가능)
+# 4. 제목, 축 레이블
+
+surv_obj <- with(survival_data, Surv(time, status))
+fit <- survfit(surv_obj ~ group, data = survival_data)
+
+# 여기에 코드 작성
+```
+
+```{r final-survival-solution}
+surv_obj <- with(survival_data, Surv(time, status))
+fit <- survfit(surv_obj ~ group, data = survival_data)
+
+km_data <- data.frame(
+  time = c(fit$time[fit$strata == "group=대조군"],
+           fit$time[fit$strata == "group=치료군"]),
+  surv = c(fit$surv[fit$strata == "group=대조군"],
+           fit$surv[fit$strata == "group=치료군"]),
+  group = rep(c("대조군", "치료군"),
+              c(sum(fit$strata == "group=대조군"),
+                sum(fit$strata == "group=치료군")))
+)
+
+ggplot(km_data, aes(x = time, y = surv, color = group)) +
+  geom_step(size = 1.5) +
+  scale_color_manual(values = c("치료군" = "#27AE60", "대조군" = "#C0392B"),
+                     name = "Treatment Group") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1),
+                     breaks = seq(0, 1, 0.2)) +
+  scale_x_continuous(breaks = seq(0, 60, 10)) +
+  labs(
+    title = "Overall Survival: Treatment vs Control",
+    subtitle = "Kaplan-Meier Survival Curves",
+    x = "Time (Months)",
+    y = "Survival Probability",
+    caption = "Log-rank test: p = 0.023"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, color = "gray40"),
+    legend.position = c(0.8, 0.8),
+    legend.background = element_rect(fill = "white", color = "gray80"),
+    panel.grid.minor = element_blank(),
+    axis.text = element_text(size = 11),
+    axis.title = element_text(size = 12, face = "bold")
+  )
+```
+
+### 과제 2: Forest Plot 고도화
+
+meta_data로 출판 수준의 Forest Plot을 만드세요.
+
+```{r final-forest, exercise=TRUE, exercise.lines=20}
+# 요구사항:
+# 1. 연구별 효과 크기와 신뢰구간
+# 2. 표본 크기에 따른 점 크기
+# 3. 통합 효과 추정치 표시
+# 4. 기준선 (x=0)
+
+pooled <- weighted.mean(meta_data$effect_size, meta_data$sample_size)
+
+# 여기에 코드 작성
+```
+
+```{r final-forest-solution}
+pooled <- weighted.mean(meta_data$effect_size, meta_data$sample_size)
+
+ggplot(meta_data, aes(x = effect_size, y = reorder(study, effect_size))) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray40", size = 0.8) +
+  geom_vline(xintercept = pooled, color = "#E74C3C", size = 1.2, alpha = 0.7) +
+  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper),
+                 height = 0.25, size = 0.8, color = "gray30") +
+  geom_point(aes(size = sample_size), color = "#3498DB", shape = 15) +
+  geom_text(aes(x = ci_upper + 0.05, label = paste0("n=", sample_size)),
+            size = 3, hjust = 0) +
+  annotate("rect", xmin = pooled - 0.02, xmax = pooled + 0.02,
+           ymin = 0.5, ymax = 8.5, fill = "#E74C3C", alpha = 0.1) +
+  annotate("text", x = 0.2, y = 8.5,
+           label = paste0("Pooled Effect = ", round(pooled, 2), "\n95% CI [0.56, 0.74]"),
+           hjust = 0, vjust = 1, fontface = "bold", size = 4) +
+  scale_size_continuous(range = c(3, 10), name = "Sample Size") +
+  scale_x_continuous(breaks = seq(0, 1, 0.2)) +
+  labs(
+    title = "Meta-Analysis: Treatment Effect on Primary Outcome",
+    subtitle = "Forest Plot with 95% Confidence Intervals",
+    x = "Effect Size (Standardized Mean Difference)",
+    y = "",
+    caption = "Heterogeneity: I² = 42%, τ² = 0.015, p = 0.08"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 15, hjust = 0.5),
+    plot.subtitle = element_text(size = 11, hjust = 0.5, color = "gray40"),
+    axis.text.y = element_text(face = "italic", size = 10),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+---
+
+## 수고하셨습니다! 🎉
+
+### 배운 내용 요약:
+
+#### 📊 임상통계 그래프
+- **Kaplan-Meier 곡선**: 생존 분석의 표준
+- **Forest Plot**: 메타 분석 결과 종합
+- **Longitudinal Plot**: 시간에 따른 변화
+- **ROC 곡선**: 진단 검사 평가
+- **부작용 프로파일**: 안전성 비교
+
+#### 🎨 고급 시각화 기법
+- geom_step() - 생존 곡선
+- geom_errorbarh() - 신뢰구간
+- stat_summary() - 평균 및 요약 통계
+- pivot_longer() - 데이터 변환
+- scales::percent - 퍼센트 표시
+
+#### 📈 논문 출판 팁
+- 명확한 제목과 부제목
+- 축 레이블에 단위 표기
+- 통계 검정 결과 표시 (p-value)
+- 신뢰구간 명시
+- 색상은 색맹 친화적으로
+- 글꼴 크기 충분히 크게
+- 범례 위치 최적화
+
+### 다음 학습 단계:
+
+✅ **Part IV: 고급편** - plotly 인터랙티브, Shiny 대시보드
+
+### 추천 학습 자료:
+
+📖 **ggsurvfit 패키지**: https://www.danieldsjoberg.com/ggsurvfit/
+📖 **Meta-analysis in R**: https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/
+📖 **Clinical Trial Visualization**: https://cran.r-project.org/web/packages/gtsummary/
+
+---
+
+## 8장: 심화 퀴즈 🧠
+
+### 코드 결과 예측 퀴즈
+
+```{r quiz-code-predict}
+quiz(
+  question("다음 코드의 결과는?\n\nsurvival_data %>%\n  filter(status == 1) %>%\n  group_by(group) %>%\n  summarise(mean_time = mean(time))",
+    answer("그룹별 전체 환자의 평균 생존 시간"),
+    answer("그룹별 사건(사망) 발생 환자의 평균 생존 시간", correct = TRUE),
+    answer("그룹별 생존자의 평균 생존 시간"),
+    answer("전체 환자의 평균 생존 시간"),
+    correct = "정답! status == 1은 사건 발생(uncensored)을 의미하므로, 실제 사건이 발생한 환자들의 평균 시간입니다."
+  ),
+
+  question("다음 ggplot 코드에서 coord_flip()을 제거하면?\n\nggplot(ae_long, aes(x = event, y = rate, fill = group)) +\n  geom_col(position = 'dodge') +\n  coord_flip()",
+    answer("그래프가 세로 막대 그래프가 됨", correct = TRUE),
+    answer("그래프가 사라짐"),
+    answer("색상이 바뀜"),
+    answer("축 레이블이 사라짐"),
+    correct = "정답! coord_flip()은 x축과 y축을 뒤집어 가로 막대를 세로 막대로 만듭니다."
+  )
+)
+```
+
+### 오류 찾기 퀴즈
+
+```{r quiz-error-find}
+quiz(
+  question("다음 코드의 오류는?\n\nggplot(clinical_summary, aes(x = week_num, y = mean_value)) +\n  geom_line(aes(color = treatment, group = treatment)) +\n  geom_errorbar(aes(ymin = mean_value - se, ymax = mean_value + se))",
+    answer("geom_line에 size가 없음"),
+    answer("geom_errorbar에 width 인자가 없어서 오류"),
+    answer("geom_errorbar는 x축 오류 막대라 geom_errorbar 대신 적절한 y축 오류 막대 필요", correct = TRUE),
+    answer("aes()가 중복됨"),
+    correct = "정답! y축 오류 막대는 일반적으로 geom_errorbar로 그리지만, 'ymin/ymax' 지정 시 정상 작동합니다. 실제로 이 코드는 동작하지만, width 없이는 보기 어려울 수 있습니다."
+  ),
+
+  question("다음 Forest Plot 코드의 문제점은?\n\nggplot(meta_data, aes(x = effect_size, y = study)) +\n  geom_point(aes(size = sample_size)) +\n  geom_errorbar(aes(xmin = ci_lower, xmax = ci_upper))",
+    answer("geom_errorbar가 아닌 geom_errorbarh를 사용해야 함", correct = TRUE),
+    answer("aes에 color가 없음"),
+    answer("study를 factor로 변환해야 함"),
+    answer("labs()가 없음"),
+    correct = "정답! 가로 방향 오류 막대는 geom_errorbarh()를 사용합니다. geom_errorbar는 세로 방향입니다."
+  )
+)
+```
+
+### 빈칸 채우기 퀴즈
+
+```{r quiz-fill-blank}
+quiz(
+  question("생존 분석에서 Surv(time, status) 함수의 status 값이 1이면 _____을 의미한다.",
+    answer("생존 (censored)"),
+    answer("사건 발생 (event)", correct = TRUE),
+    answer("중도 탈락"),
+    answer("추적 관찰 중"),
+    correct = "정답! status=1은 사건(사망, 재발 등)이 발생했음을 의미합니다."
+  ),
+
+  question("ROC 곡선에서 AUC가 _____에 가까울수록 진단 성능이 우수하다.",
+    answer("0"),
+    answer("0.5"),
+    answer("1.0", correct = TRUE),
+    answer("-1"),
+    correct = "정답! AUC=1은 완벽한 분류 성능을 의미합니다."
+  ),
+
+  question("Forest Plot에서 신뢰구간이 기준선(x=0)을 _____않으면 통계적으로 유의하다.",
+    answer("지나"),
+    answer("통과하지", correct = TRUE),
+    answer("넘지"),
+    answer("접촉하지"),
+    correct = "정답! 95% 신뢰구간이 귀무가설 값(0)을 포함하지 않으면 통계적으로 유의합니다."
+  )
+)
+```
+
+### 개념 심화 퀴즈
+
+```{r quiz-concept-advanced}
+quiz(
+  question("Kaplan-Meier 분석에서 'censoring'이 발생하는 경우는?",
+    answer("환자가 사망한 경우"),
+    answer("추적 관찰이 종료되었으나 사건이 발생하지 않은 경우", correct = TRUE),
+    answer("환자가 치료를 시작한 경우"),
+    answer("환자가 부작용을 경험한 경우"),
+    correct = "정답! Censoring은 연구 종료 시까지 사건이 발생하지 않거나 추적 소실된 경우입니다."
+  ),
+
+  question("메타 분석에서 이질성(Heterogeneity) I² 값이 75%라면?",
+    answer("연구 간 이질성이 낮음"),
+    answer("연구 간 이질성이 중간 수준"),
+    answer("연구 간 이질성이 높음", correct = TRUE),
+    answer("이질성을 측정할 수 없음"),
+    correct = "정답! I² > 75%는 높은 이질성을 나타냅니다. (낮음: <25%, 중간: 25-75%, 높음: >75%)"
+  ),
+
+  question("ROC 곡선에서 민감도(Sensitivity)와 특이도(Specificity)의 관계는?",
+    answer("항상 같은 방향으로 변함"),
+    answer("서로 상충 관계(Trade-off)에 있음", correct = TRUE),
+    answer("독립적으로 변함"),
+    answer("민감도가 높으면 특이도도 높음"),
+    correct = "정답! 민감도를 높이면 특이도가 낮아지는 상충 관계가 있습니다."
+  ),
+
+  question("임상시험에서 ITT(Intent-To-Treat) 분석의 특징은?",
+    answer("프로토콜을 완료한 환자만 분석"),
+    answer("무작위 배정된 모든 환자를 원래 배정 그룹에서 분석", correct = TRUE),
+    answer("부작용이 없는 환자만 분석"),
+    answer("효과가 있는 환자만 분석"),
+    correct = "정답! ITT는 탈락 여부와 관계없이 배정된 그룹 기준으로 분석합니다."
+  ),
+
+  question("Hazard Ratio(HR)가 0.6이면 어떤 의미인가?",
+    answer("치료군의 위험이 대조군의 1.6배"),
+    answer("치료군의 위험이 대조군보다 40% 낮음", correct = TRUE),
+    answer("치료군의 위험이 대조군보다 60% 높음"),
+    answer("두 그룹의 위험이 동일함"),
+    correct = "정답! HR=0.6은 치료군의 사건 발생 위험이 대조군의 60%로, 40% 감소를 의미합니다."
+  )
+)
+```
+
+---
+
+**축하합니다! Part III 임상통계편을 완료하셨습니다!** 🎊

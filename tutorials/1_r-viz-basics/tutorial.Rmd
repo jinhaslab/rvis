@@ -1,0 +1,850 @@
+---
+title: "Part I: R 기반 보건학 시각화 기초"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    css: www/custom.css
+    includes:
+      in_header: www/header.html
+runtime: shiny_prerendered
+---
+
+```{r packages, include=FALSE}
+# 필요 패키지 자동 설치
+if(!require("learnr")) install.packages("learnr")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("jsonlite")) install.packages("jsonlite")
+```
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+library(dplyr)
+library(jsonlite)
+library(tidyr)
+
+# 연습용 데이터셋 로드
+data(mtcars)
+data(iris)
+data(diamonds)
+
+# 보건학 예제 데이터 생성
+set.seed(123)
+health_data <- data.frame(
+  age = c(25, 32, 45, 28, 55, 61, 38, 42, 29, 50, 33, 47, 58, 36, 44),
+  bmi = c(22.5, 28.3, 31.2, 24.1, 29.8, 26.7, 25.4, 30.1, 23.2, 27.9, 26.1, 32.4, 28.7, 24.8, 29.3),
+  blood_pressure = c(120, 135, 145, 125, 140, 138, 128, 142, 122, 136, 130, 148, 141, 126, 137),
+  cholesterol = c(180, 220, 240, 195, 235, 210, 205, 245, 185, 225, 215, 250, 238, 198, 228),
+  disease = factor(c("No", "Yes", "Yes", "No", "Yes", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "Yes", "No", "Yes"))
+)
+
+# 역학 데이터 예제
+epidemic_data <- data.frame(
+  date = seq.Date(as.Date("2023-01-01"), by = "week", length.out = 20),
+  cases = c(5, 8, 12, 18, 25, 35, 42, 38, 30, 22, 15, 12, 8, 6, 5, 7, 10, 14, 12, 9)
+)
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, echo=FALSE}
+# Kakao SDK 및 커스텀 스크립트 로드
+htmltools::tags$head(
+  htmltools::tags$script(src = "https://developers.kakao.com/sdk/js/kakao.js"),
+  htmltools::tags$script(src = "kakao-login.js")
+)
+```
+
+<div style="text-align: right; padding: 10px;">
+  <a href="/shiny/" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold;">🏠 홈으로</a>
+</div>
+
+## 👤 학습자 인증
+
+시작하기 전에 본인 인증을 진행해주세요. 학습 완료 시 **인증서**를 받을 수 있습니다! 🏆
+
+<div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); max-width: 600px; margin: 20px auto;">
+
+<div style="text-align: center; margin-bottom: 30px;">
+  <h3 style="color: #333; margin-bottom: 20px;">간편 로그인</h3>
+  <button onclick="kakaoLogin()" style="background: #FEE500; color: #3C1E1E; border: none; padding: 15px 40px; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(254, 229, 0, 0.4); transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px;">
+    <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_small.png" style="width: 24px; height: 24px;" alt="Kakao">
+    카카오 로그인
+  </button>
+  <div id="kakao-login-status"></div>
+</div>
+
+<div style="text-align: center; color: #999; margin: 20px 0;">
+  ────── 또는 ──────
+</div>
+
+```{r student-info, echo=FALSE}
+div(style = "margin-top: 20px;",
+    h3(style = "color: #333; text-align: center; margin-bottom: 20px;", "수동 입력"),
+    textInput("student_id", "학번:", placeholder = "예: 20241234", width = "100%"),
+    textInput("student_name", "이름:", placeholder = "예: 홍길동", width = "100%"),
+    textInput("student_phone", "전화번호:", placeholder = "예: 010-1234-5678", width = "100%"),
+    textInput("class_code", "수업 코드:", value = "VIZ2024", width = "100%"),
+
+    actionButton("save_info", "✅ 저장하고 시작하기",
+                 style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; margin-top: 15px; width: 100%;"),
+
+    htmlOutput("welcome_msg")
+)
+```
+
+</div>
+
+```{r context="server"}
+# 카카오 로그인 정보 처리
+observeEvent(input$kakao_user_info, {
+  userInfo <- input$kakao_user_info
+
+  if (!is.null(userInfo)) {
+    output$welcome_msg <- renderUI({
+      div(style = "background: linear-gradient(135deg, #FEE500 0%, #FFEB3B 100%); color: #3C1E1E; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;",
+          h3(style = "margin: 0;", paste0("🎉 ", userInfo$nickname, "님, 환영합니다!")),
+          p(style = "margin: 10px 0 0 0;", paste0("📧 ", ifelse(nchar(userInfo$email) > 0, userInfo$email, "이메일 정보 없음"))),
+          p(style = "margin: 10px 0 0 0;", paste0("🎓 수업: ", input$class_code)),
+          p(style = "margin: 10px 0 0 0; font-size: 0.9em;", "🎯 아래로 스크롤하여 학습을 시작하세요!")
+      )
+    })
+
+    # 세션에 사용자 정보 저장
+    session$userData$student_name <- userInfo$nickname
+    session$userData$student_id <- as.character(userInfo$id)
+    session$userData$login_method <- "kakao"
+  }
+})
+
+# 수동 입력 처리
+observeEvent(input$save_info, {
+  output$welcome_msg <- renderUI({
+    if (nchar(input$student_name) > 0 && nchar(input$student_id) > 0) {
+      # 세션에 사용자 정보 저장
+      session$userData$student_name <- input$student_name
+      session$userData$student_id <- input$student_id
+      session$userData$student_phone <- input$student_phone
+      session$userData$login_method <- "manual"
+
+      div(style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;",
+          h3(style = "margin: 0; color: white;", paste0("✨ 환영합니다, ", input$student_name, "님!")),
+          p(style = "margin: 10px 0 0 0;", paste0("📚 학번: ", input$student_id)),
+          p(style = "margin: 10px 0 0 0;", paste0("📱 전화: ", input$student_phone)),
+          p(style = "margin: 10px 0 0 0;", paste0("🎓 수업: ", input$class_code)),
+          p(style = "margin: 10px 0 0 0; font-size: 0.9em;", "🎯 아래로 스크롤하여 학습을 시작하세요!")
+      )
+    } else {
+      div(style = "background: #fff3cd; padding: 15px; border-radius: 8px;",
+          "⚠️ 학번과 이름을 모두 입력해주세요."
+      )
+    }
+  })
+})
+```
+
+---
+
+## 📊 환영합니다!
+
+이 튜토리얼에서는 **보건학, 역학, 임상통계**를 위한 R 시각화 기초를 배웁니다.
+
+### 학습 목표:
+- ggplot2의 그래픽 문법(Grammar of Graphics) 이해
+- 보건학 데이터 시각화 기법 습득
+- 역학 및 임상 연구를 위한 그래프 작성
+- 7가지 핵심 구성요소 마스터
+
+### 이 과정을 마치면:
+✅ 건강 데이터를 효과적으로 시각화할 수 있습니다
+✅ 유행곡선과 발병률 그래프를 그릴 수 있습니다
+✅ 논문 출판 수준의 그래프를 제작할 수 있습니다
+
+---
+
+## 1장: ggplot2와 그래픽 문법
+
+### ggplot2란?
+
+ggplot2는 Leland Wilkinson의 **"Grammar of Graphics"**를 기반으로 한 R의 시각화 패키지입니다. 보건학 연구에서 가장 널리 사용되는 시각화 도구입니다.
+
+### 그래픽 문법의 7가지 핵심 구성요소:
+
+1. **Data** - 시각화할 데이터 (예: 환자 정보, 질병 발생 데이터)
+2. **Aesthetics (aes)** - x, y, color, size 등의 매핑
+3. **Geometries (geom)** - 점, 선, 막대 등의 시각적 요소
+4. **Facets** - 데이터를 여러 패널로 분할
+5. **Statistics** - 통계적 변환 (평균, 회귀선 등)
+6. **Coordinates** - 좌표계 (데카르트, 극좌표 등)
+7. **Themes** - 그래프 외관 (글꼴, 색상, 배경 등)
+
+### 첫 번째 보건학 그래프
+
+아래는 건강검진 데이터로 만든 산점도입니다:
+
+```{r demo-scatter, echo=TRUE}
+ggplot(data = health_data, aes(x = age, y = bmi)) +
+  geom_point(aes(color = disease), size = 3) +
+  labs(title = "연령과 BMI의 관계",
+       subtitle = "질병 유무에 따른 분류",
+       x = "연령 (세)",
+       y = "체질량지수 (BMI)",
+       color = "질병") +
+  theme_minimal()
+```
+
+**해석:** 연령이 증가하고 BMI가 높을수록 질병 발생 위험이 높아 보입니다!
+
+### 유행곡선 (Epidemic Curve)
+
+역학에서 중요한 시계열 그래프입니다:
+
+```{r demo-epi-curve, echo=TRUE}
+ggplot(epidemic_data, aes(x = date, y = cases)) +
+  geom_col(fill = "#E74C3C", alpha = 0.7) +
+  geom_line(color = "#2C3E50", size = 1) +
+  labs(title = "주간 질병 발생 추이",
+       subtitle = "2023년 상반기",
+       x = "날짜",
+       y = "발생 건수") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**해석:** 10주차에 정점을 보이다가 이후 감소하는 전형적인 유행 패턴입니다!
+
+---
+
+## 2장: 직접 해보기! 🎯
+
+### 연습 1: 건강 데이터 산점도 그리기
+
+이제 여러분 차례입니다! **health_data**로 혈압과 콜레스테롤의 관계를 시각화하세요.
+
+- x축: blood_pressure (혈압)
+- y축: cholesterol (콜레스테롤)
+
+```{r scatter-exercise, exercise=TRUE, exercise.lines=6}
+# health_data로 산점도를 그려보세요
+ggplot(data = health_data, aes(x = ___, y = ___)) +
+  geom___()
+```
+
+```{r scatter-exercise-hint-1}
+# x에는 blood_pressure를 넣어보세요
+ggplot(data = health_data, aes(x = blood_pressure, y = ___)) +
+  geom___()
+```
+
+```{r scatter-exercise-hint-2}
+# y에는 cholesterol을 넣어보세요
+ggplot(data = health_data, aes(x = blood_pressure, y = cholesterol)) +
+  geom_point()
+```
+
+```{r scatter-exercise-solution}
+ggplot(data = health_data, aes(x = blood_pressure, y = cholesterol)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(title = "혈압과 콜레스테롤의 상관관계",
+       x = "혈압 (mmHg)",
+       y = "콜레스테롤 (mg/dL)") +
+  theme_minimal()
+```
+
+---
+
+### 연습 2: 질병 상태별 색상 구분
+
+질병 유무(disease)에 따라 다른 색상을 적용해보세요!
+
+```{r color-exercise, exercise=TRUE, exercise.lines=6}
+# 질병 유무별로 다른 색상 적용
+ggplot(data = health_data, aes(x = age, y = cholesterol)) +
+  geom_point(size = 3)
+```
+
+```{r color-exercise-hint}
+# aes() 안에 color = disease를 추가하세요
+ggplot(data = health_data, aes(x = age, y = cholesterol, color = disease)) +
+  geom_point(size = 3)
+```
+
+```{r color-exercise-solution}
+ggplot(data = health_data, aes(x = age, y = cholesterol, color = disease)) +
+  geom_point(size = 4, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "연령과 콜레스테롤 수치",
+       subtitle = "질병 유무에 따른 분류",
+       x = "연령 (세)",
+       y = "콜레스테롤 (mg/dL)",
+       color = "질병") +
+  theme_minimal()
+```
+
+---
+
+## 3장: 보건학 그래프 유형
+
+### 히스토그램 - BMI 분포
+
+건강검진 데이터의 BMI 분포를 확인해보세요:
+
+```{r histogram-exercise, exercise=TRUE, exercise.lines=5}
+# health_data의 BMI 분포를 히스토그램으로
+ggplot(health_data, aes(x = ___)) +
+  geom_histogram()
+```
+
+```{r histogram-exercise-solution}
+ggplot(health_data, aes(x = bmi)) +
+  geom_histogram(bins = 8, fill = "#3498DB", color = "white", alpha = 0.7) +
+  geom_vline(xintercept = 25, color = "red", linetype = "dashed", size = 1) +
+  annotate("text", x = 26, y = 3, label = "과체중 기준", color = "red") +
+  labs(title = "체질량지수(BMI) 분포",
+       x = "BMI (kg/m²)",
+       y = "빈도") +
+  theme_minimal()
+```
+
+### 박스플롯 - 질병별 혈압 비교
+
+```{r boxplot-demo, echo=TRUE}
+ggplot(health_data, aes(x = disease, y = blood_pressure, fill = disease)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.5, size = 2) +
+  scale_fill_manual(values = c("No" = "#2ECC71", "Yes" = "#E74C3C")) +
+  labs(title = "질병 유무에 따른 혈압 분포",
+       x = "질병",
+       y = "혈압 (mmHg)",
+       fill = "질병") +
+  theme_minimal()
+```
+
+**해석:** 질병이 있는 그룹의 혈압이 평균적으로 더 높습니다!
+
+### 막대 그래프 - 연령대별 질병 발생률
+
+```{r bar-demo, echo=TRUE}
+# 연령대 구분
+health_data_age <- health_data %>%
+  mutate(age_group = cut(age, breaks = c(0, 30, 40, 50, 100),
+                         labels = c("20대", "30대", "40대", "50대+"))) %>%
+  group_by(age_group, disease) %>%
+  summarise(count = n(), .groups = "drop")
+
+ggplot(health_data_age, aes(x = age_group, y = count, fill = disease)) +
+  geom_col(position = "dodge", alpha = 0.8) +
+  geom_text(aes(label = count), position = position_dodge(width = 0.9), vjust = -0.5) +
+  scale_fill_manual(values = c("No" = "#2ECC71", "Yes" = "#E74C3C")) +
+  labs(title = "연령대별 질병 발생 현황",
+       x = "연령대",
+       y = "환자 수",
+       fill = "질병") +
+  theme_minimal()
+```
+
+---
+
+## 4장: 종합 퀴즈 📝
+
+### 기본 개념 퀴즈
+
+```{r quiz-basic}
+quiz(
+  question("ggplot2는 누구의 'Grammar of Graphics' 이론을 기반으로 하나요?",
+    answer("Hadley Wickham"),
+    answer("Leland Wilkinson", correct = TRUE),
+    answer("Edward Tufte"),
+    answer("William Playfair"),
+    correct = "정답! Leland Wilkinson의 Grammar of Graphics를 기반으로 합니다.",
+    incorrect = "Hadley Wickham은 ggplot2의 개발자이지만, 이론의 창시자는 다른 사람입니다."
+  ),
+
+  question("ggplot2에서 그래프를 겹쳐 그릴 때 사용하는 연산자는?",
+    answer("+", correct = TRUE),
+    answer("-"),
+    answer("*"),
+    answer("%>%"),
+    correct = "정답! + 연산자로 레이어를 추가합니다.",
+    incorrect = "다시 생각해보세요. 레이어를 '더한다'고 생각하면 됩니다."
+  ),
+
+  question("그래픽 문법의 7가지 핵심 구성요소가 아닌 것은?",
+    answer("Data"),
+    answer("Aesthetics"),
+    answer("Geometries"),
+    answer("Variables", correct = TRUE),
+    correct = "정답! Variables는 7가지 구성요소가 아닙니다.",
+    incorrect = "Data, Aesthetics, Geometries, Facets, Statistics, Coordinates, Themes가 7가지 구성요소입니다."
+  ),
+
+  question("aes() 함수의 역할은 무엇인가요?",
+    answer("데이터를 불러오기"),
+    answer("데이터 변수를 시각적 속성에 매핑", correct = TRUE),
+    answer("그래프를 저장하기"),
+    answer("테마를 변경하기"),
+    correct = "정답! aes()는 데이터 변수를 x, y, color 등의 시각적 속성에 연결합니다."
+  )
+)
+```
+
+### 그래프 유형 퀴즈
+
+```{r quiz-geom}
+quiz(
+  question("산점도를 그릴 때 사용하는 geom은?",
+    answer("geom_bar()"),
+    answer("geom_line()"),
+    answer("geom_point()", correct = TRUE),
+    answer("geom_histogram()"),
+    correct = "맞습니다! 점을 표시하는 geom_point()입니다."
+  ),
+
+  question("시계열 데이터 시각화에 가장 적합한 geom은?",
+    answer("geom_point()"),
+    answer("geom_line()", correct = TRUE),
+    answer("geom_bar()"),
+    answer("geom_boxplot()"),
+    correct = "정답! 시계열은 선 그래프(geom_line)가 적합합니다."
+  ),
+
+  question("유행곡선(Epidemic Curve)을 그릴 때 주로 사용하는 geom은?",
+    answer("geom_col()", correct = TRUE),
+    answer("geom_density()"),
+    answer("geom_violin()"),
+    answer("geom_smooth()"),
+    correct = "정답! 유행곡선은 주로 막대 그래프(geom_col)를 사용합니다."
+  ),
+
+  question("다음 중 연속형 변수 분포 시각화에 적합한 것은? (복수 선택)",
+    answer("geom_histogram()", correct = TRUE),
+    answer("geom_density()", correct = TRUE),
+    answer("geom_bar()"),
+    answer("geom_boxplot()", correct = TRUE),
+    type = "multiple",
+    correct = "모두 정답입니다!"
+  ),
+
+  question("박스플롯에서 표시되는 정보가 아닌 것은?",
+    answer("중앙값"),
+    answer("평균", correct = TRUE),
+    answer("사분위수"),
+    answer("이상치"),
+    correct = "정답! 박스플롯은 기본적으로 평균이 아닌 중앙값을 표시합니다.",
+    incorrect = "박스플롯은 중앙값, 사분위수, 이상치를 표시합니다."
+  )
+)
+```
+
+### 보건학 응용 퀴즈
+
+```{r quiz-health}
+quiz(
+  question("BMI가 25 이상일 때를 무엇이라고 하나요?",
+    answer("저체중"),
+    answer("정상"),
+    answer("과체중", correct = TRUE),
+    answer("고도비만"),
+    correct = "정답! BMI 25 이상은 과체중으로 분류됩니다."
+  ),
+
+  question("역학에서 시간에 따른 질병 발생을 나타내는 그래프는?",
+    answer("산점도"),
+    answer("유행곡선", correct = TRUE),
+    answer("박스플롯"),
+    answer("파이 차트"),
+    correct = "정답! 유행곡선(Epidemic Curve)입니다."
+  ),
+
+  question("두 변수 간의 상관관계를 보기에 가장 적합한 그래프는?",
+    answer("막대 그래프"),
+    answer("히스토그램"),
+    answer("산점도", correct = TRUE),
+    answer("파이 차트"),
+    correct = "정답! 산점도는 두 연속형 변수의 관계를 보여줍니다."
+  ),
+
+  question("labs() 함수의 역할은?",
+    answer("그래프의 제목과 축 레이블 설정", correct = TRUE),
+    answer("데이터 필터링"),
+    answer("색상 변경"),
+    answer("그래프 저장"),
+    correct = "정답! labs()는 제목, 축 레이블, 범례 제목을 설정합니다."
+  ),
+
+  question("theme_minimal()은 무엇을 하는 함수인가요?",
+    answer("데이터를 요약"),
+    answer("그래프의 외관 스타일 변경", correct = TRUE),
+    answer("데이터 정렬"),
+    answer("색상 팔레트 적용"),
+    correct = "정답! theme_minimal()은 깔끔한 스타일의 테마를 적용합니다."
+  ),
+
+  question("보건학 연구에서 ggplot2를 사용하는 이유는? (복수 선택)",
+    answer("재현 가능한 시각화", correct = TRUE),
+    answer("논문 출판 품질의 그래프", correct = TRUE),
+    answer("코드 기반으로 수정 용이", correct = TRUE),
+    answer("자동으로 데이터 분석"),
+    type = "multiple",
+    correct = "정답! ggplot2는 재현성, 품질, 유연성 면에서 우수합니다."
+  )
+)
+```
+
+---
+
+## 5장: 심화 퀴즈 🧠
+
+### 코드 결과 예측 퀴즈
+
+```{r quiz-code-predict}
+quiz(
+  question("다음 코드의 결과는? \n\n`ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(color = 'red')`",
+    answer("빨간색 점들의 산점도", correct = TRUE),
+    answer("파란색 점들의 산점도"),
+    answer("빨간색 선 그래프"),
+    answer("에러 발생"),
+    correct = "정답! color = 'red'는 모든 점을 빨간색으로 표시합니다."
+  ),
+
+  question("다음 코드에서 `aes(color = factor(cyl))`의 결과는?",
+    answer("cyl 값에 따라 다른 색상이 적용됨", correct = TRUE),
+    answer("모든 점이 같은 색상"),
+    answer("cyl 값이 텍스트로 표시됨"),
+    answer("에러 발생"),
+    correct = "정답! factor()로 범주형 변환 후 각 범주에 다른 색상이 적용됩니다."
+  ),
+
+  question("`geom_smooth(method = 'lm')`은 무엇을 그리나요?",
+    answer("선형 회귀선", correct = TRUE),
+    answer("곡선 (loess)"),
+    answer("수평선"),
+    answer("수직선"),
+    correct = "정답! method = 'lm'은 linear model(선형 모델)의 약자입니다."
+  )
+)
+```
+
+### 오류 찾기 퀴즈
+
+```{r quiz-error-find}
+quiz(
+  question("다음 코드의 오류는? \n\n`ggplot(mtcars, aes(x = wt, y = mpg) + geom_point()`",
+    answer("aes() 괄호가 닫히지 않음", correct = TRUE),
+    answer("geom_point() 괄호 오류"),
+    answer("+ 연산자 위치 오류"),
+    answer("오류 없음"),
+    correct = "정답! aes(x = wt, y = mpg) 뒤에 닫는 괄호 )가 빠졌습니다."
+  ),
+
+  question("다음 코드의 문제점은? \n\n`ggplot(mtcars) + geom_point(x = wt, y = mpg)`",
+    answer("geom_point() 안에서 aes() 없이 변수 사용", correct = TRUE),
+    answer("mtcars 데이터 오류"),
+    answer("+ 연산자 오류"),
+    answer("문제 없음"),
+    correct = "정답! 변수 매핑은 aes() 안에 넣어야 합니다: aes(x = wt, y = mpg)"
+  ),
+
+  question("다음 중 올바른 코드는?",
+    answer("ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()", correct = TRUE),
+    answer("ggplot(mtcars, aes(x = wt, y = mpg)) %>% geom_point()"),
+    answer("ggplot(mtcars) + aes(x = wt, y = mpg) geom_point()"),
+    answer("ggplot(aes(x = wt, y = mpg), mtcars) + geom_point()"),
+    correct = "정답! ggplot2는 + 연산자로 레이어를 추가합니다."
+  )
+)
+```
+
+### 빈칸 채우기 퀴즈
+
+```{r quiz-fill-blank}
+quiz(
+  question("산점도를 그리려면: `ggplot(data, aes(x, y)) + ______()`",
+    answer("geom_point", correct = TRUE),
+    answer("geom_line"),
+    answer("geom_bar"),
+    answer("geom_col"),
+    correct = "정답! 점을 그리는 함수는 geom_point()입니다."
+  ),
+
+  question("x축 레이블을 설정하려면: `labs(____ = '연령')`",
+    answer("x", correct = TRUE),
+    answer("xlabel"),
+    answer("xlab"),
+    answer("x.label"),
+    correct = "정답! labs(x = '레이블')로 설정합니다."
+  ),
+
+  question("깔끔한 테마를 적용하려면: `theme______()`",
+    answer("_minimal", correct = TRUE),
+    answer("_clean"),
+    answer("_simple"),
+    answer("_basic"),
+    correct = "정답! theme_minimal()이 깔끔한 테마입니다."
+  )
+)
+```
+
+### 개념 심화 퀴즈
+
+```{r quiz-concept-advanced}
+quiz(
+  question("`alpha = 0.5`는 무엇을 의미하나요?",
+    answer("50% 투명도", correct = TRUE),
+    answer("점 크기 0.5"),
+    answer("선 두께 0.5"),
+    answer("색상 밝기 50%"),
+    correct = "정답! alpha는 투명도를 0(완전 투명)~1(불투명) 사이로 설정합니다."
+  ),
+
+  question("facet_wrap(~variable)의 역할은?",
+    answer("variable 값별로 그래프를 나눠서 표시", correct = TRUE),
+    answer("variable을 색상으로 구분"),
+    answer("variable 축 레이블 변경"),
+    answer("variable 데이터 필터링"),
+    correct = "정답! facet은 데이터를 그룹별로 분리하여 여러 패널에 표시합니다."
+  ),
+
+  question("다음 중 연속형 색상 스케일은?",
+    answer("scale_color_gradient()", correct = TRUE),
+    answer("scale_color_manual()"),
+    answer("scale_color_discrete()"),
+    answer("scale_color_brewer()"),
+    correct = "정답! gradient는 연속형, manual/discrete/brewer는 범주형입니다."
+  ),
+
+  question("position = 'dodge'는 막대 그래프에서 무엇을 의미하나요?",
+    answer("막대를 나란히 배치", correct = TRUE),
+    answer("막대를 쌓아서 배치"),
+    answer("막대를 겹쳐서 배치"),
+    answer("막대를 100% 기준으로 배치"),
+    correct = "정답! dodge는 나란히, stack은 쌓기, fill은 100% 기준입니다."
+  )
+)
+```
+
+---
+
+## 6장: 종합 실습 🚀
+
+### 최종 과제: 보건학 데이터 종합 분석
+
+health_data를 사용하여 다음 조건을 만족하는 그래프를 만들어보세요:
+
+**요구사항:**
+1. 연령(age)과 BMI의 관계를 산점도로 표현
+2. 질병 유무(disease)에 따라 색상 구분
+3. 각 그룹의 추세선 추가 (geom_smooth 사용)
+4. 적절한 제목과 축 레이블 추가
+5. theme_minimal() 적용
+
+```{r final-exercise, exercise=TRUE, exercise.lines=12}
+# 여기에 코드를 작성하세요
+ggplot(health_data, aes(x = ___, y = ___)) +
+
+
+```
+
+```{r final-exercise-solution}
+ggplot(health_data, aes(x = age, y = bmi, color = disease)) +
+  geom_point(size = 4, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, alpha = 0.2) +
+  geom_hline(yintercept = 25, linetype = "dashed", color = "red", size = 0.8) +
+  annotate("text", x = 25, y = 26, label = "과체중 기준선", color = "red", size = 3) +
+  scale_color_manual(values = c("No" = "#2ECC71", "Yes" = "#E74C3C"),
+                     labels = c("건강", "질병")) +
+  labs(
+    title = "연령과 BMI의 관계: 질병 유무 비교",
+    subtitle = "선형 추세선과 과체중 기준선(BMI=25) 포함",
+    x = "연령 (세)",
+    y = "체질량지수 (BMI, kg/m²)",
+    color = "건강 상태",
+    caption = "데이터: 건강검진 데이터 (n=15)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    plot.subtitle = element_text(size = 10, hjust = 0.5, color = "gray40"),
+    legend.position = "top",
+    panel.grid.minor = element_blank()
+  )
+```
+
+### 추가 도전 과제
+
+유행곡선을 더 발전시켜보세요:
+
+```{r challenge-exercise, exercise=TRUE, exercise.lines=12}
+# epidemic_data로 고급 유행곡선 그리기
+# 힌트: geom_col + geom_line + 색상 그라데이션
+
+```
+
+```{r challenge-exercise-solution}
+ggplot(epidemic_data, aes(x = date, y = cases)) +
+  geom_col(aes(fill = cases), alpha = 0.8, color = "white") +
+  geom_line(color = "#2C3E50", size = 1.2, group = 1) +
+  geom_point(color = "#2C3E50", size = 2.5) +
+  scale_fill_gradient(low = "#3498DB", high = "#E74C3C") +
+  labs(
+    title = "COVID-19 유사 질병 발생 추이",
+    subtitle = "2023년 1월 - 5월 (주간 집계)",
+    x = "날짜",
+    y = "주간 발생 건수",
+    fill = "발생 건수",
+    caption = "출처: 가상 역학 감시 데이터"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+---
+
+## 수고하셨습니다! 🎉
+
+### 배운 내용 요약:
+
+#### 📚 핵심 개념
+- **그래픽 문법(Grammar of Graphics)** 의 7가지 구성요소
+- ggplot2의 레이어 기반 구조
+- 데이터 → 미학 → 기하 → 테마의 흐름
+
+#### 📊 보건학 시각화 기법
+- **산점도**: 연령-BMI, 혈압-콜레스테롤 관계 분석
+- **유행곡선**: 시간에 따른 질병 발생 추이
+- **박스플롯**: 질병 유무에 따른 혈압 분포 비교
+- **히스토그램**: BMI 분포와 기준선 표시
+- **막대 그래프**: 연령대별 질병 발생 현황
+
+#### 🎨 시각화 요소
+- 색상으로 그룹 구분 (질병 유무)
+- 추세선으로 패턴 파악 (geom_smooth)
+- 기준선 추가 (geom_vline, geom_hline)
+- 주석 달기 (annotate)
+- 테마 커스터마이징 (theme_minimal + theme)
+
+### 다음 학습 단계:
+
+✅ **Part II: 역학편** - 발병률, 연령 표준화, 공간 데이터 시각화
+
+✅ **Part III: 임상통계편** - 생존 분석, 메타 분석, 임상시험 그래프
+
+✅ **Part IV: 고급편** - Shiny 대시보드, plotly 인터랙티브 그래프
+
+### 추천 학습 자료:
+
+📖 **Epi R Handbook**: https://epirhandbook.com/
+📖 **R Graphics Cookbook**: https://r-graphics.org/
+📖 **ggplot2 공식 문서**: https://ggplot2.tidyverse.org/
+
+---
+
+## 🏆 수료증 발급
+
+축하합니다! 모든 학습을 완료하셨습니다. 아래 버튼을 클릭하여 **수료증**을 확인하세요!
+
+```{r certificate, echo=FALSE}
+actionButton("show_cert", "🎓 수료증 보기",
+             style = "background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4); cursor: pointer;")
+
+br()
+br()
+
+htmlOutput("certificate_display")
+```
+
+```{r context="server"}
+observeEvent(input$show_cert, {
+  output$certificate_display <- renderUI({
+    # 세션 데이터 또는 입력값에서 학생 정보 가져오기
+    student_name <- if (!is.null(session$userData$student_name)) {
+      session$userData$student_name
+    } else if (nchar(input$student_name) > 0) {
+      input$student_name
+    } else {
+      NULL
+    }
+
+    student_id <- if (!is.null(session$userData$student_id)) {
+      session$userData$student_id
+    } else if (nchar(input$student_id) > 0) {
+      input$student_id
+    } else {
+      NULL
+    }
+
+    if (!is.null(student_name) && !is.null(student_id)) {
+      div(style = "background: white; border: 8px double #667eea; padding: 50px; margin: 30px 0; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; font-family: Georgia, serif;",
+
+          # 헤더
+          div(style = "border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px;",
+              h1(style = "color: #667eea; font-size: 3em; margin: 0; font-weight: bold;", "수료증"),
+              p(style = "color: #764ba2; font-size: 1.3em; margin: 10px 0 0 0; font-style: italic;", "Certificate of Completion")
+          ),
+
+          # 본문
+          div(style = "margin: 40px 0;",
+              p(style = "font-size: 1.2em; color: #555; margin-bottom: 20px;", "이 수료증은 아래의 학생이"),
+
+              div(style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; margin: 20px auto; max-width: 500px;",
+                  h2(style = "margin: 0; font-size: 2.5em; color: white;", student_name),
+                  p(style = "margin: 10px 0 0 0; font-size: 1.2em;", paste0("학번: ", student_id))
+              ),
+
+              p(style = "font-size: 1.2em; color: #555; margin-top: 30px;", "다음 과정을 성공적으로 이수하였음을 증명합니다"),
+
+              div(style = "background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;",
+                  h3(style = "color: #333; margin: 0 0 15px 0;", "📊 R 시각화 기초 과정"),
+                  p(style = "color: #666; margin: 5px 0;", "✓ ggplot2 기본 문법 마스터"),
+                  p(style = "color: #666; margin: 5px 0;", "✓ 산점도, 히스토그램, 박스플롯 실습"),
+                  p(style = "color: #666; margin: 5px 0;", "✓ 데이터 시각화 프로젝트 완료")
+              )
+          ),
+
+          # 푸터
+          div(style = "border-top: 2px solid #e0e0e0; padding-top: 20px; margin-top: 30px;",
+              div(style = "display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto;",
+                  div(
+                    p(style = "margin: 0; color: #999; font-size: 0.9em;", paste0("발급일: ", format(Sys.Date(), "%Y년 %m월 %d일"))),
+                    p(style = "margin: 5px 0 0 0; color: #999; font-size: 0.9em;", paste0("수업 코드: ", input$class_code))
+                  ),
+                  div(
+                    p(style = "margin: 0; color: #667eea; font-weight: bold; font-size: 1.1em;", "R Visualization Lab"),
+                    p(style = "margin: 5px 0 0 0; color: #999; font-size: 0.9em;", "dspubs.org/shiny")
+                  )
+              )
+          ),
+
+          # 다운로드 버튼
+          br(),
+          actionButton("print_cert", "🖨️ 인쇄하기",
+                       onclick = "window.print();",
+                       style = "background: #667eea; color: white; border: none; padding: 12px 30px; border-radius: 20px; font-weight: bold; margin: 10px;"),
+
+          tags$button("💾 PDF로 저장",
+                      onclick = "alert('Ctrl+P 또는 Cmd+P를 눌러 PDF로 저장하세요!');",
+                      style = "background: #764ba2; color: white; border: none; padding: 12px 30px; border-radius: 20px; font-weight: bold; margin: 10px; cursor: pointer;")
+      )
+    } else {
+      div(style = "background: #fff3cd; border-left: 5px solid #ffc107; padding: 20px; border-radius: 5px; margin: 20px 0;",
+          strong("⚠️ 알림: "),
+          "수료증을 받으려면 먼저 위에서 학생 정보를 입력해주세요!"
+      )
+    }
+  })
+})
+```
+
+---
+
+**문의사항이 있으시면 언제든 질문하세요!**
+
+*본 교육 자료는 learnr과 ggplot2로 제작되었습니다. 📚*

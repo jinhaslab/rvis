@@ -1,0 +1,916 @@
+---
+title: "Part IV: 인터랙티브 시각화 고급"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    css: www/custom.css
+    includes:
+      in_header: www/header.html
+runtime: shiny_prerendered
+---
+
+```{r packages, include=FALSE}
+# 필요 패키지 자동 설치
+if(!require("learnr")) install.packages("learnr")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("plotly")) install.packages("plotly")
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("tidyr")) install.packages("tidyr")
+```
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(tidyr)
+
+# 보건학 데이터
+set.seed(999)
+
+health_survey <- data.frame(
+  region = rep(c("서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종"), 5),
+  year = rep(2019:2023, each = 8),
+  smoking_rate = runif(40, 15, 35),
+  diabetes_rate = runif(40, 5, 15),
+  hypertension_rate = runif(40, 20, 35),
+  obesity_rate = runif(40, 25, 40)
+)
+
+# 시계열 질병 데이터
+disease_time <- data.frame(
+  date = rep(seq.Date(as.Date("2020-01-01"), by = "month", length.out = 48), 3),
+  disease = rep(c("당뇨", "고혈압", "비만"), each = 48),
+  cases = c(
+    cumsum(rnorm(48, 5, 2)) + 100,  # 당뇨
+    cumsum(rnorm(48, 3, 1.5)) + 150,  # 고혈압
+    cumsum(rnorm(48, 4, 2)) + 200  # 비만
+  )
+)
+
+# 연령-성별 분포
+age_gender_data <- expand.grid(
+  age_group = c("20-29", "30-39", "40-49", "50-59", "60-69", "70+"),
+  gender = c("남성", "여성"),
+  disease = c("당뇨", "고혈압")
+) %>%
+  mutate(
+    prevalence = case_when(
+      disease == "당뇨" & gender == "남성" ~ runif(n(), 3, 12),
+      disease == "당뇨" & gender == "여성" ~ runif(n(), 2, 10),
+      disease == "고혈압" & gender == "남성" ~ runif(n(), 15, 35),
+      disease == "고혈압" & gender == "여성" ~ runif(n(), 12, 30)
+    )
+  )
+
+# 3D 데이터
+health_3d <- data.frame(
+  age = sample(20:80, 100, replace = TRUE),
+  bmi = rnorm(100, 25, 4),
+  blood_pressure = rnorm(100, 130, 15),
+  risk_score = rnorm(100, 50, 20)
+)
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<div style="text-align: right; padding: 10px;">
+  <a href="/shiny/" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold;">🏠 홈으로</a>
+</div>
+
+## ✨ 인터랙티브 시각화에 오신 것을 환영합니다!
+
+### 학습 목표:
+- **plotly 기초**: ggplot2를 interactive로 변환
+- **상호작용 요소**: 확대, 드래그, 호버, 클릭
+- **3D 시각화**: 입체 산점도와 표면 그래프
+- **대시보드 구성**: 여러 그래프를 하나의 화면에
+- **보건 데이터 탐색**: 실시간 필터링과 선택
+
+### 이 과정을 마치면:
+✅ ggplot2 그래프를 plotly로 쉽게 변환할 수 있습니다
+✅ 사용자와 상호작용하는 그래프를 만들 수 있습니다
+✅ 복잡한 3D 데이터를 시각화할 수 있습니다
+✅ 보건학 대시보드를 구성할 수 있습니다
+
+---
+
+## 1장: plotly 기초 - ggplotly()
+
+### 정적 그래프의 한계
+
+기존 ggplot2는 출판에 적합하지만, **데이터 탐색**에는 제한적입니다:
+- 확대/축소 불가
+- 정확한 값 확인 어려움
+- 필터링 불가
+
+### ggplotly()로 즉시 Interactive 만들기
+
+```{r ggplotly-demo, echo=TRUE}
+# 지역별 흡연율 ggplot2 그래프
+p <- health_survey %>%
+  filter(year == 2023) %>%
+  ggplot(aes(x = reorder(region, -smoking_rate), y = smoking_rate,
+             fill = smoking_rate)) +
+  geom_col(alpha = 0.8) +
+  scale_fill_gradient(low = "#2ECC71", high = "#E74C3C") +
+  labs(
+    title = "2023년 지역별 흡연율",
+    x = "지역",
+    y = "흡연율 (%)",
+    fill = "흡연율"
+  ) +
+  theme_minimal()
+
+# plotly로 변환!
+ggplotly(p)
+```
+
+**해보세요:**
+- 막대에 마우스를 올려보세요 (hover)
+- 드래그해서 확대해보세요 (zoom)
+- 더블클릭으로 리셋하세요
+
+### 연습: ggplotly 변환
+
+```{r ggplotly-exercise, exercise=TRUE, exercise.lines=10}
+# health_survey 데이터로 연도별 당뇨율 추이 그래프를 그리고
+# plotly로 변환하세요
+
+p <- health_survey %>%
+  group_by(year) %>%
+  summarise(avg_diabetes = mean(diabetes_rate)) %>%
+  ggplot(aes(x = year, y = avg_diabetes)) +
+  geom_line(color = "#3498DB", size = 1.5) +
+  geom_point(size = 3)
+
+# plotly로 변환
+ggplotly(___)
+```
+
+```{r ggplotly-exercise-solution}
+p <- health_survey %>%
+  group_by(year) %>%
+  summarise(avg_diabetes = mean(diabetes_rate)) %>%
+  ggplot(aes(x = year, y = avg_diabetes)) +
+  geom_line(color = "#3498DB", size = 1.5) +
+  geom_point(size = 3, color = "#2C3E50") +
+  labs(
+    title = "연도별 평균 당뇨 유병률",
+    x = "연도",
+    y = "당뇨율 (%)"
+  ) +
+  theme_minimal()
+
+ggplotly(p) %>%
+  layout(hovermode = "x unified")
+```
+
+---
+
+## 2장: plot_ly() - 직접 만들기
+
+### plot_ly()의 장점
+
+ggplotly()보다 더 세밀한 제어가 가능합니다:
+- 커스텀 툴팁 (tooltip)
+- 애니메이션
+- 3D 그래프
+- 복잡한 상호작용
+
+### 기본 plot_ly 문법
+
+```{r plotly-basic, echo=TRUE}
+plot_ly(
+  data = health_survey %>% filter(year == 2023),
+  x = ~smoking_rate,
+  y = ~obesity_rate,
+  color = ~region,
+  type = "scatter",
+  mode = "markers",
+  marker = list(size = 12, opacity = 0.7),
+  text = ~paste0(
+    "<b>", region, "</b><br>",
+    "흡연율: ", round(smoking_rate, 1), "%<br>",
+    "비만율: ", round(obesity_rate, 1), "%"
+  ),
+  hoverinfo = "text"
+) %>%
+  layout(
+    title = "지역별 흡연율 vs 비만율 (2023)",
+    xaxis = list(title = "흡연율 (%)"),
+    yaxis = list(title = "비만율 (%)")
+  )
+```
+
+**주목:** 툴팁이 HTML 형식으로 표시됩니다!
+
+### 연습: 커스텀 툴팁
+
+```{r plotly-custom-exercise, exercise=TRUE, exercise.lines=12}
+# 당뇨율 vs 고혈압율 산점도를 만들되,
+# 툴팁에 지역명과 두 지표 모두 표시하세요
+
+plot_ly(
+  data = health_survey %>% filter(year == 2023),
+  x = ~diabetes_rate,
+  y = ~hypertension_rate,
+  text = ~paste0("지역: ", ___, "<br>당뇨: ", ___)
+)
+```
+
+```{r plotly-custom-exercise-solution}
+plot_ly(
+  data = health_survey %>% filter(year == 2023),
+  x = ~diabetes_rate,
+  y = ~hypertension_rate,
+  color = ~region,
+  type = "scatter",
+  mode = "markers",
+  marker = list(size = 15, opacity = 0.8),
+  text = ~paste0(
+    "<b>", region, "</b><br>",
+    "당뇨율: ", round(diabetes_rate, 1), "%<br>",
+    "고혈압율: ", round(hypertension_rate, 1), "%"
+  ),
+  hoverinfo = "text"
+) %>%
+  layout(
+    title = "지역별 당뇨율 vs 고혈압율 (2023)",
+    xaxis = list(title = "당뇨율 (%)"),
+    yaxis = list(title = "고혈압율 (%)"),
+    hovermode = "closest"
+  )
+```
+
+---
+
+## 3장: 시계열 Interactive 그래프
+
+### 시간 범위 선택기 (Range Slider)
+
+```{r timeseries-demo, echo=TRUE}
+plot_ly(disease_time, x = ~date, y = ~cases, color = ~disease,
+        type = "scatter", mode = "lines+markers",
+        line = list(width = 2),
+        marker = list(size = 4)) %>%
+  layout(
+    title = "질병별 발생 추이 (2020-2023)",
+    xaxis = list(
+      title = "날짜",
+      rangeslider = list(visible = TRUE),  # 범위 슬라이더 추가!
+      rangeselector = list(
+        buttons = list(
+          list(count = 6, label = "6개월", step = "month", stepmode = "backward"),
+          list(count = 1, label = "1년", step = "year", stepmode = "backward"),
+          list(step = "all", label = "전체")
+        )
+      )
+    ),
+    yaxis = list(title = "발생 건수"),
+    hovermode = "x unified"
+  )
+```
+
+**기능:**
+- 하단 슬라이더로 기간 선택
+- 버튼으로 빠른 기간 선택
+- 드래그로 확대
+
+### 연습: 지역별 시계열
+
+```{r timeseries-exercise, exercise=TRUE, exercise.lines=12}
+# health_survey 데이터로 지역별 흡연율 추이를 그리되
+# 범위 선택기를 추가하세요
+
+regional_trend <- health_survey %>%
+  filter(region %in% c("서울", "부산", "대구"))
+
+plot_ly(regional_trend, x = ~year, y = ~smoking_rate, color = ~region,
+        type = "scatter", mode = "lines+markers")
+# layout 추가
+```
+
+```{r timeseries-exercise-solution}
+regional_trend <- health_survey %>%
+  filter(region %in% c("서울", "부산", "대구"))
+
+plot_ly(regional_trend, x = ~year, y = ~smoking_rate, color = ~region,
+        type = "scatter", mode = "lines+markers",
+        line = list(width = 2.5),
+        marker = list(size = 6)) %>%
+  layout(
+    title = "주요 지역별 흡연율 추이",
+    xaxis = list(
+      title = "연도",
+      rangeslider = list(visible = TRUE)
+    ),
+    yaxis = list(title = "흡연율 (%)"),
+    hovermode = "x unified",
+    legend = list(title = list(text = "지역"))
+  )
+```
+
+---
+
+## 4장: 3D 시각화
+
+### 3D 산점도
+
+3D 그래프는 **3개 변수의 관계**를 동시에 볼 수 있습니다!
+
+```{r 3d-scatter-demo, echo=TRUE}
+plot_ly(
+  data = health_3d,
+  x = ~age,
+  y = ~bmi,
+  z = ~blood_pressure,
+  color = ~risk_score,
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 5, opacity = 0.8),
+  text = ~paste0(
+    "연령: ", age, "세<br>",
+    "BMI: ", round(bmi, 1), "<br>",
+    "혈압: ", round(blood_pressure, 0), " mmHg<br>",
+    "위험점수: ", round(risk_score, 0)
+  ),
+  hoverinfo = "text"
+) %>%
+  layout(
+    title = "건강 위험 요인 3D 분석",
+    scene = list(
+      xaxis = list(title = "연령 (세)"),
+      yaxis = list(title = "BMI"),
+      zaxis = list(title = "혈압 (mmHg)")
+    )
+  )
+```
+
+**해보세요:**
+- 마우스 드래그로 회전하세요
+- 스크롤로 확대/축소하세요
+- 점에 마우스를 올려보세요
+
+### 3D 표면 그래프 (Surface Plot)
+
+```{r 3d-surface-demo, echo=TRUE}
+# 연령-BMI에 따른 위험도 표면
+age_seq <- seq(20, 80, length.out = 30)
+bmi_seq <- seq(18, 35, length.out = 30)
+
+risk_surface <- outer(age_seq, bmi_seq, function(a, b) {
+  (a - 20) * 0.5 + (b - 22)^2 * 2 + rnorm(1, 0, 5)
+})
+
+plot_ly(
+  x = ~bmi_seq,
+  y = ~age_seq,
+  z = ~risk_surface,
+  type = "surface",
+  colorscale = "Viridis"
+) %>%
+  layout(
+    title = "연령-BMI 기반 건강 위험도 지도",
+    scene = list(
+      xaxis = list(title = "BMI"),
+      yaxis = list(title = "연령 (세)"),
+      zaxis = list(title = "위험 점수")
+    )
+  )
+```
+
+---
+
+## 5장: 히트맵과 애니메이션
+
+### Interactive 히트맵
+
+```{r heatmap-demo, echo=TRUE}
+# 연령-성별-질병별 유병률 히트맵
+plot_ly(
+  data = age_gender_data %>% filter(disease == "당뇨"),
+  x = ~age_group,
+  y = ~gender,
+  z = ~prevalence,
+  type = "heatmap",
+  colorscale = "YlOrRd",
+  text = ~paste0(round(prevalence, 1), "%"),
+  hovertemplate = paste0(
+    "<b>%{y}</b>, %{x}<br>",
+    "유병률: %{z:.1f}%<extra></extra>"
+  )
+) %>%
+  layout(
+    title = "연령-성별 당뇨 유병률 히트맵",
+    xaxis = list(title = "연령군"),
+    yaxis = list(title = "성별")
+  )
+```
+
+### 애니메이션 (연도별 변화)
+
+```{r animation-demo, echo=TRUE}
+plot_ly(
+  data = health_survey,
+  x = ~smoking_rate,
+  y = ~obesity_rate,
+  size = ~diabetes_rate,
+  color = ~region,
+  frame = ~year,  # 애니메이션 프레임!
+  type = "scatter",
+  mode = "markers",
+  marker = list(sizemode = "diameter", sizeref = 0.3, opacity = 0.7),
+  text = ~paste0(region, "<br>연도: ", year),
+  hoverinfo = "text"
+) %>%
+  layout(
+    title = "지역별 건강 지표 변화 (2019-2023)",
+    xaxis = list(title = "흡연율 (%)"),
+    yaxis = list(title = "비만율 (%)")
+  ) %>%
+  animation_opts(frame = 1000, transition = 500, redraw = FALSE)
+```
+
+**재생 버튼을 눌러보세요!** 연도별 변화를 애니메이션으로 볼 수 있습니다!
+
+---
+
+## 6장: 서브플롯 (Dashboard 구성)
+
+### 여러 그래프를 하나의 대시보드로
+
+```{r subplot-demo, echo=TRUE}
+# 그래프 1: 흡연율 추이
+p1 <- plot_ly(disease_time %>% filter(disease == "당뇨"),
+              x = ~date, y = ~cases, type = "scatter", mode = "lines",
+              line = list(color = "#E74C3C", width = 2),
+              name = "당뇨") %>%
+  layout(title = "당뇨 발생 추이")
+
+# 그래프 2: 지역별 비만율
+p2 <- plot_ly(health_survey %>% filter(year == 2023),
+              x = ~region, y = ~obesity_rate, type = "bar",
+              marker = list(color = "#3498DB"),
+              name = "비만율") %>%
+  layout(title = "지역별 비만율 (2023)")
+
+# 그래프 3: BMI 분포
+p3 <- plot_ly(health_3d, x = ~bmi, type = "histogram",
+              marker = list(color = "#2ECC71"),
+              name = "BMI") %>%
+  layout(title = "BMI 분포")
+
+# 그래프 4: 산점도
+p4 <- plot_ly(health_survey %>% filter(year == 2023),
+              x = ~smoking_rate, y = ~diabetes_rate,
+              type = "scatter", mode = "markers",
+              marker = list(size = 10, color = "#9B59B6"),
+              name = "상관관계") %>%
+  layout(title = "흡연율 vs 당뇨율")
+
+# 서브플롯으로 결합 (2x2)
+subplot(p1, p2, p3, p4, nrows = 2, shareX = FALSE, shareY = FALSE,
+        titleX = TRUE, titleY = TRUE) %>%
+  layout(title = "건강 지표 통합 대시보드",
+         showlegend = FALSE)
+```
+
+---
+
+## 7장: 종합 퀴즈 📝
+
+### Plotly 기초 퀴즈
+
+```{r quiz-plotly-basic}
+quiz(
+  question("ggplot2를 plotly로 변환하는 함수는?",
+    answer("to_plotly()"),
+    answer("ggplotly()", correct = TRUE),
+    answer("plotly_convert()"),
+    answer("make_interactive()"),
+    correct = "정답! ggplotly()입니다."
+  ),
+
+  question("plotly 그래프에서 확대하는 방법은? (복수 선택)",
+    answer("마우스 드래그", correct = TRUE),
+    answer("스크롤 휠", correct = TRUE),
+    answer("더블클릭"),
+    answer("오른쪽 클릭"),
+    type = "multiple",
+    correct = "맞습니다! 드래그와 스크롤로 확대 가능합니다."
+  ),
+
+  question("plotly에서 툴팁(tooltip) 내용을 지정하는 파라미터는?",
+    answer("hover"),
+    answer("tooltip"),
+    answer("text", correct = TRUE),
+    answer("label"),
+    correct = "정답! text 파라미터로 툴팁 내용을 설정합니다."
+  ),
+
+  question("plot_ly()에서 산점도를 그릴 때 type은?",
+    answer("\"scatter\"", correct = TRUE),
+    answer("\"point\""),
+    answer("\"dots\""),
+    answer("\"markers\""),
+    correct = "정답! type = \"scatter\"입니다."
+  )
+)
+```
+
+### 고급 기능 퀴즈
+
+```{r quiz-advanced}
+quiz(
+  question("3D 산점도를 그릴 때 사용하는 type은?",
+    answer("\"3d_scatter\""),
+    answer("\"scatter3d\"", correct = TRUE),
+    answer("\"scatter_3d\""),
+    answer("\"3dplot\""),
+    correct = "정답! \"scatter3d\"입니다."
+  ),
+
+  question("시계열 그래프에 범위 선택기를 추가하려면?",
+    answer("rangeslider = TRUE"),
+    answer("xaxis = list(rangeslider = list(visible = TRUE))", correct = TRUE),
+    answer("add_rangeslider()"),
+    answer("enable_slider = TRUE"),
+    correct = "정답! layout의 xaxis 설정에 rangeslider를 추가합니다."
+  ),
+
+  question("애니메이션을 만들 때 사용하는 파라미터는?",
+    answer("animation"),
+    answer("frame", correct = TRUE),
+    answer("animate"),
+    answer("timeline"),
+    correct = "정답! frame 파라미터로 애니메이션 프레임을 지정합니다."
+  ),
+
+  question("여러 plotly 그래프를 하나로 합칠 때 사용하는 함수는?",
+    answer("combine()"),
+    answer("merge_plots()"),
+    answer("subplot()", correct = TRUE),
+    answer("grid_plot()"),
+    correct = "정답! subplot()으로 여러 그래프를 결합합니다."
+  ),
+
+  question("plotly의 장점이 아닌 것은? (복수 선택)",
+    answer("인쇄 품질이 ggplot2보다 우수함", correct = TRUE),
+    answer("확대/축소 가능"),
+    answer("데이터 탐색에 유리"),
+    answer("파일 크기가 작음", correct = TRUE),
+    type = "multiple",
+    correct = "정답! plotly는 인쇄보다 탐색에 적합하며, HTML 파일이 큽니다."
+  )
+)
+```
+
+### 활용 퀴즈
+
+```{r quiz-application}
+quiz(
+  question("보건학 대시보드에서 plotly가 유용한 이유는? (복수 선택)",
+    answer("실시간 데이터 탐색 가능", correct = TRUE),
+    answer("사용자 인터랙션 지원", correct = TRUE),
+    answer("정확한 값 확인 용이", correct = TRUE),
+    answer("자동으로 통계 분석 수행"),
+    type = "multiple",
+    correct = "맞습니다! 탐색, 인터랙션, 값 확인에 유용합니다."
+  ),
+
+  question("3D 그래프가 적합한 경우는?",
+    answer("2개 변수 관계"),
+    answer("3개 변수 관계", correct = TRUE),
+    answer("범주형 데이터"),
+    answer("시계열 데이터"),
+    correct = "정답! 3개 연속형 변수의 관계를 볼 때 적합합니다."
+  ),
+
+  question("hovermode = \"x unified\"의 효과는?",
+    answer("툴팁 비활성화"),
+    answer("같은 x값의 모든 데이터 표시", correct = TRUE),
+    answer("x축만 표시"),
+    answer("그래프 통합"),
+    correct = "정답! 같은 x 위치의 모든 시리즈 데이터를 하나의 툴팁으로 표시합니다."
+  )
+)
+```
+
+---
+
+## 8장: 최종 프로젝트 🚀
+
+### 과제: 보건학 통합 대시보드 제작
+
+**요구사항:**
+1. 4개 이상의 plotly 그래프
+2. 최소 1개의 3D 또는 애니메이션 그래프
+3. 서브플롯으로 대시보드 구성
+4. 커스텀 툴팁과 인터랙티브 요소
+
+```{r final-project, exercise=TRUE, exercise.lines=40}
+# 대시보드 구성 예시 템플릿
+
+# 그래프 1: 시계열 (범위 선택기 포함)
+p1 <- plot_ly(disease_time, x = ~date, y = ~cases, color = ~disease,
+              type = "scatter", mode = "lines") %>%
+  layout(xaxis = list(rangeslider = list(visible = TRUE)))
+
+# 그래프 2: 3D 산점도 또는 히트맵
+p2 <- # 여기에 코드 작성
+
+# 그래프 3: 막대 또는 박스플롯
+p3 <- # 여기에 코드 작성
+
+# 그래프 4: 산점도 또는 애니메이션
+p4 <- # 여기에 코드 작성
+
+# 서브플롯으로 결합
+subplot(p1, p2, p3, p4, nrows = 2)
+```
+
+```{r final-project-solution}
+# 그래프 1: 질병별 시계열 (범위 선택기)
+p1 <- plot_ly(disease_time, x = ~date, y = ~cases, color = ~disease,
+              type = "scatter", mode = "lines+markers",
+              line = list(width = 2)) %>%
+  layout(
+    title = "질병 발생 추이",
+    xaxis = list(
+      title = "날짜",
+      rangeslider = list(visible = TRUE)
+    ),
+    yaxis = list(title = "발생 건수"),
+    hovermode = "x unified"
+  )
+
+# 그래프 2: 3D 건강 위험 요인
+p2 <- plot_ly(
+  data = health_3d,
+  x = ~age,
+  y = ~bmi,
+  z = ~blood_pressure,
+  color = ~risk_score,
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 4, opacity = 0.7)
+) %>%
+  layout(
+    title = "3D 위험 요인 분석",
+    scene = list(
+      xaxis = list(title = "연령"),
+      yaxis = list(title = "BMI"),
+      zaxis = list(title = "혈압")
+    )
+  )
+
+# 그래프 3: 지역별 흡연율 (2023)
+p3 <- plot_ly(
+  data = health_survey %>% filter(year == 2023),
+  x = ~reorder(region, -smoking_rate),
+  y = ~smoking_rate,
+  type = "bar",
+  marker = list(
+    color = ~smoking_rate,
+    colorscale = "Reds",
+    showscale = FALSE
+  ),
+  text = ~paste0(round(smoking_rate, 1), "%"),
+  textposition = "outside"
+) %>%
+  layout(
+    title = "지역별 흡연율 (2023)",
+    xaxis = list(title = ""),
+    yaxis = list(title = "흡연율 (%)")
+  )
+
+# 그래프 4: 흡연-당뇨 상관관계 (애니메이션)
+p4 <- plot_ly(
+  data = health_survey,
+  x = ~smoking_rate,
+  y = ~diabetes_rate,
+  frame = ~year,
+  color = ~region,
+  type = "scatter",
+  mode = "markers",
+  marker = list(size = 10, opacity = 0.7),
+  text = ~paste0(region, " (", year, ")")
+) %>%
+  layout(
+    title = "흡연율 vs 당뇨율 (연도별)",
+    xaxis = list(title = "흡연율 (%)"),
+    yaxis = list(title = "당뇨율 (%)")
+  ) %>%
+  animation_opts(frame = 800, transition = 400)
+
+# 통합 대시보드
+subplot(
+  p1, p2, p3, p4,
+  nrows = 2,
+  heights = c(0.5, 0.5),
+  widths = c(0.6, 0.4),
+  shareX = FALSE,
+  shareY = FALSE,
+  titleX = TRUE,
+  titleY = TRUE
+) %>%
+  layout(
+    title = list(
+      text = "<b>보건학 통합 대시보드</b><br><sup>Interactive Health Data Analytics</sup>",
+      font = list(size = 20)
+    ),
+    showlegend = TRUE
+  )
+```
+
+---
+
+## 수고하셨습니다! 🎉
+
+### 배운 내용 요약:
+
+#### 📊 Plotly 핵심 기능
+- **ggplotly()**: ggplot2 → plotly 즉시 변환
+- **plot_ly()**: 완전한 제어와 커스터마이징
+- **Interactive 요소**: hover, zoom, pan, select
+- **Range slider**: 시계열 기간 선택
+- **Subplot**: 여러 그래프를 하나의 대시보드로
+
+#### 🎨 고급 시각화
+- **3D 산점도**: scatter3d로 3변수 관계
+- **3D 표면**: surface로 연속 함수 시각화
+- **애니메이션**: frame으로 시간 변화 표현
+- **히트맵**: 2D 패턴 인식
+- **커스텀 툴팁**: HTML 형식의 상세 정보
+
+#### 💡 보건학 활용
+- **질병 감시**: 시계열 범위 선택으로 패턴 탐색
+- **위험 요인 분석**: 3D로 다변량 관계 파악
+- **지역 비교**: 인터랙티브 막대/히트맵
+- **추이 분석**: 애니메이션으로 시간 변화
+- **통합 대시보드**: 여러 지표를 한 화면에
+
+#### 🚀 실무 적용
+- **데이터 탐색**: 확대, 필터링으로 이상치 발견
+- **프레젠테이션**: 인터랙티브 발표 자료
+- **웹 대시보드**: Shiny와 결합하여 배포
+- **보고서**: HTML로 embed하여 interactive 리포트
+
+### 다음 학습 단계:
+
+✅ **Shiny**: 완전한 웹 애플리케이션 구축
+✅ **ShinyDashboard**: 전문적인 대시보드 프레임워크
+✅ **공간 데이터**: leaflet으로 interactive 지도
+✅ **실시간 데이터**: 자동 업데이트 대시보드
+
+### 추천 학습 자료:
+
+📖 **Plotly for R**: https://plotly-r.com/
+📖 **Interactive web-based data visualization with R, plotly, and shiny**: Carson Sievert 저서
+📖 **Plotly Graphing Library**: https://plotly.com/r/
+
+### 전체 과정 완료! 🏆
+
+**축하합니다!** R 기반 보건학 시각화 전 과정을 완료하셨습니다!
+
+이제 여러분은:
+- ggplot2로 출판 수준의 정적 그래프를 그릴 수 있습니다
+- 역학 데이터를 효과적으로 시각화할 수 있습니다
+- 임상통계 결과를 논문 수준으로 표현할 수 있습니다
+- plotly로 인터랙티브 대시보드를 만들 수 있습니다
+
+**계속 연습하고, 실제 데이터로 적용해보세요!** 📊✨
+
+---
+
+**🎓 전체 4개 Part 복습:**
+- **Part I**: ggplot2 기초 (Grammar of Graphics)
+- **Part II**: 역학 데이터 시각화 (유행곡선, 발병률)
+- **Part III**: 임상통계 시각화 (생존분석, 메타분석)
+- **Part IV**: 인터랙티브 시각화 (plotly, 대시보드) ✅
+
+---
+
+## 9장: 심화 퀴즈 🧠
+
+### 코드 결과 예측 퀴즈
+
+```{r quiz-code-predict}
+quiz(
+  question("다음 코드의 결과는?\n\nplot_ly(mtcars, x = ~mpg, y = ~wt, type = 'scatter', mode = 'markers+lines')",
+    answer("산점도만 그려짐"),
+    answer("선 그래프만 그려짐"),
+    answer("산점도와 선이 함께 그려짐", correct = TRUE),
+    answer("오류 발생"),
+    correct = "정답! mode = 'markers+lines'는 점과 선을 동시에 그립니다."
+  ),
+
+  question("다음 코드에서 frame = ~year의 역할은?\n\nplot_ly(data, x = ~x, y = ~y, frame = ~year)",
+    answer("연도별 필터링"),
+    answer("연도별 애니메이션 생성", correct = TRUE),
+    answer("연도를 x축에 표시"),
+    answer("연도별 색상 변경"),
+    correct = "정답! frame 파라미터는 해당 변수를 기준으로 애니메이션을 생성합니다."
+  )
+)
+```
+
+### 오류 찾기 퀴즈
+
+```{r quiz-error-find}
+quiz(
+  question("다음 코드의 문제점은?\n\nggplotly(p) %>%\n  layout(title = '제목')",
+    answer("ggplotly에 layout을 사용할 수 없음"),
+    answer("title 문법이 잘못됨"),
+    answer("문제 없음, 정상 작동함", correct = TRUE),
+    answer("파이프(%>%)를 사용할 수 없음"),
+    correct = "정답! ggplotly 결과에 layout을 추가하는 것은 정상적인 문법입니다."
+  ),
+
+  question("다음 3D 그래프 코드의 문제점은?\n\nplot_ly(data, x = ~a, y = ~b, z = ~c, type = 'scatter', mode = 'markers')",
+    answer("z 축을 사용할 수 없음"),
+    answer("type이 'scatter3d'가 아님", correct = TRUE),
+    answer("mode가 잘못됨"),
+    answer("문제 없음"),
+    correct = "정답! 3D 산점도는 type = 'scatter3d'를 사용해야 합니다."
+  )
+)
+```
+
+### 빈칸 채우기 퀴즈
+
+```{r quiz-fill-blank}
+quiz(
+  question("plotly에서 마우스 오버 시 표시되는 정보를 설정하는 파라미터는 _____이다.",
+    answer("hover"),
+    answer("tooltip"),
+    answer("text", correct = TRUE),
+    answer("info"),
+    correct = "정답! text 파라미터로 호버 시 표시될 내용을 지정합니다."
+  ),
+
+  question("여러 plotly 그래프를 하나로 결합하는 함수는 _____이다.",
+    answer("combine()"),
+    answer("merge()"),
+    answer("subplot()", correct = TRUE),
+    answer("grid()"),
+    correct = "정답! subplot() 함수로 여러 그래프를 결합합니다."
+  ),
+
+  question("plotly에서 시계열 그래프에 기간 선택 슬라이더를 추가하려면 _____를 TRUE로 설정한다.",
+    answer("slider"),
+    answer("rangeslider", correct = TRUE),
+    answer("timeline"),
+    answer("daterange"),
+    correct = "정답! xaxis의 rangeslider 옵션을 사용합니다."
+  )
+)
+```
+
+### 개념 심화 퀴즈
+
+```{r quiz-concept-advanced}
+quiz(
+  question("ggplotly()와 plot_ly()의 주요 차이점은?",
+    answer("ggplotly는 더 빠름"),
+    answer("ggplotly는 ggplot2 객체를 변환하고, plot_ly는 처음부터 plotly로 작성", correct = TRUE),
+    answer("plot_ly는 정적 그래프만 가능"),
+    answer("ggplotly는 3D를 지원하지 않음"),
+    correct = "정답! ggplotly는 기존 ggplot2를 변환하고, plot_ly는 plotly 문법으로 직접 작성합니다."
+  ),
+
+  question("plotly의 hovermode = 'x unified'의 효과는?",
+    answer("x축 숨김"),
+    answer("같은 x 위치의 모든 시리즈 데이터를 하나의 툴팁에 표시", correct = TRUE),
+    answer("x축 확대 기능 활성화"),
+    answer("x 값만 툴팁에 표시"),
+    correct = "정답! 같은 x 좌표에 있는 모든 데이터 포인트를 한 번에 표시합니다."
+  ),
+
+  question("plotly 그래프를 HTML 파일로 저장하는 함수는?",
+    answer("ggsave()"),
+    answer("htmlwidgets::saveWidget()", correct = TRUE),
+    answer("save_plotly()"),
+    answer("export_html()"),
+    correct = "정답! htmlwidgets::saveWidget() 또는 plotly::save_image()를 사용합니다."
+  ),
+
+  question("plotly의 장점이 아닌 것은?",
+    answer("인터랙티브 탐색"),
+    answer("확대/축소 기능"),
+    answer("인쇄 품질이 ggplot2보다 우수", correct = TRUE),
+    answer("HTML로 공유 가능"),
+    correct = "정답! plotly는 탐색용이며, 인쇄용 고품질 그래프는 ggplot2가 더 적합합니다."
+  ),
+
+  question("3D surface plot을 만들 때 사용하는 type은?",
+    answer("'surface'", correct = TRUE),
+    answer("'3d_surface'"),
+    answer("'plot3d'"),
+    answer("'mesh3d'"),
+    correct = "정답! type = 'surface'로 3D 표면 그래프를 그립니다."
+  )
+)
+```

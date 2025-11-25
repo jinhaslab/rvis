@@ -1,0 +1,970 @@
+---
+title: "Part III-2: 논문 출판 수준 그래픽"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    css: www/custom.css
+    includes:
+      in_header: www/header.html
+runtime: shiny_prerendered
+---
+
+```{r packages, include=FALSE}
+# 필요 패키지 자동 설치
+if(!require("learnr")) install.packages("learnr")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("patchwork")) install.packages("patchwork")
+if(!require("ggrepel")) install.packages("ggrepel")
+if(!require("viridis")) install.packages("viridis")
+if(!require("scales")) install.packages("scales")
+```
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(patchwork)
+library(ggrepel)
+library(viridis)
+library(scales)
+
+# 샘플 데이터 생성
+set.seed(42)
+
+# 1. 자동차 데이터 (라벨링용)
+mtcars_labeled <- mtcars %>%
+  tibble::rownames_to_column("model") %>%
+  arrange(desc(mpg)) %>%
+  slice(1:10)
+
+# 2. 임상시험 데이터
+clinical_data <- data.frame(
+  patient_id = 1:100,
+  age = rnorm(100, mean = 55, sd = 15),
+  treatment = sample(c("Control", "Drug A", "Drug B"), 100, replace = TRUE),
+  response = rnorm(100, mean = 50, sd = 20),
+  stringsAsFactors = FALSE
+)
+clinical_data$response <- clinical_data$response +
+  ifelse(clinical_data$treatment == "Drug A", 15,
+         ifelse(clinical_data$treatment == "Drug B", 10, 0))
+
+# 3. 유전체 데이터 (Volcano Plot)
+gene_data <- data.frame(
+  gene = paste0("Gene", 1:100),
+  log2FC = rnorm(100, mean = 0, sd = 1.5),
+  pvalue = runif(100, 0, 0.1),
+  stringsAsFactors = FALSE
+) %>%
+  mutate(
+    neg_log10p = -log10(pvalue),
+    significant = ifelse(abs(log2FC) > 1 & pvalue < 0.05, "Significant", "NS"),
+    label = ifelse(abs(log2FC) > 1.5 & pvalue < 0.01, gene, "")
+  )
+
+# 4. 건강검진 데이터
+health_data <- data.frame(
+  age = rnorm(200, mean = 45, sd = 15),
+  bmi = rnorm(200, mean = 25, sd = 4),
+  sbp = rnorm(200, mean = 130, sd = 20),
+  gender = sample(c("M", "F"), 200, replace = TRUE),
+  stringsAsFactors = FALSE
+)
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<div style="text-align: right; padding: 10px;">
+  <a href="/shiny/" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold;">홈으로</a>
+</div>
+
+## 논문 출판 수준 그래픽에 오신 것을 환영합니다!
+
+### 학습 목표:
+- **ggrepel**로 텍스트 라벨 겹침 방지
+- **patchwork**로 다중 패널 Figure 조합 (A, B, C 라벨링)
+- **viridis**로 색맹 친화적 색상 사용
+- 학술지 스타일 테마 적용
+- **ggsave**로 고해상도 저장
+
+### 이 과정을 마치면:
+- Nature, Science 등 학술지 기준의 Figure 제작 가능
+- 여러 그래프를 하나의 Figure로 조합 가능
+- 색맹 친화적이고 전문적인 시각화 구현
+
+---
+
+## 1장: ggrepel - 텍스트 라벨 최적화
+
+### 문제: 텍스트 겹침
+
+산점도에 라벨을 추가할 때, `geom_text()`는 라벨이 서로 겹치는 문제가 있습니다.
+
+```{r text-overlap-demo, echo=TRUE}
+# 문제 상황: 라벨이 겹침
+ggplot(mtcars_labeled, aes(x = wt, y = mpg, label = model)) +
+  geom_point(color = "steelblue", size = 3) +
+  geom_text(size = 3, vjust = -0.5) +  # 겹침 발생!
+  labs(
+    title = "geom_text() - 라벨 겹침 문제",
+    x = "무게 (1000 lbs)",
+    y = "연비 (mpg)"
+  ) +
+  theme_minimal()
+```
+
+### 해결: ggrepel 패키지
+
+**ggrepel**은 라벨이 점과 서로 겹치지 않도록 자동으로 위치를 조정합니다.
+
+```{r repel-demo, echo=TRUE}
+# 해결: geom_text_repel() 사용
+ggplot(mtcars_labeled, aes(x = wt, y = mpg, label = model)) +
+  geom_point(color = "steelblue", size = 3) +
+  geom_text_repel(
+    size = 3,
+    box.padding = 0.5,       # 라벨 주변 여백
+    point.padding = 0.3,     # 점 주변 여백
+    segment.color = "grey50" # 연결선 색상
+  ) +
+  labs(
+    title = "geom_text_repel() - 겹침 해결!",
+    x = "무게 (1000 lbs)",
+    y = "연비 (mpg)"
+  ) +
+  theme_minimal()
+```
+
+### ggrepel 주요 옵션
+
+| 옵션 | 설명 | 기본값 |
+|------|------|--------|
+| `box.padding` | 라벨 박스 주변 여백 | 0.25 |
+| `point.padding` | 점 주변 여백 | 0 |
+| `segment.color` | 연결선 색상 | "black" |
+| `max.overlaps` | 허용 최대 겹침 수 | 10 |
+| `force` | 반발력 강도 | 1 |
+
+### 연습문제: ggrepel 사용
+
+아래 코드를 완성하여 라벨 겹침 문제를 해결하세요.
+
+```{r repel-exercise, exercise=TRUE, exercise.lines=18}
+# iris 데이터에서 상위 10개 선택
+iris_top <- iris %>%
+  mutate(id = row_number()) %>%
+  arrange(desc(Sepal.Length)) %>%
+  slice(1:10)
+
+# ggrepel로 라벨 추가
+ggplot(iris_top, aes(x = Sepal.Length, y = Sepal.Width, label = id)) +
+  geom_point(aes(color = Species), size = 3) +
+  ___(  # geom_text_repel 사용
+    size = 3,
+    box.padding = ___,
+    segment.color = "grey50"
+  ) +
+  labs(title = "붓꽃 데이터 상위 10개") +
+  theme_minimal()
+```
+
+```{r repel-exercise-hint}
+# geom_text_repel() 함수 사용
+# box.padding = 0.5 정도가 적당합니다
+```
+
+```{r repel-exercise-solution}
+iris_top <- iris %>%
+  mutate(id = row_number()) %>%
+  arrange(desc(Sepal.Length)) %>%
+  slice(1:10)
+
+ggplot(iris_top, aes(x = Sepal.Length, y = Sepal.Width, label = id)) +
+  geom_point(aes(color = Species), size = 3) +
+  geom_text_repel(
+    size = 3,
+    box.padding = 0.5,
+    segment.color = "grey50"
+  ) +
+  labs(title = "붓꽃 데이터 상위 10개") +
+  theme_minimal()
+```
+
+### 실전 예제: Volcano Plot
+
+유전체 연구에서 자주 사용되는 Volcano Plot입니다.
+
+```{r volcano-plot, echo=TRUE}
+ggplot(gene_data, aes(x = log2FC, y = neg_log10p)) +
+  geom_point(aes(color = significant), alpha = 0.6, size = 2) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed", color = "blue") +
+  geom_text_repel(
+    aes(label = label),
+    size = 3,
+    max.overlaps = 15,
+    box.padding = 0.5
+  ) +
+  scale_color_manual(values = c("NS" = "gray", "Significant" = "red")) +
+  labs(
+    title = "Volcano Plot: 유전자 발현 차이",
+    x = "Log2 Fold Change",
+    y = "-Log10(P-value)",
+    color = "Significance"
+  ) +
+  theme_classic() +
+  theme(legend.position = "top")
+```
+
+---
+
+## 2장: patchwork - 다중 플롯 조합
+
+### 왜 patchwork인가?
+
+학술 논문에서는 여러 그래프를 **Figure 1A, 1B, 1C**처럼 조합해야 합니다. **patchwork**는 직관적인 연산자로 이를 가능하게 합니다:
+
+| 연산자 | 기능 | 예시 |
+|--------|------|------|
+| `+` | 순서대로 배치 | `p1 + p2` |
+| `\|` | 옆으로 나란히 | `p1 \| p2` |
+| `/` | 위아래로 쌓기 | `p1 / p2` |
+| `()` | 그룹화 | `(p1 \| p2) / p3` |
+
+### 기본 사용법
+
+```{r patchwork-basic, echo=TRUE}
+# 3개의 플롯 생성
+p1 <- ggplot(mtcars, aes(x = mpg, y = disp)) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "연비 vs. 배기량") +
+  theme_bw()
+
+p2 <- ggplot(mtcars, aes(x = factor(cyl), y = mpg, fill = factor(cyl))) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(title = "실린더별 연비", x = "Cylinders") +
+  theme_bw()
+
+p3 <- ggplot(mtcars, aes(x = hp)) +
+  geom_histogram(bins = 15, fill = "coral", color = "black") +
+  labs(title = "마력 분포") +
+  theme_bw()
+
+# 조합: (p1과 p2를 나란히) 그 아래 p3
+(p1 | p2) / p3
+```
+
+### Figure 라벨 추가
+
+```{r patchwork-labels, echo=TRUE}
+# plot_annotation으로 A, B, C 라벨 추가
+(p1 | p2) / p3 +
+  plot_annotation(
+    title = "자동차 성능 분석 종합",
+    tag_levels = "A",  # A, B, C 자동 라벨
+    theme = theme(plot.title = element_text(size = 14, face = "bold"))
+  )
+```
+
+### 연습문제: patchwork 사용
+
+4개의 플롯을 2x2 그리드로 배치하세요.
+
+```{r patchwork-exercise, exercise=TRUE, exercise.lines=25}
+# 4개의 플롯 생성
+plot_a <- ggplot(health_data, aes(x = age, y = bmi, color = gender)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "나이와 BMI") +
+  theme_minimal()
+
+plot_b <- ggplot(health_data, aes(x = age, y = sbp, color = gender)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "나이와 혈압") +
+  theme_minimal()
+
+plot_c <- ggplot(health_data, aes(x = bmi, fill = gender)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "BMI 분포") +
+  theme_minimal()
+
+plot_d <- ggplot(health_data, aes(x = gender, y = sbp, fill = gender)) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(title = "성별 혈압") +
+  theme_minimal()
+
+# 2x2 그리드로 조합 (A, B 위, C, D 아래)
+# 힌트: (plot_a | plot_b) / (plot_c | plot_d)
+___ +
+  plot_annotation(tag_levels = "A")
+```
+
+```{r patchwork-exercise-hint}
+# | 는 옆으로 배치
+# / 는 위아래로 배치
+# (plot_a | plot_b) / (plot_c | plot_d)
+```
+
+```{r patchwork-exercise-solution}
+plot_a <- ggplot(health_data, aes(x = age, y = bmi, color = gender)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "나이와 BMI") +
+  theme_minimal()
+
+plot_b <- ggplot(health_data, aes(x = age, y = sbp, color = gender)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "나이와 혈압") +
+  theme_minimal()
+
+plot_c <- ggplot(health_data, aes(x = bmi, fill = gender)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "BMI 분포") +
+  theme_minimal()
+
+plot_d <- ggplot(health_data, aes(x = gender, y = sbp, fill = gender)) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(title = "성별 혈압") +
+  theme_minimal()
+
+(plot_a | plot_b) / (plot_c | plot_d) +
+  plot_annotation(tag_levels = "A")
+```
+
+### Quiz: patchwork
+
+```{r quiz-patchwork}
+quiz(
+  question("patchwork에서 플롯을 위아래로 쌓는 연산자는?",
+    answer("/", correct = TRUE),
+    answer("|"),
+    answer("+"),
+    answer("*"),
+    allow_retry = TRUE
+  ),
+  question("plot_annotation(tag_levels = 'A')의 결과는?",
+    answer("각 플롯에 A, B, C... 라벨이 붙음", correct = TRUE),
+    answer("모든 플롯에 'A'만 붙음"),
+    answer("플롯 배경색이 변경됨"),
+    answer("축 라벨이 A로 변경됨"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## 3장: 색맹 친화적 색상
+
+### 왜 색맹 친화적 색상이 중요한가?
+
+전 세계 **남성의 8%**, **여성의 0.5%**가 색맹입니다. 학술 출판에서는 색맹 친화적 색상을 사용해야 합니다.
+
+### Viridis 팔레트
+
+**viridis**는 색맹 친화적이며, 흑백 인쇄에서도 구별 가능합니다.
+
+```{r viridis-demo, echo=TRUE}
+# 연속형 데이터
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Petal.Length)) +
+  geom_point(size = 3) +
+  scale_color_viridis_c(option = "viridis") +
+  labs(title = "Viridis 연속형 팔레트", color = "Petal Length") +
+  theme_minimal()
+```
+
+### Viridis 옵션들
+
+```{r viridis-options, echo=TRUE, fig.width=10, fig.height=6}
+base_plot <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Petal.Length)) +
+  geom_point(size = 2) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+p_viridis <- base_plot + scale_color_viridis_c(option = "viridis") + labs(title = "viridis")
+p_magma <- base_plot + scale_color_viridis_c(option = "magma") + labs(title = "magma")
+p_plasma <- base_plot + scale_color_viridis_c(option = "plasma") + labs(title = "plasma")
+p_cividis <- base_plot + scale_color_viridis_c(option = "cividis") + labs(title = "cividis")
+
+(p_viridis | p_magma) / (p_plasma | p_cividis) +
+  plot_annotation(title = "Viridis 색상 옵션")
+```
+
+### 범주형 데이터용 Viridis
+
+```{r viridis-discrete, echo=TRUE}
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point(size = 3) +
+  scale_color_viridis_d(option = "plasma", begin = 0.2, end = 0.8) +
+  labs(title = "Viridis 범주형 팔레트 (viridis_d)") +
+  theme_minimal()
+```
+
+### 연습문제: 색상 팔레트 적용
+
+mtcars 데이터에 viridis 색상을 적용하세요.
+
+```{r viridis-exercise, exercise=TRUE, exercise.lines=15}
+# mpg를 색상으로, cyl을 모양으로
+ggplot(mtcars, aes(x = wt, y = hp, color = mpg, shape = factor(cyl))) +
+  geom_point(size = 4, alpha = 0.7) +
+  scale_color_viridis_c(option = "___") +  # plasma, magma, viridis 중 선택
+  scale_shape_manual(values = c(16, 17, 15)) +
+  labs(
+    title = "자동차 데이터: Viridis 색상",
+    x = "무게 (1000 lbs)",
+    y = "마력",
+    color = "연비",
+    shape = "실린더"
+  ) +
+  theme_minimal()
+```
+
+```{r viridis-exercise-hint}
+# option = "plasma", "magma", "viridis", "cividis" 중 하나 선택
+```
+
+```{r viridis-exercise-solution}
+ggplot(mtcars, aes(x = wt, y = hp, color = mpg, shape = factor(cyl))) +
+  geom_point(size = 4, alpha = 0.7) +
+  scale_color_viridis_c(option = "plasma") +
+  scale_shape_manual(values = c(16, 17, 15)) +
+  labs(
+    title = "자동차 데이터: Viridis 색상",
+    x = "무게 (1000 lbs)",
+    y = "마력",
+    color = "연비",
+    shape = "실린더"
+  ) +
+  theme_minimal()
+```
+
+### 피해야 할 색상 조합
+
+**빨강-초록 조합**은 적록색맹에서 구별이 불가능합니다.
+
+```{r bad-colors, echo=TRUE}
+# 피해야 할 예시
+bad_colors <- ggplot(iris, aes(x = Sepal.Length, fill = Species)) +
+  geom_histogram(bins = 20, alpha = 0.7, position = "identity") +
+  scale_fill_manual(values = c("red", "green", "blue")) +
+  labs(title = "피해야 할 조합: 빨강-초록") +
+  theme_minimal()
+
+# 좋은 예시
+good_colors <- ggplot(iris, aes(x = Sepal.Length, fill = Species)) +
+  geom_histogram(bins = 20, alpha = 0.7, position = "identity") +
+  scale_fill_viridis_d(option = "plasma") +
+  labs(title = "권장: Viridis 팔레트") +
+  theme_minimal()
+
+bad_colors | good_colors
+```
+
+---
+
+## 4장: 학술지 테마와 스타일
+
+### ggplot2 내장 테마
+
+```{r themes-compare, echo=TRUE, fig.width=10, fig.height=6}
+base <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point(color = "steelblue", size = 2) +
+  labs(x = "Weight", y = "MPG")
+
+p_gray <- base + theme_gray() + labs(title = "theme_gray()")
+p_bw <- base + theme_bw() + labs(title = "theme_bw()")
+p_minimal <- base + theme_minimal() + labs(title = "theme_minimal()")
+p_classic <- base + theme_classic() + labs(title = "theme_classic()")
+
+(p_gray | p_bw) / (p_minimal | p_classic) +
+  plot_annotation(title = "ggplot2 내장 테마 비교")
+```
+
+### 학술지별 추천 테마
+
+| 학술지 | 추천 테마 | 특징 |
+|--------|-----------|------|
+| **Nature, Science** | `theme_classic()` | 축만 표시, 격자 없음 |
+| **NEJM, Lancet** | `theme_bw()` | 흰색 배경, 검은 테두리 |
+| **PLOS ONE** | `theme_minimal()` | 최소한의 요소 |
+
+### 테마 커스터마이징
+
+```{r theme-custom, echo=TRUE}
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point(color = "steelblue", size = 3) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(
+    title = "자동차 무게와 연비의 관계",
+    subtitle = "미국 자동차 32종 (1973-74 모델)",
+    x = "무게 (1000 lbs)",
+    y = "연비 (miles per gallon)",
+    caption = "데이터: mtcars | 분석: 연세대 산업보건 연구소"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0),
+    plot.subtitle = element_text(size = 10, color = "gray40"),
+    axis.title = element_text(size = 11, face = "bold"),
+    axis.text = element_text(size = 10),
+    plot.caption = element_text(size = 8, color = "gray50", hjust = 1)
+  )
+```
+
+### 연습문제: 테마 적용
+
+학술지 스타일 그래프를 만드세요.
+
+```{r theme-exercise, exercise=TRUE, exercise.lines=20}
+ggplot(clinical_data, aes(x = treatment, y = response, fill = treatment)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.3, size = 1) +
+  scale_fill_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(
+    title = "치료군별 반응",
+    subtitle = "임상시험 결과 (N=100)",
+    x = "치료군",
+    y = "반응 점수"
+  ) +
+  theme___(base_size = 12) +  # classic, bw, minimal 중 선택
+  theme(
+    legend.position = "___",  # none, top, bottom, right 중 선택
+    plot.title = element_text(face = "bold")
+  )
+```
+
+```{r theme-exercise-hint}
+# theme_classic() 또는 theme_bw() 사용
+# legend.position = "none" 으로 범례 제거
+```
+
+```{r theme-exercise-solution}
+ggplot(clinical_data, aes(x = treatment, y = response, fill = treatment)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.3, size = 1) +
+  scale_fill_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(
+    title = "치료군별 반응",
+    subtitle = "임상시험 결과 (N=100)",
+    x = "치료군",
+    y = "반응 점수"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold")
+  )
+```
+
+---
+
+## 5장: ggsave - 고해상도 저장
+
+### ggsave 기본 사용법
+
+```{r ggsave-demo, echo=TRUE, eval=FALSE}
+# 플롯 생성
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  theme_classic()
+
+# PNG 저장
+ggsave(
+  filename = "figure1.png",
+  plot = p,
+  width = 8,           # 너비 (inch)
+  height = 6,          # 높이 (inch)
+  dpi = 300,           # 해상도
+  units = "in"
+)
+
+# PDF 저장 (벡터 형식)
+ggsave(
+  filename = "figure1.pdf",
+  plot = p,
+  width = 8,
+  height = 6,
+  device = cairo_pdf
+)
+```
+
+### 학술지별 권장 설정
+
+| 학술지 | 해상도 (DPI) | 파일 형식 | 권장 너비 |
+|--------|--------------|-----------|-----------|
+| **Nature** | 300-600 | PDF, TIFF | Single: 89 mm |
+| **Science** | 300+ | PDF, TIFF | Single: 5.5 cm |
+| **NEJM** | 300-600 | TIFF | Double: 6.75 in |
+| **PLOS ONE** | 300+ | TIFF | Max: 17.35 cm |
+
+### 벡터 vs 래스터
+
+| 형식 | 특징 | 용도 |
+|------|------|------|
+| **PDF** | 벡터, 확대해도 선명 | 논문 제출 |
+| **TIFF** | 래스터, 고품질 | 인쇄용 |
+| **PNG** | 래스터, 투명 배경 | 프레젠테이션 |
+
+### Quiz: ggsave
+
+```{r quiz-ggsave}
+quiz(
+  question("학술지 제출 시 권장되는 최소 DPI는?",
+    answer("300 DPI", correct = TRUE),
+    answer("72 DPI"),
+    answer("150 DPI"),
+    answer("96 DPI"),
+    allow_retry = TRUE
+  ),
+  question("벡터 형식 파일의 장점은?",
+    answer("확대해도 선명함", correct = TRUE),
+    answer("파일 크기가 항상 작음"),
+    answer("모든 프로그램에서 열 수 있음"),
+    answer("인터넷 로딩이 빠름"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## 6장: 출판 품질 체크리스트
+
+### Before & After 비교
+
+**Before (기본 ggplot2):**
+
+```{r before-plot, echo=TRUE}
+# 기본 플롯
+ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+**After (출판 품질):**
+
+```{r after-plot, echo=TRUE}
+# 출판 품질 플롯
+mtcars_top5 <- mtcars %>%
+  tibble::rownames_to_column("model") %>%
+  arrange(desc(mpg)) %>%
+  slice(1:5)
+
+ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl), shape = factor(cyl))) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8) +
+  geom_text_repel(
+    data = mtcars_top5,
+    aes(label = model),
+    size = 3,
+    max.overlaps = 10
+  ) +
+  scale_color_viridis_d(
+    option = "plasma",
+    name = "Cylinders",
+    labels = c("4 cyl", "6 cyl", "8 cyl")
+  ) +
+  scale_shape_manual(
+    values = c(16, 17, 15),
+    name = "Cylinders",
+    labels = c("4 cyl", "6 cyl", "8 cyl")
+  ) +
+  labs(
+    title = "Relationship Between Vehicle Weight and Fuel Efficiency",
+    subtitle = "US automobiles (1973-74 models, n=32)",
+    x = "Weight (1000 lbs)",
+    y = "Fuel Efficiency (miles per gallon)",
+    caption = "Data: Henderson and Velleman (1981) | Linear regression with 95% CI"
+  ) +
+  theme_classic(base_size = 11) +
+  theme(
+    plot.title = element_text(size = 13, face = "bold"),
+    plot.subtitle = element_text(size = 10, color = "gray40"),
+    axis.title = element_text(face = "bold"),
+    legend.position = c(0.85, 0.8),
+    legend.background = element_rect(fill = "white", color = "black", linewidth = 0.3),
+    plot.caption = element_text(size = 8, color = "gray50", hjust = 0)
+  )
+```
+
+### 출판 품질 체크리스트
+
+**데이터 정확성:**
+- [ ] 모든 수치가 올바른가?
+- [ ] 에러바가 SE인지 CI인지 명시?
+- [ ] N 수가 표시되어 있는가?
+
+**시각적 요소:**
+- [ ] 모든 축에 명확한 레이블과 단위?
+- [ ] 글꼴 크기가 적절한가? (최소 7pt)
+- [ ] 색맹 친화적 색상 사용?
+- [ ] 범례 위치가 적절한가?
+
+**해상도 및 포맷:**
+- [ ] 해상도 300 DPI 이상?
+- [ ] 적절한 파일 형식? (PDF/TIFF)
+- [ ] 크기가 학술지 규정 준수?
+
+---
+
+## 7장: 종합 예제
+
+### 다중 패널 Figure 완성본
+
+```{r comprehensive-figure, echo=TRUE, fig.width=10, fig.height=8}
+# Panel A: 치료군별 반응
+p_a <- ggplot(clinical_data, aes(x = treatment, y = response, fill = treatment)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.3, size = 1) +
+  scale_fill_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(title = "Treatment Response", x = "Group", y = "Response Score") +
+  theme_classic() +
+  theme(legend.position = "none", plot.title = element_text(face = "bold", size = 11))
+
+# Panel B: 나이와 반응의 관계
+p_b <- ggplot(clinical_data, aes(x = age, y = response, color = treatment)) +
+  geom_point(size = 2, alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8) +
+  scale_color_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(title = "Age vs. Response", x = "Age (years)", y = "Response Score") +
+  theme_classic() +
+  theme(legend.position = c(0.15, 0.85),
+        legend.background = element_rect(fill = "white", color = "black", linewidth = 0.3),
+        legend.title = element_text(size = 9),
+        plot.title = element_text(face = "bold", size = 11))
+
+# Panel C: 반응 분포
+p_c <- ggplot(clinical_data, aes(x = response, fill = treatment)) +
+  geom_density(alpha = 0.6) +
+  scale_fill_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(title = "Response Distribution", x = "Response Score", y = "Density") +
+  theme_classic() +
+  theme(legend.position = "top",
+        plot.title = element_text(face = "bold", size = 11))
+
+# Panel D: 나이 분포
+p_d <- ggplot(clinical_data, aes(x = treatment, y = age, fill = treatment)) +
+  geom_violin(alpha = 0.7) +
+  geom_boxplot(width = 0.1, fill = "white") +
+  scale_fill_viridis_d(option = "plasma", begin = 0.3, end = 0.9) +
+  labs(title = "Age by Treatment Group", x = "Group", y = "Age (years)") +
+  theme_classic() +
+  theme(legend.position = "none", plot.title = element_text(face = "bold", size = 11))
+
+# 조합
+(p_a | p_b) / (p_c | p_d) +
+  plot_annotation(
+    title = "Phase II Clinical Trial Results",
+    subtitle = "Randomized controlled trial (N=100 patients)",
+    caption = "Error bars: 95% CI | *p<0.05, **p<0.01",
+    tag_levels = "A",
+    theme = theme(
+      plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(size = 11, hjust = 0.5, color = "gray40"),
+      plot.caption = element_text(size = 9, hjust = 0)
+    )
+  )
+```
+
+---
+
+## 종합 퀴즈
+
+```{r final-quiz}
+quiz(
+  question("ggrepel 패키지의 주요 기능은?",
+    answer("텍스트 라벨 겹침 방지", correct = TRUE),
+    answer("3D 그래프 생성"),
+    answer("인터랙티브 그래프 생성"),
+    answer("애니메이션 추가"),
+    allow_retry = TRUE
+  ),
+  question("patchwork에서 모든 플롯에 같은 테마를 적용하는 연산자는?",
+    answer("&", correct = TRUE),
+    answer("|"),
+    answer("/"),
+    answer("+"),
+    allow_retry = TRUE
+  ),
+  question("색맹 친화적 색상 팔레트로 적합한 것은?",
+    answer("viridis", correct = TRUE),
+    answer("빨강-초록"),
+    answer("무지개색"),
+    answer("파랑-보라"),
+    allow_retry = TRUE
+  ),
+  question("학술지 제출용 그래프의 권장 DPI는?",
+    answer("300 이상", correct = TRUE),
+    answer("72"),
+    answer("96"),
+    answer("150"),
+    allow_retry = TRUE
+  ),
+  question("plot_annotation(tag_levels = 'a')의 결과는?",
+    answer("a, b, c... 소문자 라벨", correct = TRUE),
+    answer("A, B, C... 대문자 라벨"),
+    answer("1, 2, 3... 숫자 라벨"),
+    answer("I, II, III... 로마 숫자"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## 학습 완료!
+
+### 이번 과정에서 배운 내용:
+
+1. **ggrepel**: 텍스트 라벨 겹침 방지
+2. **patchwork**: 다중 패널 Figure 조합 (A, B, C 라벨링)
+3. **viridis**: 색맹 친화적 색상 팔레트
+4. **테마 커스터마이징**: 학술지 스타일 적용
+5. **ggsave**: 고해상도 저장 (300+ DPI)
+6. **출판 체크리스트**: 전문적인 Figure 제작
+
+### 다음 단계:
+
+- **Chapter 7**: 인터랙티브 시각화 (plotly, shiny)
+- **실습 프로젝트**: 실제 논문용 Figure 제작
+
+### 추가 학습 자료:
+
+- [ggrepel 문서](https://ggrepel.slowkow.com/)
+- [patchwork 문서](https://patchwork.data-imaginist.com/)
+- [R Graphics Cookbook](https://r-graphics.org/)
+- [Data Visualization by Kieran Healy](https://socviz.co/)
+
+### 출판 가이드라인:
+
+- [Nature Figure Guidelines](https://www.nature.com/nature/for-authors/final-submission)
+- [Science Figure Guidelines](https://www.science.org/content/page/instructions-preparing-initial-manuscript)
+- [ColorBrewer](https://colorbrewer2.org/) - 색상 선택 도구
+
+---
+
+## 8장: 심화 퀴즈 🧠
+
+### 코드 결과 예측 퀴즈
+
+```{r quiz-code-predict}
+quiz(
+  question("다음 코드의 결과는?\n\np1 <- ggplot(mtcars, aes(x = mpg)) + geom_histogram()\np2 <- ggplot(mtcars, aes(x = wt)) + geom_histogram()\np1 | p2",
+    answer("p1과 p2가 좌우로 나란히 배치됨", correct = TRUE),
+    answer("p1과 p2가 위아래로 쌓임"),
+    answer("p1만 표시됨"),
+    answer("오류 발생"),
+    correct = "정답! patchwork의 | 연산자는 플롯을 좌우로 나란히 배치합니다."
+  ),
+
+  question("다음 코드에서 begin = 0.2, end = 0.8의 역할은?\n\nscale_color_viridis_d(option = 'plasma', begin = 0.2, end = 0.8)",
+    answer("투명도를 0.2~0.8로 설정"),
+    answer("색상 팔레트의 20%~80% 범위만 사용", correct = TRUE),
+    answer("데이터의 20%~80%만 표시"),
+    answer("크기를 0.2~0.8배로 조절"),
+    correct = "정답! begin과 end는 viridis 색상 범위의 시작점과 끝점을 지정합니다."
+  )
+)
+```
+
+### 오류 찾기 퀴즈
+
+```{r quiz-error-find}
+quiz(
+  question("다음 코드의 문제점은?\n\nggplot(mtcars, aes(x = wt, y = mpg, label = rownames(mtcars))) +\n  geom_point() +\n  geom_text_repel(aes(label = label))",
+    answer("label이 두 번 중복 지정됨", correct = TRUE),
+    answer("geom_point()에 색상이 없음"),
+    answer("theme가 지정되지 않음"),
+    answer("오류가 없음"),
+    correct = "정답! aes()에서 label이 이미 지정되어 있는데, geom_text_repel에서 다시 지정하면 충돌합니다."
+  ),
+
+  question("다음 patchwork 코드의 문제점은?\n\n(p1 + p2) / p3 +\n  plot_annotation(tag_levels = 'A')\n\n# p1, p2, p3가 모두 정의되어 있다고 가정",
+    answer("+ 연산자 대신 | 를 사용해야 함", correct = TRUE),
+    answer("plot_annotation 위치가 잘못됨"),
+    answer("tag_levels가 잘못됨"),
+    answer("문제 없음"),
+    correct = "정답! p1 + p2는 순차 배치이고, p1 | p2가 나란히 배치입니다. 의도에 따라 다르지만 일반적으로 | 를 사용합니다."
+  )
+)
+```
+
+### 빈칸 채우기 퀴즈
+
+```{r quiz-fill-blank}
+quiz(
+  question("ggsave()에서 고해상도 출력을 위한 권장 DPI 설정은 최소 _____이다.",
+    answer("72"),
+    answer("150"),
+    answer("300", correct = TRUE),
+    answer("96"),
+    correct = "정답! 학술지 제출용 그래프는 최소 300 DPI를 권장합니다."
+  ),
+
+  question("patchwork에서 모든 서브플롯에 동일한 테마를 적용하려면 _____ 연산자를 사용한다.",
+    answer("+"),
+    answer("|"),
+    answer("/"),
+    answer("&", correct = TRUE),
+    correct = "정답! & 연산자는 조합된 모든 플롯에 동일한 수정을 적용합니다."
+  ),
+
+  question("색맹 환자의 약 _____가 적록색맹이다.",
+    answer("50%"),
+    answer("70%"),
+    answer("95%", correct = TRUE),
+    answer("30%"),
+    correct = "정답! 색맹의 대부분(약 95%)은 적록색맹입니다."
+  )
+)
+```
+
+### 개념 심화 퀴즈
+
+```{r quiz-concept-advanced}
+quiz(
+  question("ggrepel의 max.overlaps 옵션의 역할은?",
+    answer("최대 라벨 개수 제한"),
+    answer("허용되는 최대 겹침 횟수", correct = TRUE),
+    answer("최대 글자 수 제한"),
+    answer("최대 연결선 길이"),
+    correct = "정답! max.overlaps는 겹침이 허용되는 최대 횟수로, 초과 시 라벨이 표시되지 않습니다."
+  ),
+
+  question("벡터 형식(PDF, SVG)과 래스터 형식(PNG, TIFF)의 가장 큰 차이점은?",
+    answer("파일 크기"),
+    answer("색상 표현 범위"),
+    answer("확대 시 화질 손실 여부", correct = TRUE),
+    answer("저장 속도"),
+    correct = "정답! 벡터는 수학적 곡선으로 저장되어 확대해도 선명하지만, 래스터는 픽셀 기반이라 확대 시 화질이 저하됩니다."
+  ),
+
+  question("theme_classic()과 theme_bw()의 주요 차이점은?",
+    answer("배경색"),
+    answer("theme_classic()은 격자선이 없고 축만 표시됨", correct = TRUE),
+    answer("글꼴 크기"),
+    answer("범례 위치"),
+    correct = "정답! theme_classic()은 축만 표시하고 격자선이 없어 깔끔한 학술지 스타일에 적합합니다."
+  ),
+
+  question("Volcano Plot에서 x축과 y축은 각각 무엇을 나타내는가?",
+    answer("발현량, 샘플 수"),
+    answer("Log2 Fold Change, -Log10(P-value)", correct = TRUE),
+    answer("평균, 표준편차"),
+    answer("시간, 농도"),
+    correct = "정답! Volcano Plot은 x축에 효과 크기(Log2FC), y축에 통계적 유의성(-log10 p-value)을 표시합니다."
+  ),
+
+  question("학술지 Figure에서 범례(legend)를 그래프 내부에 배치하는 코드는?",
+    answer("legend.position = 'inside'"),
+    answer("legend.position = c(0.8, 0.8)", correct = TRUE),
+    answer("legend.position = 'center'"),
+    answer("legend.position = 'in'"),
+    correct = "정답! 0~1 사이의 좌표를 사용하여 그래프 내부의 원하는 위치에 범례를 배치할 수 있습니다."
+  )
+)
+```
