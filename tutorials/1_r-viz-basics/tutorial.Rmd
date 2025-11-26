@@ -747,104 +747,45 @@ ggplot(epidemic_data, aes(x = date, y = cases)) +
 
 ---
 
-## 🏆 수료증 발급
+## 🏆 학습 결과 확인
 
-축하합니다! 모든 학습을 완료하셨습니다. 아래 버튼을 클릭하여 **수료증**을 확인하세요!
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; text-align: center; margin: 20px 0;">
 
-```{r certificate, echo=FALSE}
-actionButton("show_cert", "🎓 수료증 보기",
-             style = "background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4); cursor: pointer;")
+<h3 style="margin: 0 0 20px 0;">📊 Part I: R 시각화 기초</h3>
 
-br()
-br()
+<div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+  <div style="background: rgba(255,255,255,0.2); padding: 20px 30px; border-radius: 10px;">
+    <p style="margin: 0; font-size: 0.9em;">정답 수</p>
+    <p style="margin: 5px 0 0 0; font-size: 2em; font-weight: bold;" id="correct-count">0</p>
+  </div>
+  <div style="background: rgba(255,255,255,0.2); padding: 20px 30px; border-radius: 10px;">
+    <p style="margin: 0; font-size: 0.9em;">총 퀴즈</p>
+    <p style="margin: 5px 0 0 0; font-size: 2em; font-weight: bold;" id="total-count">0</p>
+  </div>
+  <div style="background: rgba(255,255,255,0.2); padding: 20px 30px; border-radius: 10px;">
+    <p style="margin: 0; font-size: 0.9em;">점수</p>
+    <p style="margin: 5px 0 0 0; font-size: 2em; font-weight: bold;" id="score-percent">0%</p>
+  </div>
+</div>
 
-htmlOutput("certificate_display")
-```
+<hr style="border-color: rgba(255,255,255,0.3); margin: 20px 0;">
+<p style="margin: 0; font-size: 0.9em;">※ 퀴즈를 풀면 자동으로 점수가 업데이트됩니다</p>
+<button onclick="updateScore()" style="margin-top: 15px; padding: 10px 20px; border: none; border-radius: 20px; background: white; color: #667eea; font-weight: bold; cursor: pointer;">🔄 점수 새로고침</button>
+</div>
 
-```{r context="server"}
-observeEvent(input$show_cert, {
-  output$certificate_display <- renderUI({
-    # 세션 데이터 또는 입력값에서 학생 정보 가져오기
-    student_name <- if (!is.null(session$userData$student_name)) {
-      session$userData$student_name
-    } else if (nchar(input$student_name) > 0) {
-      input$student_name
-    } else {
-      NULL
-    }
+<script>
+function updateScore() {
+  var correct = document.querySelectorAll('.correct').length;
+  var incorrect = document.querySelectorAll('.incorrect').length;
+  var total = correct + incorrect;
 
-    student_id <- if (!is.null(session$userData$student_id)) {
-      session$userData$student_id
-    } else if (nchar(input$student_id) > 0) {
-      input$student_id
-    } else {
-      NULL
-    }
+  document.getElementById('correct-count').innerText = correct;
+  document.getElementById('total-count').innerText = total;
 
-    if (!is.null(student_name) && !is.null(student_id)) {
-      div(style = "background: white; border: 8px double #667eea; padding: 50px; margin: 30px 0; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; font-family: Georgia, serif;",
+  var percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('score-percent').innerText = percent + '%';
+}
 
-          # 헤더
-          div(style = "border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px;",
-              h1(style = "color: #667eea; font-size: 3em; margin: 0; font-weight: bold;", "수료증"),
-              p(style = "color: #764ba2; font-size: 1.3em; margin: 10px 0 0 0; font-style: italic;", "Certificate of Completion")
-          ),
-
-          # 본문
-          div(style = "margin: 40px 0;",
-              p(style = "font-size: 1.2em; color: #555; margin-bottom: 20px;", "이 수료증은 아래의 학생이"),
-
-              div(style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; margin: 20px auto; max-width: 500px;",
-                  h2(style = "margin: 0; font-size: 2.5em; color: white;", student_name),
-                  p(style = "margin: 10px 0 0 0; font-size: 1.2em;", paste0("학번: ", student_id))
-              ),
-
-              p(style = "font-size: 1.2em; color: #555; margin-top: 30px;", "다음 과정을 성공적으로 이수하였음을 증명합니다"),
-
-              div(style = "background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;",
-                  h3(style = "color: #333; margin: 0 0 15px 0;", "📊 R 시각화 기초 과정"),
-                  p(style = "color: #666; margin: 5px 0;", "✓ ggplot2 기본 문법 마스터"),
-                  p(style = "color: #666; margin: 5px 0;", "✓ 산점도, 히스토그램, 박스플롯 실습"),
-                  p(style = "color: #666; margin: 5px 0;", "✓ 데이터 시각화 프로젝트 완료")
-              )
-          ),
-
-          # 푸터
-          div(style = "border-top: 2px solid #e0e0e0; padding-top: 20px; margin-top: 30px;",
-              div(style = "display: flex; justify-content: space-between; align-items: center; max-width: 600px; margin: 0 auto;",
-                  div(
-                    p(style = "margin: 0; color: #999; font-size: 0.9em;", paste0("발급일: ", format(Sys.Date(), "%Y년 %m월 %d일"))),
-                    p(style = "margin: 5px 0 0 0; color: #999; font-size: 0.9em;", paste0("수업 코드: ", input$class_code))
-                  ),
-                  div(
-                    p(style = "margin: 0; color: #667eea; font-weight: bold; font-size: 1.1em;", "R Visualization Lab"),
-                    p(style = "margin: 5px 0 0 0; color: #999; font-size: 0.9em;", "dspubs.org/shiny")
-                  )
-              )
-          ),
-
-          # 다운로드 버튼
-          br(),
-          actionButton("print_cert", "🖨️ 인쇄하기",
-                       onclick = "window.print();",
-                       style = "background: #667eea; color: white; border: none; padding: 12px 30px; border-radius: 20px; font-weight: bold; margin: 10px;"),
-
-          tags$button("💾 PDF로 저장",
-                      onclick = "alert('Ctrl+P 또는 Cmd+P를 눌러 PDF로 저장하세요!');",
-                      style = "background: #764ba2; color: white; border: none; padding: 12px 30px; border-radius: 20px; font-weight: bold; margin: 10px; cursor: pointer;")
-      )
-    } else {
-      div(style = "background: #fff3cd; border-left: 5px solid #ffc107; padding: 20px; border-radius: 5px; margin: 20px 0;",
-          strong("⚠️ 알림: "),
-          "수료증을 받으려면 먼저 위에서 학생 정보를 입력해주세요!"
-      )
-    }
-  })
-})
-```
-
----
-
-**문의사항이 있으시면 언제든 질문하세요!**
-
-*본 교육 자료는 learnr과 ggplot2로 제작되었습니다. 📚*
+// 3초마다 자동 업데이트
+setInterval(updateScore, 3000);
+</script>

@@ -928,3 +928,47 @@ quiz(
 - [sf 패키지 공식 문서](https://r-spatial.github.io/sf/)
 - [Geocomputation with R](https://geocompr.robinlovelace.net/)
 - [국가공간정보포털](http://data.nsdi.go.kr) - 한국 행정구역 데이터
+
+---
+
+## 🏆 학습 결과 확인
+
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; text-align: center; margin: 20px 0;">
+
+<h3 style="margin: 0 0 20px 0;">📊 Part II-2: 공간 역학 시각화</h3>
+
+<div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+  <div style="background: rgba(255,255,255,0.2); padding: 20px 30px; border-radius: 10px;">
+    <p style="margin: 0; font-size: 0.9em;">정답 수</p>
+    <p style="margin: 5px 0 0 0; font-size: 2em; font-weight: bold;" id="correct-count">0</p>
+  </div>
+  <div style="background: rgba(255,255,255,0.2); padding: 20px 30px; border-radius: 10px;">
+    <p style="margin: 0; font-size: 0.9em;">총 퀴즈</p>
+    <p style="margin: 5px 0 0 0; font-size: 2em; font-weight: bold;" id="total-count">0</p>
+  </div>
+  <div style="background: rgba(255,255,255,0.2); padding: 20px 30px; border-radius: 10px;">
+    <p style="margin: 0; font-size: 0.9em;">점수</p>
+    <p style="margin: 5px 0 0 0; font-size: 2em; font-weight: bold;" id="score-percent">0%</p>
+  </div>
+</div>
+
+<hr style="border-color: rgba(255,255,255,0.3); margin: 20px 0;">
+<p style="margin: 0; font-size: 0.9em;">※ 퀴즈를 풀면 자동으로 점수가 업데이트됩니다</p>
+<button onclick="updateScore()" style="margin-top: 15px; padding: 10px 20px; border: none; border-radius: 20px; background: white; color: #667eea; font-weight: bold; cursor: pointer;">🔄 점수 새로고침</button>
+</div>
+
+<script>
+function updateScore() {
+  var correct = document.querySelectorAll('.correct').length;
+  var incorrect = document.querySelectorAll('.incorrect').length;
+  var total = correct + incorrect;
+
+  document.getElementById('correct-count').innerText = correct;
+  document.getElementById('total-count').innerText = total;
+
+  var percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('score-percent').innerText = percent + '%';
+}
+
+setInterval(updateScore, 3000);
+</script>
