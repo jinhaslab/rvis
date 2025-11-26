@@ -17,6 +17,8 @@ if(!require("ggplot2")) install.packages("ggplot2")
 if(!require("plotly")) install.packages("plotly")
 if(!require("dplyr")) install.packages("dplyr")
 if(!require("tidyr")) install.packages("tidyr")
+if(!require("showtext")) install.packages("showtext")
+if(!require("sysfonts")) install.packages("sysfonts")
 ```
 
 ```{r setup, include=FALSE}
@@ -25,6 +27,13 @@ library(ggplot2)
 library(plotly)
 library(dplyr)
 library(tidyr)
+library(showtext)
+library(sysfonts)
+
+# 한글 폰트 설정 (Google Fonts에서 Noto Sans KR 사용)
+font_add_google("Noto Sans KR", "NotoSansKR")
+showtext_auto()
+theme_set(theme_minimal(base_family = "NotoSansKR"))
 
 # 보건학 데이터
 set.seed(999)
@@ -142,7 +151,7 @@ p <- health_survey %>%
   group_by(year) %>%
   summarise(avg_diabetes = mean(diabetes_rate)) %>%
   ggplot(aes(x = year, y = avg_diabetes)) +
-  geom_line(color = "#3498DB", size = 1.5) +
+  geom_line(color = "#3498DB", linewidth = 1.5) +
   geom_point(size = 3)
 
 # plotly로 변환
@@ -154,7 +163,7 @@ p <- health_survey %>%
   group_by(year) %>%
   summarise(avg_diabetes = mean(diabetes_rate)) %>%
   ggplot(aes(x = year, y = avg_diabetes)) +
-  geom_line(color = "#3498DB", size = 1.5) +
+  geom_line(color = "#3498DB", linewidth = 1.5) +
   geom_point(size = 3, color = "#2C3E50") +
   labs(
     title = "연도별 평균 당뇨 유병률",

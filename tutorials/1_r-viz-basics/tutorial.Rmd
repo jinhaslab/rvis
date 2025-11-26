@@ -17,6 +17,8 @@ if(!require("ggplot2")) install.packages("ggplot2")
 if(!require("dplyr")) install.packages("dplyr")
 if(!require("tidyr")) install.packages("tidyr")
 if(!require("jsonlite")) install.packages("jsonlite")
+if(!require("showtext")) install.packages("showtext")
+if(!require("sysfonts")) install.packages("sysfonts")
 ```
 
 ```{r setup, include=FALSE}
@@ -25,6 +27,18 @@ library(ggplot2)
 library(dplyr)
 library(jsonlite)
 library(tidyr)
+library(showtext)
+library(sysfonts)
+
+# ============================================
+# 한글 폰트 설정 (OS별 자동 감지)
+# ============================================
+# Google Fonts에서 Noto Sans KR 추가 (모든 OS 공통)
+font_add_google("Noto Sans KR", "NotoSansKR")
+showtext_auto()
+
+# ggplot2 기본 테마에 한글 폰트 적용
+theme_set(theme_minimal(base_family = "NotoSansKR"))
 
 # 연습용 데이터셋 로드
 data(mtcars)
@@ -84,7 +98,7 @@ htmltools::tags$head(
 ```{r student-info, echo=FALSE}
 div(style = "margin-top: 20px;",
     h3(style = "color: #333; text-align: center; margin-bottom: 20px;", "수동 입력"),
-    textInput("student_id", "학번:", placeholder = "예: 20241234", width = "100%"),
+    dateInput("study_date", "학습일:", value = Sys.Date(), width = "100%"),
     textInput("student_name", "이름:", placeholder = "예: 홍길동", width = "100%"),
     textInput("student_phone", "전화번호:", placeholder = "예: 010-1234-5678", width = "100%"),
     textInput("class_code", "수업 코드:", value = "VIZ2024", width = "100%"),
@@ -123,23 +137,23 @@ observeEvent(input$kakao_user_info, {
 # 수동 입력 처리
 observeEvent(input$save_info, {
   output$welcome_msg <- renderUI({
-    if (nchar(input$student_name) > 0 && nchar(input$student_id) > 0) {
+    if (nchar(input$student_name) > 0) {
       # 세션에 사용자 정보 저장
       session$userData$student_name <- input$student_name
-      session$userData$student_id <- input$student_id
+      session$userData$study_date <- as.character(input$study_date)
       session$userData$student_phone <- input$student_phone
       session$userData$login_method <- "manual"
 
       div(style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;",
           h3(style = "margin: 0; color: white;", paste0("✨ 환영합니다, ", input$student_name, "님!")),
-          p(style = "margin: 10px 0 0 0;", paste0("📚 학번: ", input$student_id)),
+          p(style = "margin: 10px 0 0 0;", paste0("📅 학습일: ", input$study_date)),
           p(style = "margin: 10px 0 0 0;", paste0("📱 전화: ", input$student_phone)),
           p(style = "margin: 10px 0 0 0;", paste0("🎓 수업: ", input$class_code)),
           p(style = "margin: 10px 0 0 0; font-size: 0.9em;", "🎯 아래로 스크롤하여 학습을 시작하세요!")
       )
     } else {
       div(style = "background: #fff3cd; padding: 15px; border-radius: 8px;",
-          "⚠️ 학번과 이름을 모두 입력해주세요."
+          "⚠️ 이름을 입력해주세요."
       )
     }
   })
@@ -162,6 +176,82 @@ observeEvent(input$save_info, {
 ✅ 건강 데이터를 효과적으로 시각화할 수 있습니다
 ✅ 유행곡선과 발병률 그래프를 그릴 수 있습니다
 ✅ 논문 출판 수준의 그래프를 제작할 수 있습니다
+
+---
+
+## 🔤 한글 폰트 설정 안내
+
+ggplot2에서 한글이 깨지는 경우, 아래 방법으로 해결할 수 있습니다.
+
+### 방법 1: showtext 패키지 사용 (권장 - 모든 OS 공통)
+
+```r
+# 패키지 설치 (최초 1회)
+install.packages("showtext")
+install.packages("sysfonts")
+
+# 사용법
+library(showtext)
+library(sysfonts)
+
+# Google Fonts에서 한글 폰트 추가
+font_add_google("Noto Sans KR", "NotoSansKR")
+showtext_auto()
+
+# ggplot2에 적용
+ggplot(data, aes(x, y)) +
+  geom_point() +
+  theme(text = element_text(family = "NotoSansKR"))
+```
+
+### 방법 2: OS별 시스템 폰트 사용
+
+<details>
+<summary>🍎 **macOS**</summary>
+
+```r
+# AppleGothic 또는 NanumGothic 사용
+theme_set(theme_minimal(base_family = "AppleGothic"))
+
+# 또는 개별 그래프에 적용
+ggplot(data, aes(x, y)) +
+  theme(text = element_text(family = "AppleGothic"))
+```
+</details>
+
+<details>
+<summary>🪟 **Windows**</summary>
+
+```r
+# 맑은 고딕 사용
+theme_set(theme_minimal(base_family = "Malgun Gothic"))
+
+# 또는 개별 그래프에 적용
+ggplot(data, aes(x, y)) +
+  theme(text = element_text(family = "Malgun Gothic"))
+```
+</details>
+
+<details>
+<summary>🐧 **Linux (Ubuntu/Debian)**</summary>
+
+```bash
+# 터미널에서 나눔폰트 설치
+sudo apt-get install fonts-nanum
+```
+
+```r
+# R에서 사용
+theme_set(theme_minimal(base_family = "NanumGothic"))
+
+# 폰트 캐시 새로고침 필요시
+library(extrafont)
+font_import(pattern = "Nanum")
+loadfonts()
+```
+</details>
+
+> **💡 Tip:** 이 튜토리얼에서는 `showtext` 패키지를 사용하여 자동으로 한글 폰트가 적용됩니다.
 
 ---
 
@@ -205,7 +295,7 @@ ggplot(data = health_data, aes(x = age, y = bmi)) +
 ```{r demo-epi-curve, echo=TRUE}
 ggplot(epidemic_data, aes(x = date, y = cases)) +
   geom_col(fill = "#E74C3C", alpha = 0.7) +
-  geom_line(color = "#2C3E50", size = 1) +
+  geom_line(color = "#2C3E50", linewidth = 1) +
   labs(title = "주간 질병 발생 추이",
        subtitle = "2023년 상반기",
        x = "날짜",
@@ -301,7 +391,7 @@ ggplot(health_data, aes(x = ___)) +
 ```{r histogram-exercise-solution}
 ggplot(health_data, aes(x = bmi)) +
   geom_histogram(bins = 8, fill = "#3498DB", color = "white", alpha = 0.7) +
-  geom_vline(xintercept = 25, color = "red", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = 25, color = "red", linetype = "dashed", linewidth = 1) +
   annotate("text", x = 26, y = 3, label = "과체중 기준", color = "red") +
   labs(title = "체질량지수(BMI) 분포",
        x = "BMI (kg/m²)",
@@ -652,7 +742,7 @@ ggplot(health_data, aes(x = ___, y = ___)) +
 ggplot(health_data, aes(x = age, y = bmi, color = disease)) +
   geom_point(size = 4, alpha = 0.7) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.2) +
-  geom_hline(yintercept = 25, linetype = "dashed", color = "red", size = 0.8) +
+  geom_hline(yintercept = 25, linetype = "dashed", color = "red", linewidth = 0.8) +
   annotate("text", x = 25, y = 26, label = "과체중 기준선", color = "red", size = 3) +
   scale_color_manual(values = c("No" = "#2ECC71", "Yes" = "#E74C3C"),
                      labels = c("건강", "질병")) +
@@ -686,7 +776,7 @@ ggplot(health_data, aes(x = age, y = bmi, color = disease)) +
 ```{r challenge-exercise-solution}
 ggplot(epidemic_data, aes(x = date, y = cases)) +
   geom_col(aes(fill = cases), alpha = 0.8, color = "white") +
-  geom_line(color = "#2C3E50", size = 1.2, group = 1) +
+  geom_line(color = "#2C3E50", linewidth = 1.2, group = 1) +
   geom_point(color = "#2C3E50", size = 2.5) +
   scale_fill_gradient(low = "#3498DB", high = "#E74C3C") +
   labs(
@@ -769,7 +859,8 @@ ggplot(epidemic_data, aes(x = date, y = cases)) +
 </div>
 
 <hr style="border-color: rgba(255,255,255,0.3); margin: 20px 0;">
-<p style="margin: 0; font-size: 0.9em;">※ 퀴즈를 풀면 자동으로 점수가 업데이트됩니다</p>
+<p style="margin: 0; font-size: 0.9em;">📅 학습일: <span id="study-date"></span></p>
+<p style="margin: 5px 0 0 0; font-size: 0.9em;">※ 퀴즈를 풀면 자동으로 점수가 업데이트됩니다</p>
 <button onclick="updateScore()" style="margin-top: 15px; padding: 10px 20px; border: none; border-radius: 20px; background: white; color: #667eea; font-weight: bold; cursor: pointer;">🔄 점수 새로고침</button>
 </div>
 
@@ -785,6 +876,11 @@ function updateScore() {
   var percent = total > 0 ? Math.round((correct / total) * 100) : 0;
   document.getElementById('score-percent').innerText = percent + '%';
 }
+
+// 날짜 표시
+var today = new Date();
+var dateStr = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
+document.getElementById('study-date').innerText = dateStr;
 
 // 3초마다 자동 업데이트
 setInterval(updateScore, 3000);

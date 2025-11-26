@@ -17,6 +17,8 @@ if(!require("ggplot2")) install.packages("ggplot2")
 if(!require("dplyr")) install.packages("dplyr")
 if(!require("tidyr")) install.packages("tidyr")
 if(!require("survival")) install.packages("survival")
+if(!require("showtext")) install.packages("showtext")
+if(!require("sysfonts")) install.packages("sysfonts")
 ```
 
 ```{r setup, include=FALSE}
@@ -25,6 +27,13 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(survival)
+library(showtext)
+library(sysfonts)
+
+# 한글 폰트 설정 (Google Fonts에서 Noto Sans KR 사용)
+font_add_google("Noto Sans KR", "NotoSansKR")
+showtext_auto()
+theme_set(theme_minimal(base_family = "NotoSansKR"))
 
 # 임상 데이터 생성
 set.seed(789)
@@ -135,7 +144,7 @@ km_data <- data.frame(
 )
 
 ggplot(km_data, aes(x = time, y = surv, color = group)) +
-  geom_step(size = 1.2) +
+  geom_step(linewidth = 1.2) +
   geom_point(size = 2, alpha = 0.6) +
   scale_color_manual(values = c("치료군" = "#2ECC71", "대조군" = "#E74C3C")) +
   scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
@@ -202,9 +211,9 @@ ggplot(risk_table, aes(x = time, y = group, label = n_at_risk)) +
 pooled_estimate <- weighted.mean(meta_data$effect_size, meta_data$sample_size)
 
 ggplot(meta_data, aes(x = effect_size, y = reorder(study, effect_size))) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50", size = 0.8) +
-  geom_vline(xintercept = pooled_estimate, color = "#E74C3C", size = 1, linetype = "solid") +
-  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.3, size = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50", linewidth = 0.8) +
+  geom_vline(xintercept = pooled_estimate, color = "#E74C3C", linewidth = 1, linetype = "solid") +
+  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.3, linewidth = 0.8) +
   geom_point(aes(size = sample_size), color = "#3498DB", alpha = 0.8) +
   annotate("text", x = pooled_estimate + 0.1, y = 8.5,
            label = paste0("Pooled: ", round(pooled_estimate, 2)),
@@ -310,10 +319,10 @@ clinical_summary <- clinical_long_all %>%
   )
 
 ggplot(clinical_summary, aes(x = week_num, y = mean_value, color = treatment, group = treatment)) +
-  geom_line(size = 1.2) +
+  geom_line(linewidth = 1.2) +
   geom_point(size = 3) +
   geom_errorbar(aes(ymin = mean_value - se, ymax = mean_value + se),
-                width = 0.5, size = 0.8) +
+                width = 0.5, linewidth = 0.8) +
   scale_color_manual(values = c("신약" = "#2ECC71", "위약" = "#E74C3C")) +
   scale_x_continuous(breaks = c(0, 4, 8, 12)) +
   labs(
@@ -346,9 +355,9 @@ ggplot(clinical_long_all, aes(x = week_num, y = value,
 ```{r spaghetti-exercise-solution}
 ggplot(clinical_long_all, aes(x = week_num, y = value,
                                group = patient_id, color = treatment)) +
-  geom_line(alpha = 0.3, size = 0.5) +
+  geom_line(alpha = 0.3, linewidth = 0.5) +
   stat_summary(aes(group = treatment), fun = mean, geom = "line",
-               size = 2, alpha = 1) +
+               linewidth = 2, alpha = 1) +
   scale_color_manual(values = c("신약" = "#2ECC71", "위약" = "#E74C3C")) +
   scale_x_continuous(breaks = c(0, 4, 8, 12)) +
   labs(
@@ -380,8 +389,8 @@ auc <- sum(diff(1 - roc_data$specificity) *
 
 ggplot(roc_data, aes(x = 1 - specificity, y = sensitivity)) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed",
-              color = "gray50", size = 0.8) +
-  geom_line(color = "#3498DB", size = 1.5) +
+              color = "gray50", linewidth = 0.8) +
+  geom_line(color = "#3498DB", linewidth = 1.5) +
   geom_point(color = "#3498DB", size = 2) +
   annotate("text", x = 0.6, y = 0.3,
            label = paste0("AUC = ", round(auc, 3)),
@@ -603,7 +612,7 @@ km_data <- data.frame(
 )
 
 ggplot(km_data, aes(x = time, y = surv, color = group)) +
-  geom_step(size = 1.5) +
+  geom_step(linewidth = 1.5) +
   scale_color_manual(values = c("치료군" = "#27AE60", "대조군" = "#C0392B"),
                      name = "Treatment Group") +
   scale_y_continuous(labels = scales::percent, limits = c(0, 1),
@@ -648,8 +657,8 @@ pooled <- weighted.mean(meta_data$effect_size, meta_data$sample_size)
 pooled <- weighted.mean(meta_data$effect_size, meta_data$sample_size)
 
 ggplot(meta_data, aes(x = effect_size, y = reorder(study, effect_size))) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "gray40", size = 0.8) +
-  geom_vline(xintercept = pooled, color = "#E74C3C", size = 1.2, alpha = 0.7) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray40", linewidth = 0.8) +
+  geom_vline(xintercept = pooled, color = "#E74C3C", linewidth = 1.2, alpha = 0.7) +
   geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper),
                  height = 0.25, size = 0.8, color = "gray30") +
   geom_point(aes(size = sample_size), color = "#3498DB", shape = 15) +

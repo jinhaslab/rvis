@@ -18,6 +18,8 @@ if(!require("dplyr")) install.packages("dplyr")
 if(!require("tidyr")) install.packages("tidyr")
 if(!require("lubridate")) install.packages("lubridate")
 if(!require("scales")) install.packages("scales")
+if(!require("showtext")) install.packages("showtext")
+if(!require("sysfonts")) install.packages("sysfonts")
 ```
 
 ```{r setup, include=FALSE}
@@ -27,6 +29,13 @@ library(dplyr)
 library(tidyr)
 library(lubridate)
 library(scales)
+library(showtext)
+library(sysfonts)
+
+# 한글 폰트 설정 (Google Fonts에서 Noto Sans KR 사용)
+font_add_google("Noto Sans KR", "NotoSansKR")
+showtext_auto()
+theme_set(theme_minimal(base_family = "NotoSansKR"))
 
 # 역학 데이터 생성
 set.seed(456)
@@ -67,10 +76,10 @@ age_specific_data <- data.frame(
 outbreak_data <- data.frame(
   date = seq.Date(as.Date("2023-06-01"), by = "day", length.out = 60),
   cases = c(
-    2, 3, 5, 8, 12, 18, 25, 35, 48, 62, 78, 95, 110, 125, 138,  # 상승기
-    148, 155, 158, 160, 158, 152, 145, 135, 122, 108, 95, 82,   # 정점 및 하강
-    70, 58, 48, 38, 30, 24, 18, 15, 12, 10, 8, 7, 6,            # 하강 지속
-    5, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0    # 종료
+    2, 3, 5, 8, 12, 18, 25, 35, 48, 62, 78, 95, 110, 125, 138,  # 상승기 (15개)
+    148, 155, 158, 160, 158, 152, 145, 135, 122, 108, 95, 82,   # 정점 및 하강 (12개)
+    70, 58, 48, 38, 30, 24, 18, 15, 12, 10, 8, 7, 6,            # 하강 지속 (13개)
+    5, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0 # 종료 (20개) = 총 60개
   )
 ) %>%
   mutate(
@@ -124,7 +133,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r incidence-demo, echo=TRUE}
 ggplot(disease_incidence, aes(x = date, y = incidence_rate)) +
-  geom_line(color = "#E74C3C", size = 1.2) +
+  geom_line(color = "#E74C3C", linewidth = 1.2) +
   geom_point(color = "#E74C3C", size = 2) +
   geom_smooth(method = "loess", se = TRUE, alpha = 0.2, color = "#3498DB") +
   labs(
@@ -185,7 +194,7 @@ disease_incidence %>%
 ```{r epi-curve-demo, echo=TRUE}
 ggplot(outbreak_data, aes(x = date, y = cases)) +
   geom_col(fill = "#E74C3C", alpha = 0.7, color = "white") +
-  geom_line(aes(y = cases), color = "#2C3E50", size = 1, group = 1) +
+  geom_line(aes(y = cases), color = "#2C3E50", linewidth = 1, group = 1) +
   labs(
     title = "감염병 발생 유행곡선",
     subtitle = "2023년 6-7월 발생 사례 (일별)",
@@ -209,7 +218,7 @@ ggplot(outbreak_data, aes(x = date, y = cases)) +
 ```{r cumulative-curve, echo=TRUE}
 ggplot(outbreak_data, aes(x = date)) +
   geom_area(aes(y = cumulative), fill = "#3498DB", alpha = 0.5) +
-  geom_line(aes(y = cumulative), color = "#2C3E50", size = 1.2) +
+  geom_line(aes(y = cumulative), color = "#2C3E50", linewidth = 1.2) +
   geom_hline(yintercept = max(outbreak_data$cumulative),
              linetype = "dashed", color = "red") +
   annotate("text", x = min(outbreak_data$date) + 10,
@@ -302,7 +311,7 @@ ggplot(age_specific_data, aes(x = age_group, y = rate_per_100k,
 ```{r age-line-exercise-solution}
 ggplot(age_specific_data, aes(x = age_group, y = rate_per_100k,
                                color = region, group = region)) +
-  geom_line(size = 1.2) +
+  geom_line(linewidth = 1.2) +
   geom_point(size = 3) +
   scale_color_manual(values = c("도시" = "#3498DB", "농촌" = "#E74C3C")) +
   labs(
@@ -664,7 +673,7 @@ recent_data <- disease_incidence %>%
   filter(year >= 2022)
 
 ggplot(recent_data, aes(x = date, y = incidence_rate)) +
-  geom_line(color = "#E74C3C", size = 1.2) +
+  geom_line(color = "#E74C3C", linewidth = 1.2) +
   geom_point(color = "#E74C3C", size = 2.5) +
   geom_smooth(method = "loess", se = TRUE, alpha = 0.2) +
   labs(

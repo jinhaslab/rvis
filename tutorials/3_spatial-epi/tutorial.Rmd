@@ -19,6 +19,8 @@ if(!require("tidyr")) install.packages("tidyr")
 if(!require("sf")) install.packages("sf")
 if(!require("viridis")) install.packages("viridis")
 if(!require("scales")) install.packages("scales")
+if(!require("showtext")) install.packages("showtext")
+if(!require("sysfonts")) install.packages("sysfonts")
 ```
 
 ```{r setup, include=FALSE}
@@ -28,6 +30,13 @@ library(dplyr)
 library(tidyr)
 library(sf)
 library(viridis)
+library(showtext)
+library(sysfonts)
+
+# 한글 폰트 설정 (Google Fonts에서 Noto Sans KR 사용)
+font_add_google("Noto Sans KR", "NotoSansKR")
+showtext_auto()
+theme_set(theme_minimal(base_family = "NotoSansKR"))
 
 # 한국 17개 시도 데이터 생성
 set.seed(123)
@@ -507,7 +516,7 @@ regional_sir <- regional_sir %>%
 # 막대 그래프
 ggplot(regional_sir, aes(x = reorder(region, SIR), y = SIR, fill = SIR_category)) +
   geom_col(alpha = 0.8) +
-  geom_hline(yintercept = 100, linetype = "dashed", color = "red", size = 1) +
+  geom_hline(yintercept = 100, linetype = "dashed", color = "red", linewidth = 1) +
   geom_text(aes(label = round(SIR, 1)), hjust = -0.1, size = 3) +
   coord_flip() +
   scale_fill_manual(
